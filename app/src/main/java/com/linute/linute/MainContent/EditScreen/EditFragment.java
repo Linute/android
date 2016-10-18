@@ -388,19 +388,19 @@ public class EditFragment extends BaseFragment {
             }
 
             //for photos, mToolOptionView needs to load before making toolOptionView, so that crop icons can properly be measured
-            if(mContentType == ContentType.Photo | mContentType == ContentType.UploadedPhoto) {
+            if (mContentType == ContentType.Photo | mContentType == ContentType.UploadedPhoto) {
                 mToolOptionsView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                     @Override
                     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
 
                         if (v.getHeight() > 0) {
                             if (mTools.length > 0)
-                            onToolSelected(0);
+                                onToolSelected(0);
                             v.removeOnLayoutChangeListener(this);
                         }
                     }
                 });
-            }else{ //for video, toolOptionViews will load with width and height 0 unless made immediately. No idea why. This if-else works for now.
+            } else { //for video, toolOptionViews will load with width and height 0 unless made immediately. No idea why. This if-else works for now.
                 onToolSelected(0);
             }
 
@@ -464,7 +464,7 @@ public class EditFragment extends BaseFragment {
 //            Bitmap bm = Bitmap.createBitmap(mContentView.getDrawingCache(), 0, 0, mContentView.getWidth(), mContentView.getHeight());
 //            mContentView.destroyDrawingCache();
 //            ((OverlaysTool) mTools[mSelectedTool]).setBackingBitmap(bm);
-       // }
+        // }
 
         if (mToolbar != null) {
             mToolbar.setTitle(mTools[mSelectedTool].getName());
@@ -514,11 +514,11 @@ public class EditFragment extends BaseFragment {
 
                         if (testWidth < metrics.widthPixels) {
                             final int scalewidth;
-                            final int scaleheight ;
-                            if (isPortrait()){ //need to swap height and width
+                            final int scaleheight;
+                            if (isPortrait()) { //need to swap height and width
                                 scaleheight = metrics.widthPixels;
                                 scalewidth = (int) ((float) image.getWidth() * scaleheight / image.getHeight());
-                            }else {
+                            } else {
                                 scalewidth = metrics.widthPixels;
                                 scaleheight = (int) ((float) image.getHeight() * scalewidth / image.getWidth());
 
@@ -527,11 +527,11 @@ public class EditFragment extends BaseFragment {
                             mDimens.height = scaleheight;
                             mDimens.width = scalewidth;
 
-                           // Log.i(TAG, "run: "+image.getWidth() + " "+image.getHeight());
+                            // Log.i(TAG, "run: "+image.getWidth() + " "+image.getHeight());
                             //Log.i(TAG, "run: "+scalewidth + " " + scaleheight);
 
                             Matrix m = new Matrix();
-                            m.postScale((float)scalewidth / image.getWidth(), (float) scaleheight / image.getHeight());
+                            m.postScale((float) scalewidth / image.getWidth(), (float) scaleheight / image.getHeight());
                             m.postRotate(mDimens.rotation);
 
                             //scale image
@@ -553,15 +553,16 @@ public class EditFragment extends BaseFragment {
                             mContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                                 //terrible hack. Listener will remove itself after 2 passes to keep from centering image everytime
                                 int layoutPasses = 0;
+
                                 @Override
                                 public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
                                     if (!mDimens.needsCropping && scaleheight / 5 != scalewidth / 6) {
                                         requestDisableToolListener.requestDisable(OverlaysTool.class, true);
                                     }
-                                        imageView.centerImage();
+                                    imageView.centerImage();
 
                                     layoutPasses++;
-                                    if(layoutPasses >= 3)
+                                    if (layoutPasses >= 3)
                                         mContentView.removeOnLayoutChangeListener(this);
                                 }
                             });
@@ -726,27 +727,36 @@ public class EditFragment extends BaseFragment {
 
         //tools created in reverse priority order
         //(Crop appears above Text, which appears above Overlays, etc)
-        StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
-        TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
-        CropTool cropTool;
-        OverlaysTool overlaysTool;
 
         //MediaMetadataRetriever retriever;
+        PrivacySettingTool privacySettingTool;
+        CommentPrivacyTool commentPrivacyTool;
+        CropTool cropTool;
+        OverlaysTool overlaysTool;
+        StickersTool stickersTool;
+        TextTool textTool;
+
+
         switch (mContentType) {
             case UploadedPhoto:
             case Photo:
-                overlaysTool = new OverlaysTool(mUri, mContentType, overlay, Glide.with(this));
                 switch (mContentSubType) {
                     case Post:
+                        overlaysTool = new OverlaysTool(mUri, mContentType, overlay, Glide.with(this));
+                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay, this);
                         return new EditContentTool[]{
-                                new PrivacySettingTool(mUri, mContentType, overlay, this),
+                                privacySettingTool,
                                 cropTool,
                                 textTool,
                                 stickersTool,
                                 overlaysTool
                         };
                     case Chat:
+                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
                         return new EditContentTool[]{
                                 textTool,
@@ -754,8 +764,10 @@ public class EditFragment extends BaseFragment {
                                 stickersTool
                         };
                     case Comment:
-                        CommentPrivacyTool commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay, this);
+                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay, this);
                         return new EditContentTool[]{
                                 commentPrivacyTool,
                                 cropTool,
@@ -767,9 +779,11 @@ public class EditFragment extends BaseFragment {
             case Video:
                 //retriever = new MediaMetadataRetriever();
                 //retriever.setDataSource(mUri.getPath());
-                overlaysTool = new OverlaysTool(mUri, mContentType, overlay, Glide.with(this));
                 switch (mContentSubType) {
                     case Post:
+                        overlaysTool = new OverlaysTool(mUri, mContentType, overlay, Glide.with(this));
+                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
                         return new EditContentTool[]{
                                 new PrivacySettingTool(mUri, mContentType, overlay, this),
                                 textTool,
@@ -777,12 +791,16 @@ public class EditFragment extends BaseFragment {
                                 overlaysTool
                         };
                     case Chat:
+                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
                         return new EditContentTool[]{
                                 textTool,
-                                stickersTool,
+                                stickersTool
                         };
                     case Comment:
-                        CommentPrivacyTool commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay, this);
+                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
+                        commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay, this);
                         return new EditContentTool[]{
                                 commentPrivacyTool,
                                 textTool,
@@ -946,7 +964,7 @@ public class EditFragment extends BaseFragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        if(mFfmpeg != null){
+        if (mFfmpeg != null) {
             mFfmpeg.killRunningProcesses();
         }
     }
@@ -967,10 +985,9 @@ public class EditFragment extends BaseFragment {
                 tool.onDestroy();
         }
 
-        if(mContentBitmap != null){
+        if (mContentBitmap != null) {
             mContentBitmap.recycle();
         }
-
 
 
     }
@@ -1054,7 +1071,7 @@ public class EditFragment extends BaseFragment {
 
         final String outputFile = ImageUtility.getVideoUri();
         showProgress(true);
-        for(int i = 0;i < mIsDisabled.length;i++){
+        for (int i = 0; i < mIsDisabled.length; i++) {
             mIsDisabled[i] = true;
             toolHolders[i].setSelected(false, true);
         }
@@ -1070,7 +1087,6 @@ public class EditFragment extends BaseFragment {
             }
         });
         mToolOptionsView.addView(coverView);
-
 
 
         mVideoProcessSubscription = Observable.create(new Observable.OnSubscribe<Uri>() {
@@ -1296,7 +1312,6 @@ public class EditFragment extends BaseFragment {
             return null;
         }
     }
-
 
 
     private boolean isPortrait() {
