@@ -335,11 +335,11 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         if (which == 0) {
                             i = new Intent(getContext(), CameraActivity.class);
                             i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE));
-                            i.putExtra(CameraActivity.CONTENT_SUB_TYPE, EditFragment.ContentSubType.Comment);
+                            i.putExtra(CameraActivity.CONTENT_SUB_TYPE, mFeedDetail.getPost().isCommentAnonDisabled() ? EditFragment.ContentSubType.Comment_No_Anon : EditFragment.ContentSubType.Comment);
                         } else {
                             i = new Intent(getContext(), GalleryActivity.class);
                             i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, GalleryActivity.PICK_IMAGE);
-                            i.putExtra(GalleryActivity.ARG_CONTENT_SUB_TYPE, EditFragment.ContentSubType.Comment);
+                            i.putExtra(GalleryActivity.ARG_CONTENT_SUB_TYPE, mFeedDetail.getPost().isCommentAnonDisabled() ? EditFragment.ContentSubType.Comment_No_Anon : EditFragment.ContentSubType.Comment);
                         }
 
                         if (mFeedDetail.getPost().isCommentAnonDisabled()) {
@@ -1471,10 +1471,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         //if viewer is not the owner of the comment, return
         // exception: anon comments can be deleted by post owner
-        if (com.getCommentUserId() == null ||
-                !com.getCommentPostId().equals(id) ||
-                (!com.isAnon() && !mViewId.equals(com.getCommentUserId())) ||
-                (com.isAnon() && !mViewId.equals(mFeedDetail.getPostUserId())))
+        if (!com.getCommentPostId().equals(id) ||
+                (!com.isAnon() && (com.getCommentUserId() == null || !mViewId.equals(com.getCommentUserId()))) ||
+                (com.isAnon() && com.getCommentUserId() == null && !mViewId.equals(mFeedDetail.getPostUserId())))
             return;
 
 

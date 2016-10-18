@@ -123,7 +123,7 @@ public class EditFragment extends BaseFragment {
     }
 
     public enum ContentSubType {
-        None, Post, Chat, Comment
+        None, Post, Chat, Comment, Comment_No_Anon
     }
 
     private Uri mUri;
@@ -774,6 +774,15 @@ public class EditFragment extends BaseFragment {
                                 textTool,
                                 stickersTool
                         };
+                    case Comment_No_Anon:
+                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
+                        cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        return new EditContentTool[]{
+                                cropTool,
+                                textTool,
+                                stickersTool
+                        };
                 }
             case UploadedVideo:
             case Video:
@@ -806,9 +815,14 @@ public class EditFragment extends BaseFragment {
                                 textTool,
                                 stickersTool
                         };
+                    case Comment_No_Anon:
+                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
+                        return new EditContentTool[]{
+                                textTool,
+                                stickersTool
+                        };
                 }
-
-
         }
         return new EditContentTool[0];
     }
@@ -1350,6 +1364,5 @@ public class EditFragment extends BaseFragment {
     static interface RequestDisableToolListener {
         void requestDisable(Class<? extends EditContentTool> tool, boolean disable);
     }
-
 
 }
