@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
-import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -58,6 +57,15 @@ public class CreateChatFragment extends SelectUsersFragment {
         arguments.putParcelableArrayList(KEY_SELECTED_USERS, selectedUsers);
         createChatFrag.setArguments(arguments);
         return createChatFrag;
+    }
+
+    public static CreateChatFragment newInstance(ArrayList<User> lockedUsers, ArrayList<User> selectedUsers){
+        Bundle arguments = new Bundle();
+        arguments.putParcelableArrayList(KEY_LOCKED_USERS, lockedUsers);
+        arguments.putParcelableArrayList(KEY_SELECTED_USERS, selectedUsers);
+        CreateChatFragment selectUserFragment = new CreateChatFragment();
+        selectUserFragment.setArguments(arguments);
+        return selectUserFragment;
     }
 
     @Override

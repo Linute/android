@@ -361,7 +361,11 @@ room: id of room
                 final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (activity != null) {
 
-                    CreateChatFragment frag = CreateChatFragment.newInstance(mChatRoom.users);
+                    ArrayList<User> lockedUsers = new ArrayList<>();
+                    lockedUsers.addAll(mChatRoom.users);
+                    ArrayList<User> selectedUsers = new ArrayList<>();
+                    selectedUsers.addAll(lockedUsers);
+                    CreateChatFragment frag = CreateChatFragment.newInstance(lockedUsers, selectedUsers);
                     frag.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
                         @Override
                         public void onUsersSelected(ArrayList<User> users) {
