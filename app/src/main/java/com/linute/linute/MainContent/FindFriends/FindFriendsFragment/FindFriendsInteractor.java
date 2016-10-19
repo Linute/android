@@ -102,7 +102,7 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
                                 mCurrLimit = mInitLimit;
 
                                 try {
-                                    mInitCanLoadMore = object.getBoolean("lastRequest");
+                                    mInitCanLoadMore = !object.getBoolean("lastRequest");
                                 }catch (JSONException e){
                                     e.printStackTrace();
                                     mInitCanLoadMore = false;
