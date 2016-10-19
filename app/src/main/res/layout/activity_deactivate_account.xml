@@ -16,6 +16,7 @@
         android:background="@null"
         android:gravity="top"
         android:hint="Tell us a little about why you are leaving..."
+        android:inputType="textCapSentences"
     />
 
     <View
