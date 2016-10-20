@@ -19,8 +19,15 @@ package com.linute.linute.API;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -117,7 +124,7 @@ public class MyGcmListenerService extends GcmListenerService {
             case "messager":
                 try{
                     JSONObject image = new JSONObject(data.getString("roomProfileImage"));
-                    profileImage = image.getString("thumbnail");
+                    profileImage = image.getString("original");
                 }catch(JSONException|NullPointerException e){}
             break;
             default:
@@ -150,7 +157,7 @@ public class MyGcmListenerService extends GcmListenerService {
                 e.printStackTrace();
             }
             if (image != null)
-                notificationBuilder.setLargeIcon(BitmapFactory.decodeFile(image.getAbsolutePath()));
+                notificationBuilder.setLargeIcon(getCircleBitmap(image));
         }
 
         BigInteger notificationId;
@@ -169,6 +176,34 @@ public class MyGcmListenerService extends GcmListenerService {
         Notification notifications = notificationBuilder.build();
         NotificationManagerCompat.from(this).notify(notificationId.intValue(), notifications);
     }
+
+    private static Bitmap getCircleBitmap(Bitmap bitmap) {
+        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(output);
+
+        final int color = Color.RED;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawOval(rectF, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
+        bitmap.recycle();
+
+        return output;
+    }
+
+    private static Bitmap getCircleBitmap(File file) {
+        return getCircleBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
+    }
+
 
 
     private Intent buildIntent(Bundle data, String action) {
