@@ -61,6 +61,7 @@ public class SelectUsersFragment extends Fragment implements UserGroupSearchAdap
 
     protected Handler mHandler = new Handler();
     protected RecyclerView mSelectedRV;
+    protected View mSelectedContainer;
     protected RecyclerView mSearchRV;
 
     protected final static String KEY_LOCKED_USERS = "locked";
@@ -138,10 +139,10 @@ public class SelectUsersFragment extends Fragment implements UserGroupSearchAdap
             public boolean onMenuItemClick(MenuItem menuItem) {
                 if (mSelectedUsers.isEmpty()) return true;
 
-                BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
                 activity.getSupportFragmentManager().popBackStack();
-                if(mUsersSelectedListener != null && !mSelectedUsers.isEmpty()){
+                if (mUsersSelectedListener != null && !mSelectedUsers.isEmpty()) {
                     mUsersSelectedListener.onUsersSelected(mSelectedUsers);
                 }
 //                activity.replaceContainerWithFragment(ChatFragment.newInstance(null, mSelectedUsers));
@@ -165,10 +166,12 @@ public class SelectUsersFragment extends Fragment implements UserGroupSearchAdap
         mSelectedAdapter = new SelectedUsersAdapter(mSelectedUsers);
         mSelectedAdapter.setRequestManager(Glide.with(this));
         mSelectedRV = (RecyclerView) view.findViewById(R.id.selected_users);
+        mSelectedContainer = view.findViewById(R.id.top);
         LinearLayoutManager selectedLLM = new LinearLayoutManager(getActivity());
         selectedLLM.setOrientation(LinearLayoutManager.HORIZONTAL);
         mSelectedRV.setLayoutManager(selectedLLM);
         mSelectedRV.setAdapter(mSelectedAdapter);
+
 
         mSearchAdapter2.setSelectedUserList(mSelectedUsers);
         mSearchAdapter2.setLockedUserList(mLockedUsers);
@@ -241,6 +244,13 @@ public class SelectUsersFragment extends Fragment implements UserGroupSearchAdap
         search("");
         vProgress = view.findViewById(R.id.progressBar);
         vEmpty = view.findViewById(R.id.empty_view);
+
+        mSelectedContainer.setVisibility(mSelectedUsers.size() > 0 ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     protected void onSearchPressed() {
@@ -284,17 +294,30 @@ public class SelectUsersFragment extends Fragment implements UserGroupSearchAdap
                 mSearchAdapter2.clearFocusedUser();
                 mSearchAdapter2.notifyDataSetChanged();
 
-
                 showName(mSelectedUsers.size() == 1);
+
+
+                mSelectedContainer.setVisibility(mSelectedUsers.size() > 0 ? View.VISIBLE : View.GONE);
+
+                /*mSelectedContainer.clearAnimation();
+                if(mSelectedUsers.size() > 0){
+                    mSelectedContainer.setVisibility(View.VISIBLE);
+                }
+                mSelectedContainer.animate().y(mSelectedUsers.size() > 0 ? -mSelectedContainer.getHeight() : 0).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSelectedContainer.setVisibility(mSelectedUsers.size() > 0 ? View.VISIBLE : View.GONE);
+                    }
+                });*/
 
             }
         });
     }
 
+
     @Override
     public void onStop() {
         super.onStop();
-
         if (editText.hasFocus() && getActivity() != null) {
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
@@ -350,7 +373,7 @@ public class SelectUsersFragment extends Fragment implements UserGroupSearchAdap
                         for (int i = 0; i < friends.length(); i++) {
                             user = friends.getJSONObject(i);
                             String college = null;
-                            if(!user.getString("college").equals("null")){
+                            if (!user.getString("college").equals("null")) {
                                 college = user.getJSONObject("college").getString("name");
                             }
                             tempUsers.add(new User(
@@ -410,7 +433,7 @@ public class SelectUsersFragment extends Fragment implements UserGroupSearchAdap
 
     public void showName(boolean show) {
         firstUserName.setVisibility(show ? View.VISIBLE : View.GONE);
-        mSelectedRV.animate().x(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (show ? 16 : 2 ), getResources().getDisplayMetrics()));
+        mSelectedRV.animate().x(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (show ? 16 : 2), getResources().getDisplayMetrics()));
         if (show) {
             firstUserName.setText(mSelectedUsers.get(0).getFullName());
         }
@@ -420,7 +443,8 @@ public class SelectUsersFragment extends Fragment implements UserGroupSearchAdap
     public void onDestroyView() {
         super.onDestroyView();
 //   TODO     if (mSearchAdapter.getRequestManager() != null) mSearchAdapter.getRequestManager().onDestroy();
-        if (mSelectedAdapter.getRequestManager() != null) mSelectedAdapter.getRequestManager().onDestroy();
+        if (mSelectedAdapter.getRequestManager() != null)
+            mSelectedAdapter.getRequestManager().onDestroy();
     }
 
     private OnUsersSelectedListener mUsersSelectedListener;
