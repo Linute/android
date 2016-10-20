@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -68,6 +67,8 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
 
     }
 
+
+    boolean hasBeenTouched = false;
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
@@ -80,6 +81,8 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
                 , mImageView.getBottom()
                 , bPaint
         );*/
+        if(!hasBeenTouched)
+        centerImage();
     }
 
     private ViewManipulationListener mCollisionListener;
@@ -165,7 +168,7 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
-
+        hasBeenTouched = true;
         if (!isActive) return false;
 
         getImageBounds(rect);
