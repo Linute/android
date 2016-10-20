@@ -21,6 +21,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.API.RegistrationIntentService;
@@ -132,6 +133,8 @@ public class LaunchActivity extends Activity {
                 }
             }
         };
+
+        DeviceInfoSingleton.getInstance(this);
     }
 
     //signiture for profile image
