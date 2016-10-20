@@ -237,9 +237,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         emit = true;
                     }
 
-                    Log.i("TEST", "likePost: 1");
                     if (emit) {
-                        Log.i("TEST", "likePost: ");
                         JSONObject body = new JSONObject();
                         body.put("user", mUserId);
                         body.put("room", mPost.getPostId());
@@ -338,7 +336,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     vUserName.setVisibility(View.GONE);
                     vProfileImage.setVisibility(View.INVISIBLE);
                 }
-
 
             }
 
