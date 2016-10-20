@@ -178,6 +178,10 @@ public class MyGcmListenerService extends GcmListenerService {
     }
 
     private static Bitmap getCircleBitmap(Bitmap bitmap) {
+        //returns square image for older phones that prefer square notifs
+        /*if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT){
+            return bitmap;
+        }*/
         final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
                 bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(output);
