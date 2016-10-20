@@ -369,6 +369,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                 //if you sent last message : show  "You: <text>"
 
                                 tempArray = message.getJSONArray("videos");
+                                boolean sharedPost = false;
 
                                 if (tempArray.length() > 0) {
                                     lastMessage = isOwner ? "sent a video" : "sent you a video";
@@ -377,14 +378,34 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                     if (tempArray.length() > 0) {
                                             lastMessage = isOwner ? "sent an image" : "sent you an image";
                                     } else {
+                                        JSONObject obj;
+                                        try {
+                                            obj = message.getJSONObject("post");
+                                        }catch (JSONException e){
+                                            obj = null;
+                                        }
+                                        if(obj != null){
+                                            sharedPost = true;
+                                        }
                                         lastMessage = message.getString("text");
                                     }
                                 }
 
                                 if (isOwner) {
-                                    lastMessage = "You: " + lastMessage;
+                                    if(sharedPost){
+                                        lastMessage = "You shared a post";
+                                    }else
+                                    if(showName){
+                                        lastMessage = "You: " + lastMessage;
+                                    }else{
+                                        lastMessage = "You " + lastMessage;
+                                    }
                                 } else if (showName) {
-                                    lastMessage = owner.getString("firstName") + ": " + lastMessage;
+                                    if(sharedPost){
+                                        lastMessage = owner.getString("firstName") + " shared a post";
+                                    }else {
+                                        lastMessage = owner.getString("firstName") + ": " + lastMessage;
+                                    }
                                 }
 
                             } else { //no messages show "..."
