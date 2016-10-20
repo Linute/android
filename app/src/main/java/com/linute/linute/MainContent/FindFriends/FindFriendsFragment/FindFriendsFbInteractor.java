@@ -22,10 +22,10 @@ import okhttp3.Response;
 /**
  * Created by QiFeng on 9/27/16.
  */
-public class FindFriendsFbInteractor extends BaseFindFriendsInteratctor {
+public class FindFriendsFbInteractor extends BaseFindFriendsInteractor {
 
     @Override
-    public void query(Context context, Map<String, Object> params, boolean loadMore, final OnFinishedRequest onFinishedQuery) {
+    public void query(Context context, Map<String, Object> params, boolean loadMore, final OnFinishedRequest<FriendSearchUser> onFinishedQuery)  {
         Handler handler = new Handler(Looper.getMainLooper());
         String query = (String) params.get("fullName");
 
@@ -49,7 +49,7 @@ public class FindFriendsFbInteractor extends BaseFindFriendsInteratctor {
     }
 
     @Override
-    protected void search(Context context, Map<String, Object> params, boolean loadMore, final OnFinishedRequest onFinishedQuery) {
+    protected void search(Context context, Map<String, Object> params, boolean loadMore, final OnFinishedRequest<FriendSearchUser> onFinishedQuery) {
         mCall = new LSDKFriendSearch(context).searchFriendByFacebook(params, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
@@ -102,7 +102,7 @@ public class FindFriendsFbInteractor extends BaseFindFriendsInteratctor {
         );
     }
 
-    private void filterList(final String name, final OnFinishedRequest request) {
+    private void filterList(final String name, final OnFinishedRequest<FriendSearchUser> request) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {

@@ -2113,6 +2113,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                 try {
                     post = message.getJSONObject("post");
+                    //Log.d(TAG, "addMessage: "+post.toString(4));
                     if (post != null) {
                         chat.setPost(new Post(post));
                         chat.setMessageType(

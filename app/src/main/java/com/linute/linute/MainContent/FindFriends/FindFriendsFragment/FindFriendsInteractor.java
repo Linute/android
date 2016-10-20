@@ -23,7 +23,7 @@ import okhttp3.Response;
 /**
  * Created by QiFeng on 9/24/16.
  */
-public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
+public class FindFriendsInteractor extends BaseFindFriendsInteractor {
 
     private Call mInitCall;
 
@@ -36,7 +36,7 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
     private boolean mInitCanLoadMore;
 
     @Override
-    public void query(Context context, Map<String, Object> params, boolean loadMore, final OnFinishedRequest onFinishedQuery) {
+    public void query(Context context, Map<String, Object> params, boolean loadMore, final OnFinishedRequest<FriendSearchUser> onFinishedQuery) {
         if (mCall != null) mCall.cancel();
 
         String query = (String) params.get("fullName");
@@ -66,7 +66,7 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
         }
     }
 
-    private void initList(Context context, Map<String, Object> params, final OnFinishedRequest onFinishedQuery) {
+    private void initList(Context context, Map<String, Object> params, final OnFinishedRequest<FriendSearchUser> onFinishedQuery) {
         if (mInitCall != null)
             mInitCall.cancel();
 
@@ -145,7 +145,7 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
     }
 
     @Override
-    protected void search(Context context, Map<String, Object> params, final boolean loadMore, final OnFinishedRequest onFinishedQuery) {
+    protected void search(Context context, Map<String, Object> params, final boolean loadMore, final OnFinishedRequest<FriendSearchUser> onFinishedQuery) {
 
         mCall = new LSDKFriendSearch(context).searchFriendByName(getFiltersAndParams(params, loadMore), new Callback() {
                     @Override

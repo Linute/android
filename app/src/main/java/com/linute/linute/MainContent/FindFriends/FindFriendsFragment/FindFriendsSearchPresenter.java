@@ -10,14 +10,14 @@ import java.util.Map;
 /**
  * Created by QiFeng on 9/24/16.
  */
-public class FindFriendsSearchPresenter extends BaseRequestPresenter {
+public class FindFriendsSearchPresenter extends BaseRequestPresenter<FriendSearchUser> {
 
-    protected BaseFindFriendsInteratctor mFindFriendsInteractor;
+    protected BaseFindFriendsInteractor mFindFriendsInteractor;
 
     public static final int TYPE_FB = 0;
     public static final int TYPE_SEARCH = 1;
 
-    public FindFriendsSearchPresenter(RequestCallbackView friendsView, int type) {
+    public FindFriendsSearchPresenter(RequestCallbackView<FriendSearchUser> friendsView, int type) {
         super(friendsView);
         mFindFriendsInteractor = type == TYPE_FB ? new FindFriendsFbInteractor() : new FindFriendsInteractor();
     }

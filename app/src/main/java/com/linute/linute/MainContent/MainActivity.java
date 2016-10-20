@@ -123,7 +123,6 @@ public class MainActivity extends BaseTaptActivity {
         public static final short ACTIVITY = 4;
     }
 
-    private Realm mRealm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,8 +134,6 @@ public class MainActivity extends BaseTaptActivity {
         TaptSocket.initSocketConnection(this);
 
         EmptyProfileHolder.activity = this;
-
-        mRealm = Realm.getDefaultInstance();
 
         mFragments = new BaseFragment[5];
         mWatchForRefresh = false;
@@ -587,7 +584,6 @@ public class MainActivity extends BaseTaptActivity {
         socket.on("filters", filter);
         socket.on("status colors", statusColors);
         socket.on("blocked", blocked);
-        socket.on("sync contacts", syncContacts);
         socket.on("message", message);
         socket.on("alert", alert);
         socket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
@@ -653,7 +649,6 @@ public class MainActivity extends BaseTaptActivity {
             socket.off("filters", filter);
             socket.off("status colors", statusColors);
             socket.off("blocked", blocked);
-            socket.off("sync contacts", syncContacts);
             socket.off("message", message);
             socket.off("alert", alert);
             socket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -840,29 +835,6 @@ public class MainActivity extends BaseTaptActivity {
                                     newEventSnackbar(text, update.getPost());
                                 } else {
                                     newProfileSnackBar(update);
-
-                                    //add follower to list of users we can share to
-                                    if (update.getUpdateType() == Update.UpdateType.FOLLOWER) {
-                                        if (mRealm.isClosed()) return;
-                                        mRealm.executeTransactionAsync(new Realm.Transaction() {
-                                            @Override
-                                            public void execute(Realm realm) {
-                                                TaptUser user = realm.where(TaptUser.class).equalTo("id", update.getUserId()).findFirst();
-                                                if (user != null) {
-                                                    user.setFullName(update.getUserFullName());
-                                                    user.setFriend(true);
-                                                    user.setProfileImage(update.getUserProfileImageName());
-                                                } else {
-                                                    realm.copyToRealm(
-                                                            new TaptUser(update.getUserId(),
-                                                                    update.getUserFullName(),
-                                                                    update.getUserProfileImageName(),
-                                                                    true)
-                                                    );
-                                                }
-                                            }
-                                        });
-                                    }
                                 }
                             }
                         });
@@ -1255,71 +1227,6 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-    private Emitter.Listener syncContacts = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            if ((boolean) args[0]) {
-                updateFriendsList();
-            }
-        }
-    };
-
-    private void updateFriendsList() {
-        new LSDKFriends(this).getSendToList(mSharedPreferences.getLong("timestamp", 0), new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        final JSONObject object = new JSONObject(response.body().string());
-                        //Log.d(TAG, "onResponse: " + object.toString(4));
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (mRealm.isClosed()) return;
-                                mRealm.executeTransactionAsync(new Realm.Transaction() {
-                                    @Override
-                                    public void execute(Realm realm) {
-                                        try {
-                                            JSONArray insertAndDelete = object.getJSONArray("insert");
-                                            TaptUser user;
-                                            TaptUser temp;
-                                            for (int i = 0; i < insertAndDelete.length(); i++) {
-                                                user = TaptUser.getUser(insertAndDelete.getJSONObject(i), true);
-                                                temp = realm.where(TaptUser.class).equalTo("id", user.getId()).findFirst();
-                                                if (temp != null) temp.update(user);
-                                                else realm.copyToRealm(user);
-                                            }
-
-                                            insertAndDelete = object.getJSONArray("delete");
-                                            for (int j = 0; j < insertAndDelete.length(); j++) {
-                                                user = TaptUser.getUser(insertAndDelete.getJSONObject(j), false);
-                                                temp = realm.where(TaptUser.class).equalTo("id", user.getId()).findFirst();
-                                                if (temp != null) temp.update(user);
-                                            }
-
-                                            mSharedPreferences.edit().putLong("timestamp", object.getLong("timestamp")).apply();
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Log.d(TAG, "onResponse: " + response.body().string());
-                }
-            }
-        });
-    }
 
     private Emitter.Listener onReconnect = new Emitter.Listener() {
         @Override
@@ -1420,6 +1327,5 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mRealm.close();
     }
 }

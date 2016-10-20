@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Created by QiFeng on 9/24/16.
  */
-public abstract class BaseFindFriendsFragment extends BaseFragment implements RequestCallbackView, LoadMoreViewHolder.OnLoadMore {
+public abstract class BaseFindFriendsFragment extends BaseFragment implements RequestCallbackView<FriendSearchUser>, LoadMoreViewHolder.OnLoadMore {
 
     public static final String TAG = BaseFindFriendsFragment.class.getSimpleName();
 

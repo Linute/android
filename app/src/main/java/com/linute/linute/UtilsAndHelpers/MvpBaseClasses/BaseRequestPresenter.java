@@ -10,16 +10,16 @@ import java.util.Map;
 /**
  * Created by QiFeng on 9/24/16.
  */
-public abstract class BaseRequestPresenter implements OnFinishedRequest {
+public abstract class BaseRequestPresenter<T> implements OnFinishedRequest<T> {
 
-    protected RequestCallbackView mRequestCallbackView;
+    protected RequestCallbackView<T> mRequestCallbackView;
 
-    public BaseRequestPresenter(RequestCallbackView callbackView){
+    public BaseRequestPresenter(RequestCallbackView<T> callbackView){
         mRequestCallbackView = callbackView;
     }
 
     @Override
-    public void onSuccess(ArrayList<FriendSearchUser> users, boolean canLoadMore, boolean addToBack) {
+    public void onSuccess(ArrayList<T> users, boolean canLoadMore, boolean addToBack) {
         mRequestCallbackView.onSuccess(users, canLoadMore, addToBack);
     }
 

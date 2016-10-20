@@ -1,15 +1,14 @@
 package com.linute.linute.UtilsAndHelpers.MvpBaseClasses;
 
-import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.FriendSearchUser;
 
 import java.util.ArrayList;
 
 /**
  * Created by QiFeng on 9/24/16.
  */
-public interface OnFinishedRequest {
+public interface OnFinishedRequest<T> {
 
-    void onSuccess(ArrayList<FriendSearchUser> users, boolean canLoadMore, boolean addToBack);
+    void onSuccess(ArrayList<T> users, boolean canLoadMore, boolean addToBack);
     void onFailure();
     void onError(String error);
 }

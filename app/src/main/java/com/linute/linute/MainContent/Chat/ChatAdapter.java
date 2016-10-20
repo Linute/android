@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -224,7 +225,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             BaseTaptActivity activity = (BaseTaptActivity) aContext;
             if (activity != null && mPost != null) {
                 try {
-
                     boolean emit = false;
 
                     if (checkbox.isActive() && mPost.isPostLiked()) {
@@ -236,6 +236,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         mPost.setPostLiked(true);
                         emit = true;
                     }
+
                     if (emit) {
                         JSONObject body = new JSONObject();
                         body.put("user", mUserId);
@@ -335,7 +336,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     vUserName.setVisibility(View.GONE);
                     vProfileImage.setVisibility(View.INVISIBLE);
                 }
-
 
             }
 
