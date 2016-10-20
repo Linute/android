@@ -174,9 +174,9 @@ public class ForgotPasswordFragment extends Fragment {
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("AAA", mCurrentViewFlipperIndex+"");
                 switch(mCurrentViewFlipperIndex){
                     case 1:
+
                         enterNewEmail();
                         break;
                     case 2:
