@@ -115,7 +115,7 @@ public class Post implements Parcelable {
             JSONObject owner = jsonObject.getJSONObject("owner");
 
             mUserId = owner.getString("id");
-            mUserName = owner.getString("fullName");
+            mUserName = Utils.stripUnsupportedCharacters(owner.getString("fullName"));
             mUserImage = Utils.getImageUrlOfUser(owner.getString("profileImage"));
 
             try {
