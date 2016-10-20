@@ -1648,7 +1648,7 @@ limitations under the License.\n\n
     <string name="empty_feed_button_campus">Take me there!</string>
     <string name="empty_feed_button_hot">See other Campuses</string>
     <string name="deactivata_account_text">
-        Deactivating your Tapt account will disable your profile and remove your data and being
+        Deactivating your Tapt account will disable your profile and remove your data from being
         searched anywhere, including your posts on the campus feed. To reactivate your account,
         simply log in with your .edu email and password.
     </string>
@@ -1663,7 +1663,7 @@ limitations under the License.\n\n
     </string>
 
     <string name="unblock_users">
-        If there is someone that you have blocked and would like to unblock them, select the option
-        below to see the users you have blocked.
+        If you had a change of heart, you can view users previously blocked and unblock them.
+        This will start showing you their content and profile immediately.
     </string>
 </resources>

@@ -372,7 +372,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                         if (mFollowed) return; //won't do anything if button pressed twice
 
                         mFollowed = true;
-                        mEventPicture.setImageResource(R.drawable.done); //change icon
+                        mEventPicture.setVisibility(View.INVISIBLE);
                         Map<String, Object> params = new HashMap<>();
                         params.put("user", mUpdate.getUserId());
 

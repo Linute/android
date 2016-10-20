@@ -14,6 +14,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -75,7 +76,7 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 //                    "",
 //                    ""
 //            );
-//        else
+        //else
         if (viewType == SendToItem.TYPE_PERSON)
             return new SendToPersonViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.view_holder_send_to, parent, false)
@@ -96,7 +97,7 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             ((BaseSendToViewHolder) holder).bindViews(mSendToItems.get(position));
 //        else if (holder instanceof LoadMoreViewHolder) {
 //            ((LoadMoreViewHolder) holder).bindView(mLoadState);
-//            if (mOnLoadMore != null) mOnLoadMore.loadMore();
+//            if (mOnLoadMore != null && mLoadState != LoadMoreViewHolder.STATE_END) mOnLoadMore.loadMore();
 //        }
     }
 

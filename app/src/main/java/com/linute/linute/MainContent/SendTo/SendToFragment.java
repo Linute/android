@@ -25,7 +25,9 @@ import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
-import com.linute.linute.Database.TaptUser;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
+import com.linute.linute.UtilsAndHelpers.MvpBaseClasses.BaseRequestPresenter;
+import com.linute.linute.UtilsAndHelpers.MvpBaseClasses.RequestCallbackView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -33,45 +35,35 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
-
-import io.realm.Realm;
-import io.realm.RealmChangeListener;
-import io.realm.RealmResults;
-import io.realm.Sort;
 
 /**
  * Created by QiFeng on 7/15/16.
  */
-public class SendToFragment extends BaseFragment {
+public class SendToFragment extends BaseFragment implements RequestCallbackView<SendToItem>{
 
     public static final String TAG = SendToFragment.class.getSimpleName();
     public static final String POST_ID_KEY = "send_post_id_key";
 
-    private ArrayList<SendToItem> mUnfilteredList = new ArrayList<>();
     private ArrayList<SendToItem> mSendToItems = new ArrayList<>();
 
     private SendToAdapter mSendToAdapter;
 
     private String mPostId;
 
-    private Handler mHandler = new Handler();
-
     private View vProgress;
     private TextView vErrorText;
-
     private EditText vSearch;
-
     private Button vSendButton;
+    private BaseRequestPresenter mRequestPresenter;
+    private Handler mSearchHandler = new Handler();
 
     //private PendingUploadPost mPendingUploadPost;
 
     // we currently have to make 2 api calls : one to retrieve list of trends and one to retrieve list
     //   friends. We won't show list until both api calls have finished
     //private boolean mGotResponseForApiCall = false;
-
-    private Realm mRealm;
-    private RealmResults<TaptUser> mRealmResults;
 
 
     /**
@@ -103,8 +95,6 @@ public class SendToFragment extends BaseFragment {
         if (getArguments() != null) {
             mPostId = getArguments().getString(POST_ID_KEY);
         }
-
-        mRealm = Realm.getDefaultInstance();
     }
 
     @Nullable
@@ -143,7 +133,13 @@ public class SendToFragment extends BaseFragment {
             @Override
             public void afterTextChanged(Editable s) {
                 if (getFragmentState() == FragmentState.FINISHED_UPDATING) {
-                    filterList();
+                    mSearchHandler.removeCallbacksAndMessages(null);
+                    mSearchHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            search();
+                        }
+                    }, 250);
                 }
             }
         });
@@ -161,6 +157,8 @@ public class SendToFragment extends BaseFragment {
             }
         });
 
+        //mSendToAdapter.setOnLoadMore(this);
+        mRequestPresenter = new SendToPresenter(this);
 
         vSendButton.setBackgroundResource(mSendToAdapter.checkedItemsIsEmpty()
                 ? R.color.twentyfive_black : R.color.yellow_color);
@@ -194,75 +192,20 @@ public class SendToFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
-            getSendToList();
+            search();
+            setFragmentState(FragmentState.FINISHED_UPDATING);
         } else if (mSendToItems.isEmpty()) {
             showEmpty(true);
+            showProgress(false);
         }
     }
 
 
-    private void getSendToList() {
+    private void search() {
         if (getContext() == null) return;
-        getFriends();
-    }
-
-
-    private void getFriends() {
-        mRealmResults = mRealm.where(TaptUser.class)
-                .equalTo("isFriend", true)
-                .findAllSortedAsync("numTimesSharedWith", Sort.DESCENDING, "fullName", Sort.ASCENDING);
-        //.sort("fullName", Sort.DESCENDING, "numTimesSharedWith", Sort.DESCENDING);
-
-        //gets called when we get the results from async call
-        mRealmResults.addChangeListener(new RealmChangeListener<RealmResults<TaptUser>>() {
-            @Override
-            public void onChange(RealmResults<TaptUser> element) {
-                ArrayList<SendToItem> items = new ArrayList<>();
-                for (TaptUser user1 : mRealmResults) {
-                    items.add(new SendToItem(
-                            SendToItem.TYPE_PERSON,
-                            user1.getFullName(),
-                            user1.getId(),
-                            user1.getProfileImage()
-                    ));
-                }
-
-                mUnfilteredList.clear();
-                mUnfilteredList.addAll(items);
-                mRealmResults.removeChangeListeners();
-                filterList();
-            }
-        });
-    }
-
-    private void filterList() {
-
-        final String filter = vSearch.getText().toString().toLowerCase();
-
-        mHandler.removeCallbacksAndMessages(null);
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (filter.isEmpty()) {
-                    mSendToItems.clear();
-                    mSendToItems.addAll(mUnfilteredList);
-                } else {
-                    ArrayList<SendToItem> items = new ArrayList<>();
-                    for (SendToItem i : mUnfilteredList) {
-                        if (i.getName().toLowerCase().contains(filter)) {
-                            items.add(i);
-                        }
-                    }
-                    mSendToItems.clear();
-                    mSendToItems.addAll(items);
-                }
-
-                mSendToAdapter.notifyDataSetChanged();
-                showEmpty(mSendToItems.isEmpty());
-                showProgress(false);
-                setFragmentState(FragmentState.FINISHED_UPDATING);
-            }
-        }, 200);
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("fullName", vSearch.getText().toString());
+        mRequestPresenter.request(getContext(), params, false);
     }
 
 
@@ -304,17 +247,8 @@ public class SendToFragment extends BaseFragment {
         String firstPersonName = null;
         for (SendToItem sendToItem : mSendToAdapter.getCheckedItems().get(SendToAdapter.PEOPLE)) {
             people.put(sendToItem.getId());
-
-            final String id = sendToItem.getId();
-            mRealm.executeTransactionAsync(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    TaptUser user = realm.where(TaptUser.class).equalTo("id", id).findFirst();
-                    user.incrementNumTimeShared();
-                }
-            });
-
-            if (firstPersonName == null) firstPersonName = sendToItem.getName();
+            if (firstPersonName == null)
+                firstPersonName = sendToItem.getName();
         }
 
         JSONObject send = new JSONObject();
@@ -354,13 +288,67 @@ public class SendToFragment extends BaseFragment {
     @Override
     public void onStop() {
         super.onStop();
-        mRealmResults.removeChangeListeners();
         hideKeyboard();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mRealm.close();
+        if (mRequestPresenter != null) mRequestPresenter.cancelRequest();
     }
+
+    @Override
+    public void onSuccess(final ArrayList<SendToItem> list, boolean canLoadMore, boolean addToBack) {
+        if (getActivity() == null) return;
+
+        //mSendToAdapter.setLoadState(canLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
+
+        if (addToBack) {
+            if (list.isEmpty()) return;
+
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    int start = mSendToItems.size();
+                    mSendToItems.addAll(list);
+                    mSendToAdapter.notifyItemRangeInserted(start, list.size());
+                    mSendToAdapter.notifyItemChanged(mSendToItems.size());
+                }
+            });
+        }else {
+
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mSendToItems.clear();
+                    mSendToItems.addAll(list);
+                    mSendToAdapter.notifyDataSetChanged();
+                    showProgress(false);
+                    showEmpty(mSendToItems.isEmpty());
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onError(String response) {
+        if (getActivity() == null) return;
+        showProgress(false);
+        Utils.showServerErrorToast(getActivity());
+
+        if (mSendToItems.isEmpty())
+            showEmpty(true);
+    }
+
+    @Override
+    public void onFailure() {
+        if (getActivity() == null) return;
+
+        showProgress(false);
+        Utils.showBadConnectionToast(getActivity());
+
+        if (mSendToItems.isEmpty())
+            showEmpty(true);
+    }
+
 }

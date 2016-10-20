@@ -59,11 +59,9 @@ public class LSDKFriends {
 //        return API_Methods.get(new String[]{"friends"}, header, param, callback);
 //    }
 
-    public Call getSendToList(long timeStamp, Callback callback) {
+    public Call getSendToList(Map<String, Object> param, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
-        Map<String, Object> param = new HashMap<>();
-        param.put("timestamp", timeStamp);
-
+        //param.put("timestamp", timeStamp);
         return API_Methods.post("friends/followers", header, param, callback);
     }
 
