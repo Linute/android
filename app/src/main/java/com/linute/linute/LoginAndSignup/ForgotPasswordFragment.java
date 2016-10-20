@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -68,6 +69,7 @@ public class ForgotPasswordFragment extends Fragment {
     private String mUserID;
 
     private String mUserToken;
+    private Toolbar mToolbar;
 
     public ForgotPasswordFragment() {
 
@@ -81,6 +83,8 @@ public class ForgotPasswordFragment extends Fragment {
 
         mViewFlipper = (ViewFlipper) rootView.findViewById(R.id.forgotPass_view_flipper);
         mPasswordView = (EditText) rootView.findViewById(R.id.forgotPas_password_text);
+
+
 
         setUpViewFlipper(rootView);
         bindViews(rootView);
@@ -164,6 +168,29 @@ public class ForgotPasswordFragment extends Fragment {
 
         mChangePassButton = (Button) root.findViewById(R.id.forgotPass_change_password);
 
+        mToolbar = (Toolbar) root.findViewById(R.id.toolbar);
+        mToolbar.setBackgroundColor(0);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("AAA", mCurrentViewFlipperIndex+"");
+                switch(mCurrentViewFlipperIndex){
+                    case 1:
+                        enterNewEmail();
+                        break;
+                    case 2:
+                        mViewFlipper.showPrevious();
+                        mCurrentViewFlipperIndex--;
+                        break;
+                    default:
+                        getActivity().getSupportFragmentManager().popBackStack();
+                        break;
+
+                }
+            }
+        });
+/*
 
         root.findViewById(R.id.forgotPass_enter_new_email).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -171,6 +198,7 @@ public class ForgotPasswordFragment extends Fragment {
                 enterNewEmail();
             }
         });
+*/
 
 
         root.findViewById(R.id.forgotPass_verify_code_button).setOnClickListener(new View.OnClickListener() {
