@@ -31,7 +31,7 @@
         android:src="@drawable/ic_cinema"
         android:visibility="gone"/>
 
-    <ImageView
+    <com.linute.linute.MainContent.EditScreen.MoveZoomImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
