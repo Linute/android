@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
+import android.graphics.Color;
 import android.support.annotation.ColorInt;
 
 /**
@@ -9,12 +10,12 @@ public class PollChoiceItem {
 
     public final String mOptionText;
     private int mVotes;
-    public final  @ColorInt int mColor;
+    public final int mColor;
 
-    public PollChoiceItem(String text, int votes, @ColorInt int color){
+    public PollChoiceItem(String text, int votes, String color){
         mOptionText = text;
         mVotes = votes;
-        mColor = color;
+        mColor = Color.parseColor(color);
     }
 
     public int getVotes() {

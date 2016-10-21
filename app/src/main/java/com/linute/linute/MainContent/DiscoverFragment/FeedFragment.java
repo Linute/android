@@ -269,12 +269,13 @@ public class FeedFragment extends BaseFeedFragment {
     private Post getPollItem(){
         Post p = new Post("");
         p.setTotalVotes(100);
+        p.setTitle("TITLE");
         p.setType(Post.POST_TYPE_POLL);
         ArrayList<PollChoiceItem> items = new ArrayList<>();
-        items.add(new PollChoiceItem("choice 1", 10, 0xFBB72E));
-        items.add(new PollChoiceItem("choice 2", 70, 0xD0021B));
-        items.add(new PollChoiceItem("choice 3", 10, 0x56bb1d));
-        items.add(new PollChoiceItem("choice 4", 10, 0x48BEF7));
+        items.add(new PollChoiceItem("choice 1", 10, "#FBB72E"));
+        items.add(new PollChoiceItem("choice 2", 70, "#D0021B"));
+        items.add(new PollChoiceItem("choice 3", 10, "#56bb1d"));
+        items.add(new PollChoiceItem("choice 4", 10, "#48BEF7"));
         p.mPollChoices = items;
         return p;
     }
