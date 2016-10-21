@@ -30,7 +30,7 @@ import org.json.JSONObject;
 /**
  * Created by QiFeng on 3/8/16.
  */
-public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
+public class BasePostFeedHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
 
     protected View vLikeButton;
     protected View vCommentButton;
@@ -57,7 +57,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     protected boolean mEnableProfileView = true;
 
-    public BaseFeedHolder(final View itemView, final Context context, RequestManager manager, BaseFeedAdapter.PostAction action) {
+    public BasePostFeedHolder(final View itemView, final Context context, RequestManager manager, BaseFeedAdapter.PostAction action) {
         super(itemView);
 
         mFilterColor = ContextCompat.getColor(context, R.color.inactive_grey);

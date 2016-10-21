@@ -32,7 +32,7 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 /**
  * Created by QiFeng on 2/3/16.
  */
-public class ImageFeedHolder extends BaseFeedHolder {
+public class ImageFeedHolder extends BasePostFeedHolder {
 
     public static final String TAG = ImageFeedHolder.class.getSimpleName();
     public static final String FULL_VIEW = "full_view_image_feed";

@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -179,6 +180,7 @@ public class Post implements Parcelable {
 //            }
 //        }
     }
+
 
 
     public void updateInfo(JSONObject jsonObject) throws JSONException {
@@ -482,4 +484,27 @@ public class Post implements Parcelable {
     public void setPrivacyChanged(boolean privacyChanged) {
         isPrivacyChanged = privacyChanged;
     }
+
+
+
+    // NOTE : ARE WE MOVING THIS TO POST?
+    // NOTE : Used for testing atm; needs to be fixed
+
+    public static final int POST_TYPE_POLL = 3;
+    private int mTotalVotes;
+
+    public ArrayList<PollChoiceItem> mPollChoices = new ArrayList<>();
+
+    public ArrayList<PollChoiceItem> getPollChoices(){
+        return mPollChoices;
+    }
+
+    public int getTotalVotes(){
+        return mTotalVotes;
+    }
+
+    public void setTotalVotes(int votes){
+        mTotalVotes = votes;
+    }
+
 }

@@ -57,6 +57,10 @@ public class FeedAdapter extends BaseFeedAdapter {
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_load_more, parent, false),
                         "", "That's all folks!");
 
+            case POLL:
+                return new PollViewHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feeddetail_poll, parent, false)
+                );
             case IMAGE_POST:
                 return new ImageFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_image, parent, false),
@@ -86,7 +90,9 @@ public class FeedAdapter extends BaseFeedAdapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         boolean sendImpression = true;
-        if (holder instanceof VideoFeedHolder) {
+        if (holder instanceof PollViewHolder){
+            ((PollViewHolder) holder).bindView(mPosts.get(position));
+        }else if (holder instanceof VideoFeedHolder) {
             ((VideoFeedHolder) holder).bindModel(mPosts.get(position));
         } else if (holder instanceof ImageFeedHolder) {
             ((ImageFeedHolder) holder).bindModel(mPosts.get(position));
@@ -122,13 +128,19 @@ public class FeedAdapter extends BaseFeedAdapter {
     public static final int IMAGE_POST = 0;
     public static final int STATUS_POST = 1;
     public static final int VIDEO_POST = 2;
+    public static final int POLL = 3;
 
     @Override
     public int getItemViewType(int position) {
         if (position == mPosts.size()) {
             return LoadMoreViewHolder.FOOTER;
-        } else if (mPosts.get(position).isImagePost()) {
-            return mPosts.get(position).isVideoPost() ? VIDEO_POST : IMAGE_POST;
+        }
+
+        Post p = mPosts.get(position);
+        if (p.isImagePost()) {
+            return p.isVideoPost() ? VIDEO_POST : IMAGE_POST;
+        }else if (p.getType() == Post.POST_TYPE_POLL){
+            return POLL;
         }
         return STATUS_POST;
     }

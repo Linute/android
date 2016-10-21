@@ -265,6 +265,20 @@ public class FeedFragment extends BaseFeedFragment {
         );
     }
 
+    //NOTE: TEST FUNCTION
+    private Post getPollItem(){
+        Post p = new Post("");
+        p.setTotalVotes(100);
+        p.setType(Post.POST_TYPE_POLL);
+        ArrayList<PollChoiceItem> items = new ArrayList<>();
+        items.add(new PollChoiceItem("choice 1", 10, 0xFBB72E));
+        items.add(new PollChoiceItem("choice 2", 70, 0xD0021B));
+        items.add(new PollChoiceItem("choice 3", 10, 0x56bb1d));
+        items.add(new PollChoiceItem("choice 4", 10, 0x48BEF7));
+        p.mPollChoices = items;
+        return p;
+    }
+
     @Override
     public ArrayList<Post> getPostsArray() {
         return mPosts;
@@ -347,6 +361,9 @@ public class FeedFragment extends BaseFeedFragment {
                             }
 
                             final ArrayList<Post> refreshedPosts = new ArrayList<>();
+
+                            // TODO: USED FOR TESTING. REMOVE LATER
+                            refreshedPosts.add(getPollItem());
 
                             for (int i = jsonArray.length() - 1; i >= 0; i--) {
                                 try {

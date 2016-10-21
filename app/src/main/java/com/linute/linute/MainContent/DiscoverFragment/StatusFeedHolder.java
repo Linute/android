@@ -12,7 +12,7 @@ import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 /**
  * Created by QiFeng on 2/3/16.
  */
-public class StatusFeedHolder extends BaseFeedHolder {
+public class StatusFeedHolder extends BasePostFeedHolder {
 
 
     public static final String TAG = StatusFeedHolder.class.getSimpleName();
