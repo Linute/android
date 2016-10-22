@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.SendTo.SendToFragment;
@@ -192,7 +193,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
         if (getActivity() == null || !mUserId.equals(p.getUserId())) return;
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "", "Deleting", true, false);
 
-        new LSDKEvents(getActivity()).deleteEvent(p.getPostId(), new Callback() {
+        new LSDKEvents(getActivity()).deleteEvent(p.getId(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 progressDialog.dismiss();
@@ -228,12 +229,12 @@ public abstract class BaseFeedFragment extends BaseFragment {
                                 @Override
                                 public void run() {
                                     int position = pos;
-                                    if (!getPostsArray().get(pos).equals(p)) { //check this is correct post
-                                        position = getPostsArray().indexOf(p);
+                                    if (!getFeedArray().get(pos).equals(p)) { //check this is correct post
+                                        position = getFeedArray().indexOf(p);
                                     }
 
                                     if (position >= 0) {
-                                        getPostsArray().remove(position);
+                                        getFeedArray().remove(position);
                                         mFeedAdapter.notifyItemRemoved(position);
                                     }
                                 }
@@ -274,7 +275,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
 
     private void reportPost(Post p, int reason) {
         if (getActivity() == null) return;
-        new LSDKEvents(getActivity()).reportEvent(reason, p.getPostId(), new Callback() {
+        new LSDKEvents(getActivity()).reportEvent(reason, p.getId(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
@@ -339,7 +340,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
         if (getActivity() == null || !mUserId.equals(p.getUserId())) return;
         final boolean isAnon = p.getPrivacy() == 1;
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing post..." : "Making post anonymous...", true, false);
-        new LSDKEvents(getActivity()).revealEvent(p.getPostId(), !isAnon, new Callback() {
+        new LSDKEvents(getActivity()).revealEvent(p.getId(), !isAnon, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 progressDialog.dismiss();
@@ -382,8 +383,8 @@ public abstract class BaseFeedFragment extends BaseFragment {
                                         @Override
                                         public void run() {
                                             int pos = position;
-                                            if (!getPostsArray().get(position).equals(p)){
-                                                pos = getPostsArray().indexOf(p);
+                                            if (!getFeedArray().get(position).equals(p)){
+                                                pos = getFeedArray().indexOf(p);
                                             }
 
                                             if (pos >= 0){
@@ -454,8 +455,8 @@ public abstract class BaseFeedFragment extends BaseFragment {
         }
 
         int pos = position;
-        if (!getPostsArray().get(position).equals(p)){
-            pos = getPostsArray().indexOf(p);
+        if (!getFeedArray().get(position).equals(p)){
+            pos = getFeedArray().indexOf(p);
         }
 
         final int pos1 = pos;
@@ -463,7 +464,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    getPostsArray().remove(pos1);
+                    getFeedArray().remove(pos1);
                     mFeedAdapter.notifyItemRemoved(pos1);
                 }
             });
@@ -479,7 +480,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
         JSONObject emit = new JSONObject();
         try {
             emit.put("hide", !p.isPostHidden());
-            emit.put("room", p.getPostId());
+            emit.put("room", p.getId());
             TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:hide", emit);
         } catch (JSONException e) {
             Utils.showServerErrorToast(activity);
@@ -497,11 +498,11 @@ public abstract class BaseFeedFragment extends BaseFragment {
     private void sharePost(Post p) {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null)
-            activity.addFragmentOnTop(SendToFragment.newInstance(p.getPostId()), "send_to");
+            activity.addFragmentOnTop(SendToFragment.newInstance(p.getId()), "send_to");
     }
 
 
-    public abstract ArrayList<Post> getPostsArray();
+    public abstract ArrayList<BaseFeedItem> getFeedArray();
 
     @Override
     public void onDestroyView() {

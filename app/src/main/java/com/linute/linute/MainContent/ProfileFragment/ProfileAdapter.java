@@ -150,11 +150,11 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         } else if (holder instanceof VideoFeedHolder) {
             Post p = mPosts.get(position - 2);
             ((VideoFeedHolder) holder).bindModel(p);
-            ImpressionHelper.sendImpressionsAsync(mCollegeId, mUserid, p.getPostId());
+            ImpressionHelper.sendImpressionsAsync(mCollegeId, mUserid, p.getId());
         } else if (holder instanceof ImageFeedHolder) {
             Post p = mPosts.get(position - 2);
             ((ImageFeedHolder) holder).bindModel(p);
-            ImpressionHelper.sendImpressionsAsync(mCollegeId, mUserid, p.getPostId());
+            ImpressionHelper.sendImpressionsAsync(mCollegeId, mUserid, p.getId());
         } else if (holder instanceof ProfileHeaderViewHolder) {
             ((ProfileHeaderViewHolder) holder).bindModel(mUser);
         } else if (holder instanceof ProfileHeaderActions) {
@@ -162,7 +162,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         } else if (holder instanceof StatusFeedHolder) {
             Post p = mPosts.get(position - 2);
             ((StatusFeedHolder) holder).bindModel(p);
-            ImpressionHelper.sendImpressionsAsync(mCollegeId, mUserid, p.getPostId());
+            ImpressionHelper.sendImpressionsAsync(mCollegeId, mUserid, p.getId());
         }
     }
 

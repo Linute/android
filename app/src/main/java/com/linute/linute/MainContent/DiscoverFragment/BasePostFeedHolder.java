@@ -30,7 +30,7 @@ import org.json.JSONObject;
 /**
  * Created by QiFeng on 3/8/16.
  */
-public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
+public class BasePostFeedHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
 
     protected View vLikeButton;
     protected View vCommentButton;
@@ -47,7 +47,6 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     private String mUserId;
     private String mImageSignature;
-    private String mCollegeId;
     protected RequestManager mRequestManager;
     protected BaseFeedAdapter.PostAction mPostAction;
 
@@ -57,7 +56,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     protected boolean mEnableProfileView = true;
 
-    public BaseFeedHolder(final View itemView, final Context context, RequestManager manager, BaseFeedAdapter.PostAction action) {
+    public BasePostFeedHolder(final View itemView, final Context context, RequestManager manager, BaseFeedAdapter.PostAction action) {
         super(itemView);
 
         mFilterColor = ContextCompat.getColor(context, R.color.inactive_grey);
@@ -66,7 +65,6 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         mContext = context;
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mUserId = mSharedPreferences.getString("userID", "");
-        mCollegeId = mSharedPreferences.getString("collegeId", "");
         mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
 
         vLikeButton = itemView.findViewById(R.id.feed_control_bar_like_button);
@@ -152,7 +150,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
             try {
                 JSONObject body = new JSONObject();
                 body.put("user", mUserId);
-                body.put("room", mPost.getPostId());
+                body.put("room", mPost.getId());
                 TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:like", body);
             } catch (JSONException e) {
                 e.printStackTrace();

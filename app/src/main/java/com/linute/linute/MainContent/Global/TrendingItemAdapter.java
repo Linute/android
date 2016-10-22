@@ -11,7 +11,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.ImageFeedHolder;
+import com.linute.linute.MainContent.DiscoverFragment.Poll;
+import com.linute.linute.MainContent.DiscoverFragment.PollViewHolder;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoFeedHolder;
 import com.linute.linute.R;
@@ -34,16 +37,15 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
 
     public static final int UNDEFINED = 666;
 
-    List<Post> mPosts;
-    Context mContext;
+    private List<BaseFeedItem> mPosts;
+    private Context mContext;
 
-    String mUserId;
-    String mImageSignature;
-    String mCollege;
-    GlobalChoiceItem mGlobalItem;
+    private String mUserId;
+    private String mCollege;
+    private GlobalChoiceItem mGlobalItem;
 
 
-    public TrendingItemAdapter(List<Post> posts, Context context, RequestManager manager, GlobalChoiceItem item) {
+    public TrendingItemAdapter(List<BaseFeedItem> posts, Context context, RequestManager manager, GlobalChoiceItem item) {
         mContext = context;
         mRequestManager = manager;
         mPosts = posts;
@@ -52,17 +54,16 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mUserId = mSharedPreferences.getString("userID", "");
         mCollege = mSharedPreferences.getString("collegeId", "");
-        mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
     }
 
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        if (viewType == Post.POST_TYPE_VIDEO) {
+        if (viewType == VIDEO_POST) {
             return new VideoTrendViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_item_video, parent, false),
                     mContext, mRequestManager, mPostAction);
-        } else if (viewType == Post.POST_TYPE_IMAGE) {
+        } else if (viewType == IMAGE_POST) {
             return new BaseTrendViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_item, parent, false),
                     mContext, mRequestManager, mPostAction);
         } else if (viewType == LoadMoreViewHolder.FOOTER) {
@@ -70,6 +71,8 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
                     "",
                     "That's all folks!"
             );
+        }else if (viewType == POLL){
+            return new PollViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.feeddetail_poll, parent, false));
         }
 
         return null;
@@ -79,11 +82,13 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 
         if (holder instanceof BaseTrendViewHolder) {
-            ((BaseTrendViewHolder) holder).bindModel(mPosts.get(position));
+            ((BaseTrendViewHolder) holder).bindModel((Post) mPosts.get(position));
         } else if (holder instanceof VideoTrendViewHolder) {
-            ((VideoFeedHolder) holder).bindModel(mPosts.get(position));
+            ((VideoFeedHolder) holder).bindModel((Post) mPosts.get(position));
         } else if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView(mLoadState);
+        } else if (holder instanceof PollViewHolder){
+            ((PollViewHolder) holder).bindView((Poll) mPosts.get(position));
         }
 
         if (position == mPosts.size() - 1) {
@@ -96,13 +101,20 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
     public int getItemViewType(int position) {
         if (position == mPosts.size()) {
             return LoadMoreViewHolder.FOOTER;
-        } else if (mPosts.get(position).isVideoPost()) {
-            return Post.POST_TYPE_VIDEO;
-        } else if (mPosts.get(position).isImagePost()) {
-            return Post.POST_TYPE_IMAGE;
-        } else {
-            return UNDEFINED;
         }
+
+        if (mPosts.get(position) instanceof Post) {
+            Post p = (Post) mPosts.get(position);
+            if (p.isVideoPost()) {
+                return VIDEO_POST;
+            } else if (p.isImagePost()) {
+                return IMAGE_POST;
+            }
+        } else if (mPosts.get(position) instanceof Poll) {
+            return POLL;
+        }
+
+        return UNDEFINED;
     }
 
     @Override
@@ -111,29 +123,28 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
     }
 
 
-    public class BaseTrendViewHolder extends ImageFeedHolder {
-        protected TextView vCollegeText;
+    private class BaseTrendViewHolder extends ImageFeedHolder {
+        TextView vCollegeText;
 
-        public BaseTrendViewHolder(View itemView, Context context, RequestManager requestManager, PostAction action) {
+        BaseTrendViewHolder(View itemView, Context context, RequestManager requestManager, PostAction action) {
             super(itemView, context, requestManager, action);
             vCollegeText = (TextView) itemView.findViewById(R.id.college_name);
         }
-
 
         @Override
         public void bindModel(Post post) {
             super.bindModel(post);
             vCollegeText.setText(post.getCollegeName());
-            sendImpressionsAsync(post.getPostId());
+            sendImpressionsAsync(post.getId());
         }
     }
 
 
-    public class VideoTrendViewHolder extends VideoFeedHolder {
+    private class VideoTrendViewHolder extends VideoFeedHolder {
 
-        protected TextView vCollegeName;
+        TextView vCollegeName;
 
-        public VideoTrendViewHolder(View itemView, Context context, RequestManager manager, PostAction action) {
+        VideoTrendViewHolder(View itemView, Context context, RequestManager manager, PostAction action) {
             super(itemView, context, manager, action);
             vCollegeName = (TextView) itemView.findViewById(R.id.college_name);
         }
@@ -142,7 +153,7 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
         public void bindModel(Post post) {
             super.bindModel(post);
             vCollegeName.setText(post.getCollegeName());
-            sendImpressionsAsync(post.getPostId());
+            sendImpressionsAsync(post.getId());
         }
     }
 

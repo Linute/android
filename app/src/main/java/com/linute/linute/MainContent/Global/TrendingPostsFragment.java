@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.MainActivity;
@@ -40,7 +41,7 @@ public class TrendingPostsFragment extends BaseFeedFragment {
     private static final String ARGS_KEY = "id_key";
     private static final String TAG = TrendingPostsFragment.class.getSimpleName();
 
-    private ArrayList<Post> mPostList = new ArrayList<>();
+    private ArrayList<BaseFeedItem> mPostList = new ArrayList<>();
 
     private GlobalChoiceItem mGlobalItem;
 
@@ -377,7 +378,7 @@ public class TrendingPostsFragment extends BaseFeedFragment {
     }
 
     @Override
-    public ArrayList<Post> getPostsArray() {
+    public ArrayList<BaseFeedItem> getFeedArray() {
         return mPostList;
     }
 

@@ -240,7 +240,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     if (emit) {
                         JSONObject body = new JSONObject();
                         body.put("user", mUserId);
-                        body.put("room", mPost.getPostId());
+                        body.put("room", mPost.getId());
                         TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:like", body);
                     }
 

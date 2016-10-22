@@ -948,7 +948,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         if (getActivity() == null || !mViewerId.equals(p.getUserId())) return;
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "", "Deleting", true, false);
 
-        new LSDKEvents(getActivity()).deleteEvent(p.getPostId(), new Callback() {
+        new LSDKEvents(getActivity()).deleteEvent(p.getId(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 progressDialog.dismiss();
@@ -1028,7 +1028,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
     private void reportPost(Post p, int reason) {
         if (getActivity() == null) return;
-        new LSDKEvents(getActivity()).reportEvent(reason, p.getPostId(), new Callback() {
+        new LSDKEvents(getActivity()).reportEvent(reason, p.getId(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
@@ -1095,7 +1095,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         if (getActivity() == null || !mViewerId.equals(p.getUserId())) return;
         final boolean isAnon = p.getPrivacy() == 1;
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing post..." : "Making post anonymous...", true, false);
-        new LSDKEvents(getActivity()).revealEvent(p.getPostId(), !isAnon, new Callback() {
+        new LSDKEvents(getActivity()).revealEvent(p.getId(), !isAnon, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 progressDialog.dismiss();
@@ -1220,7 +1220,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         JSONObject emit = new JSONObject();
         try {
             emit.put("hide", p.isPostHidden());
-            emit.put("room", p.getPostId());
+            emit.put("room", p.getId());
             TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:hide", emit);
         } catch (JSONException e) {
             Utils.showServerErrorToast(activity);
@@ -1231,6 +1231,6 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
     private void sharePost(Post p) {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null)
-            activity.addFragmentOnTop(SendToFragment.newInstance(p.getPostId()), "send_to");
+            activity.addFragmentOnTop(SendToFragment.newInstance(p.getId()), "send_to");
     }
 }

@@ -41,7 +41,7 @@ public class FeedDetail {
     }
 
     public String getPostId() {
-        return mPost.getPostId();
+        return mPost.getId();
     }
 
     public String getPostUserId() {

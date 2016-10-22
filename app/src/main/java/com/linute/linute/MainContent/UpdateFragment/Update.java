@@ -230,7 +230,7 @@ public class Update {
     public void markViewed(){mIsViewed = true;}
 
     public String getEventID() {
-        return mPost.getPostId();
+        return mPost.getId();
     }
 
     public String getActionID() {
