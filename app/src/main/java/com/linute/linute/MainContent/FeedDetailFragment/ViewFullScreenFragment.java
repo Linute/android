@@ -18,13 +18,10 @@ import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
-import com.linute.linute.MainContent.EditScreen.MoveZoomImageView;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -49,7 +46,7 @@ public class ViewFullScreenFragment extends BaseFragment {
     private static final String POST_ID_KEY = "post_id_key";
     private static final String PROGRESS_THRESHOLD = "progress_thresh";
 
-    private MoveZoomImageView vImage;
+    private ZoomImageView vImage;
     private View vVideoParent;
     private TextureVideoView vTextureVideoView;
     private View vVideoLoadingIndicator;
@@ -126,7 +123,7 @@ public class ViewFullScreenFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_view_full_screen, container, false);
         getActivity().onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_CANCEL, 0, 0, 0));
-        vImage = (MoveZoomImageView) root.findViewById(R.id.imageView);
+        vImage = (ZoomImageView) root.findViewById(R.id.imageView);
         vVideoParent = root.findViewById(R.id.video_parent);
         vTextureVideoView = (TextureVideoView) vVideoParent.findViewById(R.id.video);
 
@@ -221,6 +218,8 @@ public class ViewFullScreenFragment extends BaseFragment {
             vImage.setVisibility(View.VISIBLE);
             vVideoLoadingIndicator.setVisibility(View.GONE);
 
+
+
             vLoadingText.setVisibility(View.VISIBLE);
             Glide.with(this)
                     .load(mLink)
@@ -236,15 +235,11 @@ public class ViewFullScreenFragment extends BaseFragment {
                             //hide loading when finished loading image
                             setFragmentState(FragmentState.FINISHED_UPDATING);
                             vLoadingText.setVisibility(View.GONE);
+
                             return false;
                         }
                     })
-                    .into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            vImage.setImageBitmap(resource);
-                        }
-                    });
+                    .into(vImage);
         } else if (mPostType == Post.POST_TYPE_VIDEO) {
 
             VideoPlayerSingleton.getSingleVideoPlaybackManager().playNewVideo(vTextureVideoView, mLink);
