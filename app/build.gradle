@@ -23,8 +23,8 @@ android {
         applicationId "com.linute.linute"
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 39
-        versionName "1.7.5.6.4"
+        versionCode 40
+        versionName "1.7.6"
         multiDexEnabled true
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
     }
