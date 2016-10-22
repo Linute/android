@@ -119,21 +119,17 @@ public class Post implements Parcelable {
             mUserName = Utils.stripUnsupportedCharacters(owner.getString("fullName"));
             mUserImage = Utils.getImageUrlOfUser(owner.getString("profileImage"));
 
-            try {
-                mCollegeName = owner.getJSONObject("college").getString("name");
-            } catch (JSONException e) {
-                try{
-                    mCollegeName = jsonObject.getJSONObject("college").getString("name");
-                }catch (JSONException eq){
-                    mCollegeName = "";
-                }
-            }
         } catch (JSONException e) {
             mUserId = jsonObject.getString("owner");
             mUserName = "";
             mUserImage = "";
         }
 
+        try{
+            mCollegeName = jsonObject.getJSONObject("college").getString("name");
+        }catch (JSONException eq){
+            mCollegeName = "";
+        }
 
         mTitle = jsonObject.getString("title");
         mPrivacy = jsonObject.getInt("privacy");
@@ -203,20 +199,20 @@ public class Post implements Parcelable {
 
         mPostTime = (myDate == null ? 0 : myDate.getTime());
 
+
+        if (mCollegeName == null || mCollegeName.isEmpty()) {
+            try {
+                mCollegeName = jsonObject.getJSONObject("college").getString("name");
+            } catch (JSONException e) {
+                mCollegeName = "";
+            }
+        }
+
         try {
             JSONObject owner = jsonObject.getJSONObject("owner");
-
             mUserId = owner.getString("id");
             mUserName = owner.getString("fullName");
             mUserImage = Utils.getImageUrlOfUser(owner.getString("profileImage"));
-
-            if (mCollegeName == null || mCollegeName.isEmpty()) {
-                try {
-                    mCollegeName = owner.getJSONObject("college").getString("name");
-                } catch (JSONException e) {
-                    mCollegeName = "";
-                }
-            }
         } catch (JSONException e) {
             mUserId = jsonObject.getString("owner");
             mUserName = "";
