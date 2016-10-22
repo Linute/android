@@ -10,13 +10,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 
 /**
  * Created by Arman on 12/27/15.
  */
-public class Post implements Parcelable {
+public class Post extends BaseFeedItem implements Parcelable {
 
     public final static int POST_TYPE_STATUS = 0;
     public final static int POST_TYPE_IMAGE = 1;
@@ -27,8 +26,6 @@ public class Post implements Parcelable {
     private String mUserImage;      // post owner's profile image
     private String mCollegeName;    // OP's college
     private String mAnonImage;      // anon image of user
-
-    private String mPostId;         // id of post
 
     private String mVideoURL = "";  // video url
 
@@ -61,8 +58,8 @@ public class Post implements Parcelable {
     }
 
     public Post(String imageurl, String postid, String userid, String userName) {
+        super(postid);
         mImage = imageurl;
-        mPostId = postid;
         mPostTime = 0;
         mUserId = userid;
         mUserName = Utils.stripUnsupportedCharacters(userName);
@@ -83,7 +80,7 @@ public class Post implements Parcelable {
 
 
     public Post(String postId) {
-        mPostId = postId;
+        super(postId);
         setPrivacyChanged(false);
     }
 
@@ -93,6 +90,7 @@ public class Post implements Parcelable {
     public Post(JSONObject jsonObject) throws JSONException {
 
         //Log.i("test", "Post: "+jsonObject.toString(4));
+        super(jsonObject.getString("id"));
         mType = jsonObject.getInt("type");
 
         if (jsonObject.getJSONArray("images").length() > 0)
@@ -135,7 +133,6 @@ public class Post implements Parcelable {
         mPrivacy = jsonObject.getInt("privacy");
 
         mCommentAnonDisabled = jsonObject.getBoolean("isAnonymousCommentsDisabled");
-        mPostId = jsonObject.getString("id");
 
         String anonImage = jsonObject.getString("anonymousImage");
         mAnonImage = anonImage == null || anonImage.equals("") ? "" : Utils.getAnonImageUrl(anonImage);
@@ -180,6 +177,8 @@ public class Post implements Parcelable {
 
 
     public void updateInfo(JSONObject jsonObject) throws JSONException {
+        setId(jsonObject.getString("id"));
+
         mType = jsonObject.getInt("type");
 
         if (jsonObject.getJSONArray("images").length() > 0)
@@ -223,7 +222,6 @@ public class Post implements Parcelable {
         mPrivacy = jsonObject.getInt("privacy");
 
         mCommentAnonDisabled = jsonObject.getBoolean("isAnonymousCommentsDisabled");
-        mPostId = jsonObject.getString("id");
 
         String anonImage = jsonObject.getString("anonymousImage");
         mAnonImage = anonImage == null || anonImage.equals("") ? "" : Utils.getAnonImageUrl(anonImage);
@@ -297,10 +295,6 @@ public class Post implements Parcelable {
 
     public String getPostTime() {
         return Utils.getTimeAgoString(mPostTime);
-    }
-
-    public String getPostId() {
-        return mPostId;
     }
 
     public String getUserId() {
@@ -398,12 +392,12 @@ public class Post implements Parcelable {
 
     @Override
     public int hashCode() {
-        return mPostId.hashCode();
+        return getId().hashCode();
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Post && ((Post) o).getPostId().equals(mPostId);
+        return o instanceof Post && ((Post) o).getId().equals(getId());
     }
 
     @Override
@@ -417,6 +411,7 @@ public class Post implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeString(mUserId);
         dest.writeString(mUserName);
         dest.writeString(mUserImage);
@@ -425,7 +420,6 @@ public class Post implements Parcelable {
         dest.writeInt(mPrivacy);
         dest.writeInt(mNumLikes);
         dest.writeLong(mPostTime);
-        dest.writeString(mPostId);
         dest.writeInt(mNumOfComments);
         dest.writeString(mAnonImage);
         dest.writeByte((byte) (mPostLiked ? 1 : 0)); //boolean
@@ -435,10 +429,13 @@ public class Post implements Parcelable {
         dest.writeParcelable(mImageSize, 0);
         dest.writeByte((byte) (mIsDeleted ? 1 : 0));
         dest.writeByte((byte) (isPrivacyChanged() ? 1 : 0));
+        dest.writeString(imageBase64);
+        dest.writeInt(mType);
         //dest.writeList(mComments);
     }
 
     private Post(Parcel in) {
+        super(in);
         mUserId = in.readString();
         mUserName = in.readString();
         mUserImage = in.readString();
@@ -447,7 +444,6 @@ public class Post implements Parcelable {
         mPrivacy = in.readInt();
         mNumLikes = in.readInt();
         mPostTime = in.readLong();
-        mPostId = in.readString();
         mNumOfComments = in.readInt();
         mAnonImage = in.readString();
         mPostLiked = in.readByte() != 0; //true if byte != 0
@@ -457,6 +453,8 @@ public class Post implements Parcelable {
         mImageSize = in.readParcelable(PostSize.class.getClassLoader());
         mIsDeleted = in.readByte() != 0;
         setPrivacyChanged(in.readByte()!=0);
+        imageBase64 = in.readString();
+        mType = in.readInt();
        // mComments = new ArrayList<>();
         //in.readList(mComments, Object.class.getClassLoader());
     }
@@ -480,27 +478,4 @@ public class Post implements Parcelable {
     public void setPrivacyChanged(boolean privacyChanged) {
         isPrivacyChanged = privacyChanged;
     }
-
-
-
-    // NOTE : ARE WE MOVING THIS TO POST?
-    // NOTE : Used for testing atm; needs to be fixed
-
-    public static final int POST_TYPE_POLL = 3;
-    private int mTotalVotes;
-
-    public ArrayList<PollChoiceItem> mPollChoices = new ArrayList<>();
-
-    public ArrayList<PollChoiceItem> getPollChoices(){
-        return mPollChoices;
-    }
-
-    public int getTotalVotes(){
-        return mTotalVotes;
-    }
-
-    public void setTotalVotes(int votes){
-        mTotalVotes = votes;
-    }
-
 }

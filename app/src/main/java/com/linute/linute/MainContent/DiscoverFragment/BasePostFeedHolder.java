@@ -47,7 +47,6 @@ public class BasePostFeedHolder extends RecyclerView.ViewHolder implements Check
 
     private String mUserId;
     private String mImageSignature;
-    private String mCollegeId;
     protected RequestManager mRequestManager;
     protected BaseFeedAdapter.PostAction mPostAction;
 
@@ -66,7 +65,6 @@ public class BasePostFeedHolder extends RecyclerView.ViewHolder implements Check
         mContext = context;
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mUserId = mSharedPreferences.getString("userID", "");
-        mCollegeId = mSharedPreferences.getString("collegeId", "");
         mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
 
         vLikeButton = itemView.findViewById(R.id.feed_control_bar_like_button);
@@ -152,7 +150,7 @@ public class BasePostFeedHolder extends RecyclerView.ViewHolder implements Check
             try {
                 JSONObject body = new JSONObject();
                 body.put("user", mUserId);
-                body.put("room", mPost.getPostId());
+                body.put("room", mPost.getId());
                 TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:like", body);
             } catch (JSONException e) {
                 e.printStackTrace();

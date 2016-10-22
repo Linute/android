@@ -87,7 +87,7 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
             vCinemaIcon.setAlpha(1f);
         }
 
-        mPostId = post.getPostId();
+        mPostId = post.getId();
         mVideoUrl = Uri.parse(post.getVideoUrl());
 
     }

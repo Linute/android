@@ -31,31 +31,31 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
     }
 
 
-    public void bindView(Post p) {
+    public void bindView(Poll p) {
         RatingBar b;
         vTitle.setText(p.getTitle());
 
-        while (p.getPollChoices().size() > mRatingBars.size()) {
+        while (p.getPollChoiceItems().size() > mRatingBars.size()) {
             b = new RatingBar(itemView.getContext());
             b.setOnClickChoice(this);
             mRatingBars.addLast(b);
             vRatingBarsContainer.addView(b);
         }
 
-        while (p.getPollChoices().size() < mRatingBars.size()){
+        while (p.getPollChoiceItems().size() < mRatingBars.size()){
             mRatingBars.removeLast();
             vRatingBarsContainer.removeViewAt(vRatingBarsContainer.getChildCount() - 1);
         }
 
 
         PollChoiceItem item;
-        for (int i = 0 ; i < p.getPollChoices().size(); i++){
-            item = p.getPollChoices().get(i);
+        for (int i = 0 ; i < p.getPollChoiceItems().size(); i++){
+            item = p.getPollChoiceItems().get(i);
             b = mRatingBars.get(i);
             b.setChoice(i);
             b.setProgressColor(item.mColor);
             b.setOptionText(item.mOptionText);
-            b.setProgress((int)((float)item.getVotes() / p.getTotalVotes() * 100));
+            b.setProgress((int)((float)item.getVotes() / p.getTotalCount() * 100));
         }
 
     }

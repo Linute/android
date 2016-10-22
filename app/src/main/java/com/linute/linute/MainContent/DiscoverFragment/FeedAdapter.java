@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class FeedAdapter extends BaseFeedAdapter {
     private static final String TAG = FeedAdapter.class.getSimpleName();
-    private List<Post> mPosts;
+    private List<BaseFeedItem> mPosts;
     private Context context;
 
     private String mCollege;
@@ -40,7 +40,7 @@ public class FeedAdapter extends BaseFeedAdapter {
 
     private boolean mSectionTwo;
 
-    public FeedAdapter(List<Post> posts, Context context, boolean sectiontwo) {
+    public FeedAdapter(List<BaseFeedItem> posts, Context context, boolean sectiontwo) {
         mSectionTwo = sectiontwo;
         mPosts = posts;
         this.context = context;
@@ -51,6 +51,8 @@ public class FeedAdapter extends BaseFeedAdapter {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (viewType == -1) return null;
+
         switch (viewType) {
             case LoadMoreViewHolder.FOOTER:
                 return new LoadMoreViewHolder(
@@ -91,16 +93,16 @@ public class FeedAdapter extends BaseFeedAdapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         boolean sendImpression = true;
         if (holder instanceof PollViewHolder){
-            ((PollViewHolder) holder).bindView(mPosts.get(position));
+            ((PollViewHolder) holder).bindView((Poll)mPosts.get(position));
         }else if (holder instanceof VideoFeedHolder) {
-            ((VideoFeedHolder) holder).bindModel(mPosts.get(position));
+            ((VideoFeedHolder) holder).bindModel((Post) mPosts.get(position));
         } else if (holder instanceof ImageFeedHolder) {
-            ((ImageFeedHolder) holder).bindModel(mPosts.get(position));
+            ((ImageFeedHolder) holder).bindModel((Post) mPosts.get(position));
         } else if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView(mLoadState);
             sendImpression = false;
         } else {
-            ((StatusFeedHolder) holder).bindModel(mPosts.get(position));
+            ((StatusFeedHolder) holder).bindModel((Post) mPosts.get(position));
         }
 
         if (position + 1 == mPosts.size()) {
@@ -116,7 +118,7 @@ public class FeedAdapter extends BaseFeedAdapter {
 
         //tracking impressions
         if (sendImpression)
-            ImpressionHelper.sendImpressionsAsync(mCollege, mUserId ,mPosts.get(position).getPostId());
+            ImpressionHelper.sendImpressionsAsync(mCollege, mUserId ,mPosts.get(position).getId());
 
     }
 
@@ -125,24 +127,24 @@ public class FeedAdapter extends BaseFeedAdapter {
         return mPosts.isEmpty() ? 0 : mPosts.size() + 1;
     }
 
-    public static final int IMAGE_POST = 0;
-    public static final int STATUS_POST = 1;
-    public static final int VIDEO_POST = 2;
-    public static final int POLL = 3;
-
     @Override
     public int getItemViewType(int position) {
         if (position == mPosts.size()) {
             return LoadMoreViewHolder.FOOTER;
         }
 
-        Post p = mPosts.get(position);
-        if (p.isImagePost()) {
-            return p.isVideoPost() ? VIDEO_POST : IMAGE_POST;
-        }else if (p.getType() == Post.POST_TYPE_POLL){
+        if (mPosts.get(position) instanceof Post) {
+            Post p = (Post) mPosts.get(position);
+
+            if (p.isImagePost())
+                return p.isVideoPost() ? VIDEO_POST : IMAGE_POST;
+
+            return STATUS_POST;
+        } else if (mPosts.get(position) instanceof Poll){
             return POLL;
         }
-        return STATUS_POST;
+
+        return -1;
     }
 
 

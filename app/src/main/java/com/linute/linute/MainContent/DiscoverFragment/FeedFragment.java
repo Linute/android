@@ -45,7 +45,7 @@ public class FeedFragment extends BaseFeedFragment {
     private static final String TAG = FeedFragment.class.getSimpleName();
     private static final String SECTION_KEY = "section";
 
-    private ArrayList<Post> mPosts = new ArrayList<>();
+    private ArrayList<BaseFeedItem> mPosts = new ArrayList<>();
     protected SwipeRefreshLayout vSwipeRefreshLayout;
     private boolean mSectionTwo = false;
 
@@ -207,7 +207,7 @@ public class FeedFragment extends BaseFeedFragment {
                         JSONObject jsonObject;
                         JSONArray jsonArray;
 
-                        final ArrayList<Post> tempList = new ArrayList<>();
+                        final ArrayList<BaseFeedItem> tempList = new ArrayList<>();
 
                         try {
                             jsonObject = new JSONObject(response.body().string());
@@ -266,22 +266,21 @@ public class FeedFragment extends BaseFeedFragment {
     }
 
     //NOTE: TEST FUNCTION
-    private Post getPollItem(){
-        Post p = new Post("");
-        p.setTotalVotes(100);
+    private Poll getPollItem(){
+        Poll p = new Poll(new JSONObject());
+        p.setTotalCount(100);
         p.setTitle("TITLE");
-        p.setType(Post.POST_TYPE_POLL);
         ArrayList<PollChoiceItem> items = new ArrayList<>();
         items.add(new PollChoiceItem("choice 1", 10, "#FBB72E"));
         items.add(new PollChoiceItem("choice 2", 70, "#D0021B"));
         items.add(new PollChoiceItem("choice 3", 10, "#56bb1d"));
         items.add(new PollChoiceItem("choice 4", 10, "#48BEF7"));
-        p.mPollChoices = items;
+        p.setPollChoiceItems(items);
         return p;
     }
 
     @Override
-    public ArrayList<Post> getPostsArray() {
+    public ArrayList<BaseFeedItem> getFeedArray() {
         return mPosts;
     }
 
@@ -361,7 +360,7 @@ public class FeedFragment extends BaseFeedFragment {
                                 mFeedAdapter.setLoadState(LoadMoreViewHolder.STATE_LOADING);
                             }
 
-                            final ArrayList<Post> refreshedPosts = new ArrayList<>();
+                            final ArrayList<BaseFeedItem> refreshedPosts = new ArrayList<>();
 
                             // TODO: USED FOR TESTING. REMOVE LATER
                             refreshedPosts.add(getPollItem());

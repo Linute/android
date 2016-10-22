@@ -11,6 +11,11 @@ import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
  */
 public abstract class BaseFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    public static final int IMAGE_POST = 0;
+    public static final int STATUS_POST = 1;
+    public static final int VIDEO_POST = 2;
+    public static final int POLL = 3;
+
     protected short mLoadState;
     protected RequestManager mRequestManager;
     protected LoadMoreViewHolder.OnLoadMore mGetMoreFeed; //interface that gets more feed
