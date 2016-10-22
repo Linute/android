@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
     <PreferenceCategory android:title="ACCOUNT">
         <Preference
             android:key="edit_profile"
@@ -11,6 +10,9 @@
         <Preference
             android:key="change_phone_number"
             android:title="Change Phone Number" />
+        <Preference
+            android:key="change_password"
+            android:title="Change Password"/>
         <Preference
             android:key="manage_account"
             android:title="Manage Account" />

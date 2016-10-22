@@ -74,7 +74,6 @@ public class Poll extends BaseFeedItem implements Parcelable{
         mPollChoiceItems = pollChoiceItems;
     }
 
-
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         super.writeToParcel(parcel, i);

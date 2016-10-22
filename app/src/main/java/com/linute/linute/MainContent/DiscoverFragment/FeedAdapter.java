@@ -92,8 +92,10 @@ public class FeedAdapter extends BaseFeedAdapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         boolean sendImpression = true;
+
         if (holder instanceof PollViewHolder){
             ((PollViewHolder) holder).bindView((Poll)mPosts.get(position));
+            sendImpression = false;
         }else if (holder instanceof VideoFeedHolder) {
             ((VideoFeedHolder) holder).bindModel((Post) mPosts.get(position));
         } else if (holder instanceof ImageFeedHolder) {

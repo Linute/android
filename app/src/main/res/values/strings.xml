@@ -1653,7 +1653,8 @@ limitations under the License.\n\n
         simply log in with your .edu email and password.
     </string>
     <string name="deactivate_perm_text">
-        To delete your account completely, to the point where you won\'t be able to access it anymore,
+        To delete your account completely, to the point where you won\'t be able to access it
+        anymore,
         contact Tapt Support by emailing: support@tapt.io
     </string>
     <string name="reactivvate_acount_message">Welcome back to Tapt, we’re excited to have your here
