@@ -19,6 +19,7 @@ package com.linute.linute.API;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -70,6 +71,13 @@ public class MyGcmListenerService extends GcmListenerService {
     @Override
     public void onMessageReceived(String from, Bundle data) {
         //String message = data.getString("message");
+
+        //doesn't post notifications if user is logged out
+        SharedPreferences pref = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+        if(pref.getString("userID", null) == null){
+            return;
+        }
+
         String action = data.getString("action");
 //        Log.d(TAG, "From: " + from);
 //        Log.d(TAG, "Message: " + message);
@@ -110,6 +118,8 @@ public class MyGcmListenerService extends GcmListenerService {
         Intent intent = buildIntent(data, action);
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(this, (int)System.currentTimeMillis(), intent, PendingIntent.FLAG_ONE_SHOT);
+
+
 
         //Log.d(TAG, data.toString());
 
