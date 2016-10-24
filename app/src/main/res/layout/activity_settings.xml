@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent" android:layout_height="match_parent"
-              android:orientation="vertical">
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/window"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+              >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
 
         <include android:id="@+id/settingactivity_toolbar"
                  layout="@layout/tool_bar"/>
@@ -10,5 +18,6 @@
         android:id="@+id/setting_fragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+    </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>
