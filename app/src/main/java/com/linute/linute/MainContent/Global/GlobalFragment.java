@@ -22,6 +22,8 @@ import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
+import com.linute.linute.MainContent.Global.Articles.Article;
+import com.linute.linute.MainContent.Global.Articles.ArticleFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -105,7 +107,16 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
             @Override
             public int getSpanSize(int position) {
                 //headers are 1 span
-                return mGlobalChoiceItems.get(position).type == GlobalChoiceItem.TYPE_TREND ? 2 : 1;
+                switch (mGlobalChoiceItems.get(position).type) {
+                    case GlobalChoiceItem.TYPE_TREND:
+                    case GlobalChoiceItem.TYPE_ARTICLE:
+                        return 2;
+                    case GlobalChoiceItem.TYPE_HEADER_FRIEND:
+                    case GlobalChoiceItem.TYPE_HEADER_HOT:
+                        return 1;
+                    default:
+                        return 2;
+                }
             }
         });
 
@@ -272,16 +283,26 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                         addHotAndFriends(tempList);
                         GlobalChoiceItem item;
 
+                        tempList.add(new Article("Test Article", null));
+
                         for (int i = 0; i < trends.length(); i++) {
                             try {
-
                                 trend = trends.getJSONObject(i);
-                                item = new GlobalChoiceItem(
-                                        trend.getString("name"),
-                                        trend.getString("description"),
-                                        trend.getString("image"),
-                                        trend.getString("id")
-                                );
+                                if (trend.has("type") && trend.getString("type").equals("article")) {
+                                    item = new Article(
+                                            trend.getString("name"),
+                                            trend.getString("description"),
+                                            trend.getString("image"),
+                                            trend.getString("id")
+                                    );
+                                } else {
+                                    item = new GlobalChoiceItem(
+                                            trend.getString("name"),
+                                            trend.getString("description"),
+                                            trend.getString("image"),
+                                            trend.getString("id")
+                                    );
+                                }
                                 item.setUnread(trend.getInt("badge"));
                                 tempList.add(item);
 
@@ -297,7 +318,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if(isViewLoaded()){
+                                    if (isViewLoaded()) {
                                         vSwipe.setRefreshing(false);
                                     }
                                     mHandler.removeCallbacksAndMessages(null);
@@ -306,7 +327,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                                         public void run() {
                                             mGlobalChoiceItems.clear();
                                             mGlobalChoiceItems.addAll(tempList);
-                                            if(isViewLoaded()){
+                                            if (isViewLoaded()) {
                                                 mGlobalChoicesAdapter.notifyDataSetChanged();
                                                 vEmpty.setVisibility(mGlobalChoiceItems.isEmpty() ? View.VISIBLE : View.GONE);
                                             }
@@ -385,7 +406,10 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     public void goToTrend(GlobalChoiceItem item) {
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
-            activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item), "TREND");
+            if (item.type == GlobalChoiceItem.TYPE_ARTICLE)
+                activity.addFragmentToContainer(ArticleFragment.newInstance((Article) item));
+            else
+                activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item), "TREND");
         }
     }
 

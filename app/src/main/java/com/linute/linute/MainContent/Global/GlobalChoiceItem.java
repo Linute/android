@@ -23,6 +23,7 @@ public class GlobalChoiceItem implements Parcelable {
     public static final int TYPE_HEADER_HOT = 0;
     public static final int TYPE_HEADER_FRIEND = 1;
     public static final int TYPE_TREND = 2;
+    public static final int TYPE_ARTICLE = 3;
 
     public GlobalChoiceItem(String title,
                             String description,
@@ -35,6 +36,20 @@ public class GlobalChoiceItem implements Parcelable {
         this.type = TYPE_TREND;
         this.description = description;
     }
+
+    public GlobalChoiceItem(String title,
+                            String description,
+                            String imageUrl,
+                            String key,
+                            int type) {
+        this.imageUrl = imageUrl;
+        this.title = title;
+        this.key = key;
+        this.unread = 0;
+        this.type = type;
+        this.description = description;
+    }
+
 
     public GlobalChoiceItem(String title, String key, int type) {
         this.imageUrl = null;
