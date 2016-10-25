@@ -74,7 +74,7 @@ public class ImageFeedHolder extends BasePostFeedHolder {
             @Override
             protected void onLongPress() {
                 //Log.i(TAG, "onLongPress: ");
-//                longPress();
+                longPress();
             }
 
             @Override
@@ -163,7 +163,7 @@ public class ImageFeedHolder extends BasePostFeedHolder {
                     ViewFullScreenFragment.newInstance(
                             Uri.parse(mPost.getType() == Post.POST_TYPE_VIDEO ? mPost.getVideoUrl() : mPost.getImage()),
                             mPost.getType(),
-                            3000
+                            0
                     ),
                     FULL_VIEW
             );

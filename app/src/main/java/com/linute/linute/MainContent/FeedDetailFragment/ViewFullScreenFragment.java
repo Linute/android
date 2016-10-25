@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 
 
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -13,11 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.linute.linute.API.API_Methods;
@@ -34,7 +33,6 @@ import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 import static android.content.Context.MODE_PRIVATE;
 
 /**
@@ -48,7 +46,7 @@ public class ViewFullScreenFragment extends BaseFragment {
     private static final String POST_ID_KEY = "post_id_key";
     private static final String PROGRESS_THRESHOLD = "progress_thresh";
 
-    private ImageView vImage;
+    private ZoomImageView vImage;
     private View vVideoParent;
     private TextureVideoView vTextureVideoView;
     private View vVideoLoadingIndicator;
@@ -125,7 +123,7 @@ public class ViewFullScreenFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_view_full_screen, container, false);
         getActivity().onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_CANCEL, 0, 0, 0));
-        vImage = (ImageView) root.findViewById(R.id.imageView);
+        vImage = (ZoomImageView) root.findViewById(R.id.imageView);
         vVideoParent = root.findViewById(R.id.video_parent);
         vTextureVideoView = (TextureVideoView) vVideoParent.findViewById(R.id.video);
 
@@ -162,7 +160,7 @@ public class ViewFullScreenFragment extends BaseFragment {
             vProgressBar.setVisibility(View.GONE);
         }
 
-        root.findViewById(R.id.touch_layer).setOnTouchListener(
+        /*root.findViewById(R.id.touch_layer).setOnTouchListener(
                 new View.OnTouchListener() {
                     float totalMovement = 0;
                     float x;
@@ -201,7 +199,7 @@ public class ViewFullScreenFragment extends BaseFragment {
                         }
                         return true;
                     }
-                });
+                });*/
 
         vVideoLoadingIndicator = root.findViewById(R.id.play);
         vLoadingText = root.findViewById(R.id.loading);
@@ -220,20 +218,24 @@ public class ViewFullScreenFragment extends BaseFragment {
             vImage.setVisibility(View.VISIBLE);
             vVideoLoadingIndicator.setVisibility(View.GONE);
 
+
+
             vLoadingText.setVisibility(View.VISIBLE);
             Glide.with(this)
                     .load(mLink)
-                    .listener(new RequestListener<Uri, GlideDrawable>() {
+                    .asBitmap()
+                    .listener(new RequestListener<Uri, Bitmap>() {
                         @Override
-                        public boolean onException(Exception e, Uri model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        public boolean onException(Exception e, Uri model, Target<Bitmap> target, boolean isFirstResource) {
                             return false;
                         }
 
                         @Override
-                        public boolean onResourceReady(GlideDrawable resource, Uri model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        public boolean onResourceReady(Bitmap resource, Uri model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
                             //hide loading when finished loading image
                             setFragmentState(FragmentState.FINISHED_UPDATING);
                             vLoadingText.setVisibility(View.GONE);
+
                             return false;
                         }
                     })
