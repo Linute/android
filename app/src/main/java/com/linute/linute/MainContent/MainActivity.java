@@ -220,12 +220,12 @@ public class MainActivity extends BaseTaptActivity {
             public void run() {
                 preloadFragments();
             }
-        })
+        }).start();
     }
 
     private void preloadFragments(){
-        GlobalFragment.getInstance().getChoices();
-
+        GlobalFragment global = GlobalFragment.getInstance();
+        getSupportFragmentManager().beginTransaction().attach(global).commit();
     }
 
 
