@@ -214,6 +214,19 @@ public class MainActivity extends BaseTaptActivity {
                 .setRateText("Wasup! We see you come here often, how are you liking it so far?")
                 .setUpperBound(4)
                 .showAfter(10);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                preloadFragments();
+            }
+        }).start();
+    }
+
+    private void preloadFragments(){
+        GlobalFragment global = GlobalFragment.getInstance();
+        RoomsActivityFragment rooms = RoomsActivityFragment.getInstance();
+        getSupportFragmentManager().beginTransaction().attach(global).attach(rooms).commit();
     }
 
 
@@ -323,7 +336,7 @@ public class MainActivity extends BaseTaptActivity {
                     fragment = new Profile();
                     break;
                 case FRAGMENT_INDEXES.GLOBAL:
-                    fragment = new GlobalFragment();
+                    fragment = GlobalFragment.getInstance();
                     break;
                 default:
                     fragment = null;
@@ -949,7 +962,7 @@ public class MainActivity extends BaseTaptActivity {
 
             //boolean empty = room.roomId == null || room.roomId.isEmpty();
             if (getSupportFragmentManager().findFragmentByTag(RoomsActivityFragment.TAG) == null)
-                addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
+                addFragmentToContainer(RoomsActivityFragment.getInstance(), RoomsActivityFragment.TAG);
             addFragmentToContainer(ChatFragment.newInstance(room));
             /*addFragmentToContainer(ChatFragment.newInstance(
                     empty ? null : room,
