@@ -214,6 +214,18 @@ public class MainActivity extends BaseTaptActivity {
                 .setRateText("Wasup! We see you come here often, how are you liking it so far?")
                 .setUpperBound(4)
                 .showAfter(10);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                preloadFragments();
+            }
+        })
+    }
+
+    private void preloadFragments(){
+        GlobalFragment.getInstance().getChoices();
+
     }
 
 
@@ -323,7 +335,7 @@ public class MainActivity extends BaseTaptActivity {
                     fragment = new Profile();
                     break;
                 case FRAGMENT_INDEXES.GLOBAL:
-                    fragment = new GlobalFragment();
+                    fragment = GlobalFragment.getInstance();
                     break;
                 default:
                     fragment = null;

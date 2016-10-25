@@ -46,6 +46,16 @@ import rx.schedulers.Schedulers;
  */
 public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter.GoToTrend {
 
+    private static GlobalFragment instance;
+
+    public static GlobalFragment getInstance(){
+        if(instance == null){
+            instance = new GlobalFragment();
+        }
+        return instance;
+    }
+
+
     private static final String TAG = GlobalFragment.class.getSimpleName();
 
     private RecyclerView vRecycler;
