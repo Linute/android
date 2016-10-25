@@ -225,7 +225,8 @@ public class MainActivity extends BaseTaptActivity {
 
     private void preloadFragments(){
         GlobalFragment global = GlobalFragment.getInstance();
-        getSupportFragmentManager().beginTransaction().attach(global).commit();
+        RoomsActivityFragment rooms = RoomsActivityFragment.getInstance();
+        getSupportFragmentManager().beginTransaction().attach(global).attach(rooms).commit();
     }
 
 
@@ -961,7 +962,7 @@ public class MainActivity extends BaseTaptActivity {
 
             //boolean empty = room.roomId == null || room.roomId.isEmpty();
             if (getSupportFragmentManager().findFragmentByTag(RoomsActivityFragment.TAG) == null)
-                addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
+                addFragmentToContainer(RoomsActivityFragment.getInstance(), RoomsActivityFragment.TAG);
             addFragmentToContainer(ChatFragment.newInstance(room));
             /*addFragmentToContainer(ChatFragment.newInstance(
                     empty ? null : room,

@@ -95,7 +95,7 @@ public class DiscoverHolderFragment extends BaseFragment {
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) getActivity();
                 if (activity != null)
-                    activity.addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
+                    activity.addFragmentToContainer(RoomsActivityFragment.getInstance(), RoomsActivityFragment.TAG);
             }
         });
 

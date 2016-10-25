@@ -150,7 +150,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) getActivity();
                 if (activity != null)
-                    activity.addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
+                    activity.addFragmentToContainer(RoomsActivityFragment.getInstance(), RoomsActivityFragment.TAG);
             }
         });
         vNotificationIndicator = chat.findViewById(R.id.notification);

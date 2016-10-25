@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -60,6 +61,15 @@ import rx.schedulers.Schedulers;
 public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.RoomContextMenuCreator {
     public static final String TAG = RoomsActivityFragment.class.getSimpleName();
 
+
+    private static RoomsActivityFragment instance;
+    public static RoomsActivityFragment getInstance(){
+        if(instance == null){
+            instance = new RoomsActivityFragment();
+        }
+        return instance;
+    }
+
     private RoomsAdapter mRoomsAdapter;
 
     private List<ChatRoom> mRoomsList = new ArrayList<>(); //list of rooms
@@ -73,16 +83,23 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
 
     private boolean mCanLoadMore = false;
 
-    private Handler mHandler = new Handler();
+    private Handler mHandler;
     TaptSocket mTaptSocket = TaptSocket.getInstance();
 
     public RoomsActivityFragment() {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mHandler = new Handler();
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         mRoomsAdapter = new RoomsAdapter(context, mRoomsList);
+        getRooms();
     }
 
     @Override
@@ -147,7 +164,6 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                 getRooms();
             }
         });
-
         mRoomsAdapter.setLoadMore(new LoadMoreViewHolder.OnLoadMore() {
             @Override
             public void loadMore() {
@@ -174,12 +190,14 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) activity.setShowSnackbar(false);
 
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
-            }
-        });
+        if(isViewCreated()) {
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
+        }
         getRooms();
 
         // when new message comes it, it's intercepted by MainActivity
@@ -187,6 +205,10 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
         mChatSubscription = NewMessageBus.getInstance().getObservable()
                 .observeOn(Schedulers.io())
                 .subscribe(mNewMessageSubscriber);
+    }
+
+    private boolean isViewCreated() {
+        return getView() != null;
     }
 
     @Override
@@ -231,6 +253,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                         @Override
                         public void run() {
                             Utils.showBadConnectionToast(getActivity());
+                            if(isViewCreated())
                             mSwipeRefreshLayout.setRefreshing(false);
                         }
                     });
@@ -400,15 +423,17 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (mSwipeRefreshLayout.isRefreshing()) {
-                                        mSwipeRefreshLayout.setRefreshing(false);
-                                    }
-                                    if (tempRooms.isEmpty()) {
-                                        if (mEmptyText.getVisibility() == View.GONE)
-                                            mEmptyText.setVisibility(View.VISIBLE);
-                                    } else {
-                                        if (mEmptyText.getVisibility() == View.VISIBLE)
-                                            mEmptyText.setVisibility(View.GONE);
+                                    if(isViewCreated()) {
+                                        if (mSwipeRefreshLayout.isRefreshing()) {
+                                            mSwipeRefreshLayout.setRefreshing(false);
+                                        }
+                                        if (tempRooms.isEmpty()) {
+                                            if (mEmptyText.getVisibility() == View.GONE)
+                                                mEmptyText.setVisibility(View.VISIBLE);
+                                        } else {
+                                            if (mEmptyText.getVisibility() == View.VISIBLE)
+                                                mEmptyText.setVisibility(View.GONE);
+                                        }
                                     }
 
                                     mHandler.post(new Runnable() {
@@ -416,6 +441,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                         public void run() {
                                             mRoomsList.clear();
                                             mRoomsList.addAll(tempRooms);
+                                            if(isViewCreated())
                                             mRoomsAdapter.notifyDataSetChanged();
                                         }
                                     });
@@ -429,6 +455,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                 @Override
                                 public void run() {
                                     Utils.showServerErrorToast(getActivity());
+                                    if(isViewCreated())
                                     mSwipeRefreshLayout.setRefreshing(false);
                                 }
                             });
@@ -441,6 +468,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                             @Override
                             public void run() {
                                 Utils.showServerErrorToast(getActivity());
+                                if(isViewCreated())
                                 mSwipeRefreshLayout.setRefreshing(false);
                             }
                         });
