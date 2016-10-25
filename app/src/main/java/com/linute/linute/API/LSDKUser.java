@@ -177,6 +177,14 @@ public class LSDKUser {
         return API_Methods.post("users/confirm-email", header, param, callback);
     }
 
+
+    public Call checkPincode(String email, String pin, Callback callback){
+        Map<String, Object> params = new HashMap<>();
+        params.put("email", email);
+        params.put("pinCode", pin);
+        return API_Methods.post("users/confirm-pincode", API_Methods.getMainHeader(mToken), params, callback);
+    }
+
     //login facebook
     public Call authorizationFacebook(String fbToken, Callback callback ){
         Map<String, String> header = API_Methods.getMainHeader(mToken);

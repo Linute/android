@@ -151,6 +151,7 @@ public class SettingActivity extends BaseSocketActivity {
         Preference mAttributions;
         Preference mNotification;
         Preference mAbout;
+        Preference mChangePassword;
 
         private Realm mRealm;
 
@@ -177,6 +178,7 @@ public class SettingActivity extends BaseSocketActivity {
             mAttributions = findPreference("attributions");
             mNotification = findPreference("notifications");
             mAbout = findPreference("version");
+            mChangePassword = findPreference("change_password");
 
             DeviceInfoSingleton info = DeviceInfoSingleton.getInstance(getActivity());
             mAbout.setSummary("v" + info.getVersionCode() + "api" + API_Methods.VERSION + (API_Methods.IS_DEV_BUILD ? " @"+new Date(BuildConfig.TIMESTAMP).toLocaleString() : ""));
@@ -235,6 +237,15 @@ public class SettingActivity extends BaseSocketActivity {
                 public boolean onPreferenceClick(Preference preference) {
                     Intent i = new Intent(getActivity(), EditProfileInfoActivity.class);
                     getActivity().startActivityForResult(i, NEED_UPDATE_REQUEST);
+                    return true;
+                }
+            });
+
+            mChangePassword.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent i = new Intent(getActivity(), ChangePasswordActivity.class);
+                    startActivity(i);
                     return true;
                 }
             });

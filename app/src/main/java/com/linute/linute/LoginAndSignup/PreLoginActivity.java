@@ -58,9 +58,7 @@ public class PreLoginActivity extends AppCompatActivity {
     public static String TAG = PreLoginActivity.class.getSimpleName();
 
     private String mFBToken;
-
     private CallbackManager mCallbackManager;
-
     private OnBackPressed mOnBackPressed;
 
     private View vChat;

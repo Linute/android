@@ -342,12 +342,12 @@ public class FeedFragment extends BaseFeedFragment {
                             return;
                         }
 
-                        String json = response.body().string();
                         JSONObject jsonObject;
                         JSONArray jsonArray;
                         try {
 
-                            jsonObject = new JSONObject(json);
+                            jsonObject = new JSONObject(response.body().string());
+                            Log.d(TAG, "onResponse: "+jsonObject.toString(4));
                             mSkip = jsonObject.getInt("skip");
 
                             jsonArray = jsonObject.getJSONArray("events");
