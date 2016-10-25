@@ -1,11 +1,13 @@
 package com.linute.linute.MainContent.EditScreen;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -17,7 +19,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -102,6 +107,7 @@ public class EditFragment extends BaseFragment {
     private static final String ARG_RETURN_TYPE = "return_type";
     private static final String ARG_DIMEN = "dimen";
     private static final String ARG_CAMERA_TYPE = "camera_type";
+    public static final int REQUEST_LOCATION = 23;
 
 
     private ViewGroup mContentContainer;
@@ -476,6 +482,10 @@ public class EditFragment extends BaseFragment {
         }
         mToolOptionsView.addView(mToolViews[i]);
         mToolOptionsView.requestLayout();
+
+        if(mTools[mSelectedTool] instanceof OverlaysTool && ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+        }
     }
 
 
@@ -660,6 +670,11 @@ public class EditFragment extends BaseFragment {
                 });
                 break;
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private void setImage(final Bitmap image, final MoveZoomImageView imageView) {
