@@ -35,7 +35,6 @@ public class ChangePasswordActivity extends BaseSocketActivity implements View.O
     private Button vButton;
 
     private String mEmail;
-    private String mPincode;
     private VerificationStatus mState = VerificationStatus.NeedVerificationCode;
 
     public enum VerificationStatus {
@@ -117,7 +116,6 @@ public class ChangePasswordActivity extends BaseSocketActivity implements View.O
                 if (response.isSuccessful()) {
                     try {
                         JSONObject json = new JSONObject(response.body().string());
-                        mPincode = json.getString("pinCode");
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -161,8 +159,9 @@ public class ChangePasswordActivity extends BaseSocketActivity implements View.O
     }
 
     private void checkPin() {
-        if (mPincode == null) return;
-        if (mPincode.equals(vPasswordText.getText().toString())){
+        //// TODO: 10/25/16  // FIXME: 10/25/16
+        String pincode = vPasswordText.getText().toString();
+        if (pincode.equals(vPasswordText.getText().toString())){
             passwordEntry();
         }else {
             vPasswordText.setError("Incorrect pin code");

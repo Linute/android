@@ -2123,7 +2123,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         );
                     }
                 } catch (JSONException e) {
-//                    e.printStackTrace();
+                    //e.printStackTrace();
 //                    //Log.i(TAG, "parseMessagesJSON: none");
                     //Log.d(TAG, "parseMessagesJSON: no value for post");
                 }

@@ -38,66 +38,56 @@ import okhttp3.Response;
 public class SignUpPinFragment extends Fragment {
 
     public static final String TAG = SignUpPinFragment.class.getSimpleName();
-    public static final String PIN_KEY = "pin_key_sign_up";
 
     private Button vResend;
     private EditText vPinCode;
+    private View vProgress;
 
     private boolean mCanResend = true;
     private int mTime = 30;
 
     private ButtonCountDownTimer mButtonCountDownTimer;
 
-    private String mPincode;
-
     private Button vConfirm;
 
     private SignUpInfo mSignUpInfo;
 
 
-    public static SignUpPinFragment newInstance(String pin){
-        SignUpPinFragment fragment = new SignUpPinFragment();
-        Bundle arg = new Bundle();
-        arg.putString(PIN_KEY, pin);
-        fragment.setArguments(arg);
-        return fragment;
+    public static SignUpPinFragment newInstance() {
+        return new SignUpPinFragment();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null){
-            mPincode = getArguments().getString(PIN_KEY, null);
-        }else {
-            mPincode = null;
-        }
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_sign_up_pin_code, container, false);
-        
+
         mSignUpInfo = ((SignUpParentFragment) getParentFragment()).getSignUpInfo();
         vResend = (Button) root.findViewById(R.id.resend);
 
         vConfirm = (Button) root.findViewById(R.id.confirm);
         vPinCode = (EditText) root.findViewById(R.id.pincode);
+        vProgress = root.findViewById(R.id.progress);
 
         if (mButtonCountDownTimer != null) mButtonCountDownTimer.cancel();
 
         if (vPinCode.getText().length() < 4) {
             mButtonCountDownTimer = new ButtonCountDownTimer(30000, 1000);
             mButtonCountDownTimer.start();
-        }else {
+        } else {
             vConfirm.setVisibility(View.VISIBLE);
-            vResend.setVisibility(View.GONE);
+            vResend.setVisibility(View.INVISIBLE);
         }
 
         vResend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCanResend){
+                if (mCanResend) {
                     resendPin();
                 }
             }
@@ -122,12 +112,12 @@ public class SignUpPinFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.length() == 4){
-                    vResend.setVisibility(View.GONE);
+                if (s.length() == 4) {
+                    vResend.setVisibility(View.INVISIBLE);
                     vConfirm.setVisibility(View.VISIBLE);
-                }else {
+                } else {
                     vResend.setVisibility(View.VISIBLE);
-                    vConfirm.setVisibility(View.GONE);
+                    vConfirm.setVisibility(View.INVISIBLE);
                 }
             }
         });
@@ -135,8 +125,8 @@ public class SignUpPinFragment extends Fragment {
         vPinCode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE){
-                    checkPin();
+                if (actionId == EditorInfo.IME_ACTION_DONE && vPinCode.getText().length() == 4) {
+                        checkPin();
                 }
                 return false;
             }
@@ -145,25 +135,99 @@ public class SignUpPinFragment extends Fragment {
         return root;
     }
 
-
-    private void checkPin(){
-        vPinCode.setError(null);
-        if (mPincode != null && vPinCode.getText().toString().equals(mPincode)){
-            SignUpParentFragment frag = (SignUpParentFragment) getParentFragment();
-            if (frag != null){
-                frag.addFragment(new SignUpProfilePicture(), SignUpProfilePicture.TAG);
-            }
-        }else {
-            vPinCode.setError("Invalid pin");
-            vPinCode.requestFocus();
+    private void showProgress(boolean show) {
+        if (show) {
+            vConfirm.setVisibility(View.INVISIBLE);
+            vProgress.setVisibility(View.VISIBLE);
+        } else {
+            vConfirm.setVisibility(View.VISIBLE);
+            vProgress.setVisibility(View.INVISIBLE);
         }
     }
 
+    private void checkPin() {
+        if (getActivity() == null) return;
+        vPinCode.setError(null);
+        showProgress(true);
 
-    public void resendPin(){
+        new LSDKUser(getContext()).checkPincode(mSignUpInfo.getEmail(), vPinCode.getText().toString(), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (getActivity() != null)
+                                Utils.showBadConnectionToast(getActivity());
+                            showProgress(false);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        boolean valid = new JSONObject(response.body().string()).getBoolean("confirm");
+
+                        if (valid) {
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        showProgress(false);
+                                        SignUpParentFragment frag = (SignUpParentFragment) getParentFragment();
+                                        if (frag != null) {
+                                            frag.addFragment(new SignUpProfilePicture(), SignUpProfilePicture.TAG);
+                                        }
+                                    }
+                                });
+                            }
+                        } else {
+                            if (getActivity() != null)
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        showProgress(false);
+                                        vPinCode.setError("Invalid pin");
+                                        vPinCode.requestFocus();
+                                    }
+                                });
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        if (getActivity() != null)
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showProgress(false);
+                                    if (getActivity() != null)
+                                        Utils.showServerErrorToast(getContext());
+                                }
+                            });
+                    }
+                } else {
+                    Log.d(TAG, "onResponse: " + response.code() + response.body().string());
+                    if (getActivity() != null)
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showProgress(false);
+                                vPinCode.setError("Invalid pin");
+                                vPinCode.requestFocus();
+                            }
+                        });
+                }
+            }
+        });
+    }
+
+
+    public void resendPin() {
         if (getContext() == null) return;
 
-        if (getActivity() != null){
+        if (getActivity() != null) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -191,21 +255,7 @@ public class SignUpPinFragment extends Fragment {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    try {
-                        String stringResp = response.body().string();
-                        mPincode = (new JSONObject(stringResp).getString("pinCode"));
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Utils.showServerErrorToast(getContext());
-                                }
-                            });
-                        }
-                    }
+                    response.body().close();
                 } else {
                     Log.e(TAG, "onResponse: " + response.body().string());
                     if (getActivity() != null) {
@@ -228,8 +278,8 @@ public class SignUpPinFragment extends Fragment {
         hideKeyboard();
     }
 
-    private void hideKeyboard(){
-        if (getActivity() != null){
+    private void hideKeyboard() {
+        if (getActivity() != null) {
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(vPinCode.getWindowToken(), 0);
         }
@@ -257,8 +307,8 @@ public class SignUpPinFragment extends Fragment {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            mTime = (int)(millisUntilFinished / 1000);
-            vResend.setText("Resend in "+mTime);
+            mTime = (int) (millisUntilFinished / 1000);
+            vResend.setText("Resend in " + mTime);
         }
     }
 

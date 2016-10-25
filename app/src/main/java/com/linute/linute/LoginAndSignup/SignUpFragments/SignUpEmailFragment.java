@@ -190,7 +190,7 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
     private void showEmailOptions() {
         if (getContext() == null) return;
 
-        if (vEmail.hasFocus()){
+        if (vEmail.hasFocus()) {
             InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(vEmail.getWindowToken(), 0);
         }
@@ -298,65 +298,55 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
 
     public void getPinCode() {
         new LSDKUser(getActivity()).getConfirmationCodeForEmail(mSignUpInfo.getEmail(), mSignUpInfo.getFirstName(), mSignUpInfo.getLastName(), new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showBadConnectionToast(getContext());
-                            showProgress(false);
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        String stringResp = response.body().string();
-                        final String pin = (new JSONObject(stringResp).getString("pinCode"));
-                        //Log.d(TAG, "onResponse: " + stringResp);
-
-                        if (getActivity() == null) return;
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                showProgress(false);
-                                SignUpParentFragment frag = (SignUpParentFragment) getParentFragment();
-                                if (frag != null) {
-                                    frag.addFragment(SignUpPinFragment.newInstance(pin), SignUpPinFragment.TAG);
-                                }
-                            }
-                        });
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                    @Override
+                    public void onFailure(Call call, IOException e) {
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Utils.showServerErrorToast(getContext());
+                                    Utils.showBadConnectionToast(getContext());
                                     showProgress(false);
                                 }
                             });
                         }
                     }
-                } else {
-                    Log.e(TAG, "onResponse: " + response.body().string());
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showServerErrorToast(getContext());
-                                showProgress(false);
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        if (response.isSuccessful()) {
+
+                            response.body().close();
+                            //Log.d(TAG, "onResponse: " + stringResp);
+
+                            if (getActivity() == null) return;
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showProgress(false);
+                                    SignUpParentFragment frag = (SignUpParentFragment) getParentFragment();
+                                    if (frag != null) {
+                                        frag.addFragment(SignUpPinFragment.newInstance(), SignUpPinFragment.TAG);
+                                    }
+                                }
+                            });
+                        } else
+
+                        {
+                            Log.e(TAG, "onResponse: " + response.body().string());
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Utils.showServerErrorToast(getContext());
+                                        showProgress(false);
+                                    }
+                                });
                             }
-                        });
+                        }
                     }
                 }
-            }
-        });
+
+        );
     }
 
 

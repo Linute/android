@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,7 +64,7 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
 
     private int[] mPostBackgroundColors = new int[6];
     private int[] mPostTextColors = new int[6];
-    private View[] mPostColorSelectorViews = new View[6];
+    private FrameLayout[] mPostColorSelectorViews = new FrameLayout[6];
 
     private int mCurrentlySelected = 0;
 
@@ -245,12 +246,12 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
 
         mTextFrame = findViewById(R.id.post_create_frame);
 
-        mPostColorSelectorViews[0] = findViewById(R.id.post_create_0);
-        mPostColorSelectorViews[1] = findViewById(R.id.post_create_1);
-        mPostColorSelectorViews[2] = findViewById(R.id.post_create_2);
-        mPostColorSelectorViews[3] = findViewById(R.id.post_create_3);
-        mPostColorSelectorViews[4] = findViewById(R.id.post_create_4);
-        mPostColorSelectorViews[5] = findViewById(R.id.post_create_5);
+        mPostColorSelectorViews[0] = (FrameLayout) findViewById(R.id.post_create_0);
+        mPostColorSelectorViews[1] = (FrameLayout) findViewById(R.id.post_create_1);
+        mPostColorSelectorViews[2] = (FrameLayout) findViewById(R.id.post_create_2);
+        mPostColorSelectorViews[3] = (FrameLayout) findViewById(R.id.post_create_3);
+        mPostColorSelectorViews[4] = (FrameLayout) findViewById(R.id.post_create_4);
+        mPostColorSelectorViews[5] = (FrameLayout) findViewById(R.id.post_create_5);
 
         //wont let me generate signed apk if using same id
         SharedPreferences sharedPrefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
@@ -279,13 +280,8 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
     private void setItem(int res, int index, SharedPreferences preferences, Typeface typeface) {
         mPostTextColors[index] = preferences.getInt("status_color_" + index + "_text", 0xFF000000);
         mPostBackgroundColors[index] = preferences.getInt("status_color_" + index + "_bg", 0xFF000000);
-
-        View postColorSelectorView = mPostColorSelectorViews[index];
-
-        View view = postColorSelectorView.findViewById(res);
-        view.getBackground().setColorFilter(mPostBackgroundColors[index], PorterDuff.Mode.SRC_ATOP);
-
-        postColorSelectorView.setOnClickListener(this);
+        mPostColorSelectorViews[index].getChildAt(0).getBackground().setColorFilter(mPostBackgroundColors[index], PorterDuff.Mode.SRC_ATOP);
+        mPostColorSelectorViews[index].setOnClickListener(this);
     }
 
 
@@ -390,8 +386,6 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
                 break;
         }
         selectStyle(selected);
-
-
     }
 
     public void selectStyle(int selected) {

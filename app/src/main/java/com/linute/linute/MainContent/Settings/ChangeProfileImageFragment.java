@@ -10,7 +10,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -21,11 +23,22 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.util.Util;
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.LoginAndSignup.PreLoginActivity;
+import com.linute.linute.LoginAndSignup.SignUpFragments.SignUpProfilePicture;
 import com.linute.linute.ProfileCamera.ProfileCameraActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -36,9 +49,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -46,7 +61,7 @@ import okhttp3.Response;
 
 public class ChangeProfileImageFragment extends Fragment {
 
-    public static final String TAG = "ChangeProfileImage";
+    public static final String TAG = ChangeProfileImageFragment.class.getSimpleName();
 
     private boolean mHasChangedImage = false; //won't allow send unless user actually makes a change
 
@@ -58,6 +73,17 @@ public class ChangeProfileImageFragment extends Fragment {
     private SharedPreferences mSharedPreferences;
     private ProgressBar mProgressBar;
     private Uri mImageUri;
+
+
+    CallbackManager mCallbackManager;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
+
+        mCallbackManager = CallbackManager.Factory.create();
+    }
 
     @Nullable
     @Override
@@ -90,7 +116,7 @@ public class ChangeProfileImageFragment extends Fragment {
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle("Image Source");
-                String[] options = {"Camera", "Photo Gallery", "Cancel"};
+                String[] options = {"Camera", "Photo Gallery", "Import from Facebook"};
                 builder.setItems(options, actionListener);
                 builder.create().show();
             }
@@ -98,7 +124,16 @@ public class ChangeProfileImageFragment extends Fragment {
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveImage();
+                if (!mHasChangedImage || getActivity() == null)
+                    return; //no edits to image
+
+                showProgress(true);
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        saveImage();
+                    }
+                });
             }
         });
     }
@@ -119,6 +154,9 @@ public class ChangeProfileImageFragment extends Fragment {
                     type = ProfileCameraActivity.TYPE_GALLERY;
                     request = REQUEST_GALLERY;
                     break;
+                case 2:
+                    clickedFacebook();
+                    return;
                 default:
                     return;
             }
@@ -129,6 +167,56 @@ public class ChangeProfileImageFragment extends Fragment {
         }
     };
 
+
+    private void clickedFacebook(){
+        if (AccessToken.getCurrentAccessToken() != null && !AccessToken.getCurrentAccessToken().isExpired()){
+            loadFbImage(AccessToken.getCurrentAccessToken().getUserId());
+        }else {
+            setUpFacebookCallback();
+            LoginManager.getInstance().logInWithReadPermissions(this, Collections.singletonList("public_profile"));
+        }
+    }
+
+
+    private void setUpFacebookCallback(){
+        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                if (!loginResult.getRecentlyDeniedPermissions().isEmpty()) {
+                    if (getActivity() != null)
+                        Toast.makeText(getActivity(), "Facebook access denied", Toast.LENGTH_SHORT).show();
+
+                    return;
+                }
+
+                loadFbImage(loginResult.getAccessToken().getUserId());
+
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.d(TAG, "onError: "+error.toString());
+                if (getActivity() != null)
+                    Toast.makeText(getActivity(), "Error communicating with Facebook server", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private void loadFbImage(String userId){
+        mHasChangedImage = true;
+        mImageUri = Uri.parse(Utils.getFBImage(userId));
+        Glide.with(ChangeProfileImageFragment.this)
+                .load(mImageUri)
+                .asBitmap()
+                .placeholder(R.color.seperator_color)
+                .into(mImageView);
+    }
 
     private void setDefaultValues() {
         Glide.with(this)
@@ -143,20 +231,37 @@ public class ChangeProfileImageFragment extends Fragment {
 
     private void saveImage() {
 
-        if (!mHasChangedImage || getActivity() == null) return; //no edits to image
         Map<String, Object> userInfo = new HashMap<>();
-        try {
-            userInfo.put("profileImage",
-                    Utils.encodeImageBase64(
-                            Bitmap.createScaledBitmap(
-                                    MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), mImageUri),
-                                    1080, 1080, false)));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
+
+        if (mImageUri != null && mImageUri.toString().contains("facebook.com")){
+            try {
+                userInfo.put("profileImage", Utils.encodeImageBase64(
+                        BitmapFactory.decodeFile(
+                                Glide.with(this).load(mImageUri).downloadOnly(720, 720).get().getAbsolutePath()
+                        )
+                ));
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }else {
+            try {
+                userInfo.put("profileImage",
+                        Utils.encodeImageBase64(
+                                Bitmap.createScaledBitmap(
+                                        MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), mImageUri),
+                                        1080, 1080, false)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        showProgress(true);
+        if (!userInfo.containsKey("profileImage")){
+            Bitmap map = mImageView.getDrawingCache();
+            userInfo.put("profileImage", Utils.encodeImageBase64(map));
+        }
+
+        if (getActivity() == null)
+            return;
 
         new LSDKUser(getActivity()).updateUserInfo(userInfo, null, new Callback() {
             @Override
@@ -237,6 +342,8 @@ public class ChangeProfileImageFragment extends Fragment {
 
                 mHasChangedImage = true;
             }
+        }else {
+            mCallbackManager.onActivityResult(requestCode,resultCode, data);
         }
     }
 
