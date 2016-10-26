@@ -45,13 +45,18 @@
             android:title="Terms of Service" />
     </PreferenceCategory>
 
-    <PreferenceCategory>
+    <PreferenceCategory
+        android:key="misc">
         <com.linute.linute.MainContent.Settings.ColoredPreference
             android:key="logout"
             android:title="Log Out" />
         <Preference
             android:key="version"
             android:title="About" />
+        <Preference
+            android:key="change_college"
+            android:title="Change College"
+            />
     </PreferenceCategory>
 
 </PreferenceScreen>
