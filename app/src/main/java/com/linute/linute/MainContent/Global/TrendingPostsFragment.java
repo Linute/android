@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
+import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.MainActivity;
@@ -133,11 +134,6 @@ public class TrendingPostsFragment extends BaseFeedFragment {
         setFragmentState(FragmentState.LOADING_DATA);
         mProgressBar.setVisibility(View.VISIBLE);
         new LSDKEvents(getContext()).getEvents(getUrlPathEnding(), getParams(-1, 20), getPostsCallback());
-    }
-
-    @Override
-    protected void getPolls() {
-
     }
 
     private String getUrlPathEnding(){
@@ -301,15 +297,25 @@ public class TrendingPostsFragment extends BaseFeedFragment {
 
                     mSkip = jsonObject.getInt("skip");
 
-                    jsonArray = jsonObject.getJSONArray(mGlobalItem.type == GlobalChoiceItem.TYPE_TREND ? "posts" : "events");
-
                     if (mSkip == 0) {
                         mFeedDone = true; //no more feed to load
                         mFeedAdapter.setLoadState(LoadMoreViewHolder.STATE_END);
                     }
 
-                    final ArrayList<Post> refreshedPosts = new ArrayList<>();
+                    final ArrayList<BaseFeedItem> refreshedPosts = new ArrayList<>();
 
+                    //get polls
+                    try {
+                        jsonArray = jsonObject.getJSONArray("polls");
+                        for (int i = jsonArray.length() - 1; i >= 0; i++){
+                            refreshedPosts.add(new Poll(jsonArray.getJSONObject(i)));
+                        }
+                    }catch (JSONException e){
+                        e.printStackTrace();
+                    }
+
+
+                    jsonArray = jsonObject.getJSONArray(mGlobalItem.type == GlobalChoiceItem.TYPE_TREND ? "posts" : "events");
                     for (int i = jsonArray.length() - 1; i >= 0; i--) {
                         try {
                             refreshedPosts.add(new Post(jsonArray.getJSONObject(i)));

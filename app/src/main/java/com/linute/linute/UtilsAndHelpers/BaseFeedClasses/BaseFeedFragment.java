@@ -167,8 +167,6 @@ public abstract class BaseFeedFragment extends BaseFragment {
 
     protected abstract void getPosts();
 
-    protected abstract void getPolls();
-
     protected abstract void getMorePosts();
 
     private void confirmDeletePost(final Post p, final int position) {

@@ -123,7 +123,6 @@ public class FeedFragment extends BaseFeedFragment {
                 && !mSectionTwo
                 && fragment.getCampusFeedNeedsUpdating()) {
             getPosts();
-            getPolls();
             fragment.setCampusFeedNeedsUpdating(false);
         } else if (!fragment.getInitiallyPresentedFragmentWasCampus()
                 && mSectionTwo
@@ -436,31 +435,6 @@ public class FeedFragment extends BaseFeedFragment {
                     }
                 }
         );
-    }
-
-    @Override
-    protected void getPolls() {
-        if (getContext() == null) return;
-        new LSDKEvents(getContext()).getPolls(null, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        JSONObject object = new JSONObject(response.body().string());
-                        Log.d(TAG, "onResponse: " + object.toString(4));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }else {
-                    Log.d(TAG, "onResponse: "+response.code() + " " + response.body().string());
-                }
-            }
-        });
     }
 
     private void noInternet() {
