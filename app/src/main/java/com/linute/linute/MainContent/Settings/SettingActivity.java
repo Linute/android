@@ -1,10 +1,11 @@
 package com.linute.linute.MainContent.Settings;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
@@ -15,16 +16,21 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.BuildConfig;
 import com.linute.linute.Database.TaptUser;
+import com.linute.linute.LoginAndSignup.CollegePickerActivity;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
+import com.linute.linute.MainContent.Chat.ChatFragment;
+import com.linute.linute.MainContent.Chat.User;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.WebViewActivity;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import io.realm.Realm;
@@ -37,6 +43,7 @@ public class SettingActivity extends BaseSocketActivity {
     public static String TAG = "SettingActivity";
 
     private boolean mUpdateNeeded;
+    private LinutePreferenceFragment mPreferenceFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +55,10 @@ public class SettingActivity extends BaseSocketActivity {
         //get toolbar
         setUpToolbar();
 
-        if (savedInstanceState == null)
-            getFragmentManager().beginTransaction().replace(R.id.setting_fragment, new LinutePreferenceFragment()).commit();
+        if (savedInstanceState == null) {
+            mPreferenceFragment = new LinutePreferenceFragment();
+            getFragmentManager().beginTransaction().replace(R.id.setting_fragment, mPreferenceFragment).commit();
+        }
 
     }
 
@@ -90,6 +99,48 @@ public class SettingActivity extends BaseSocketActivity {
         }
     }
 
+    @Override
+    public void addFragmentToContainer(final Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.window, fragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void addFragmentToContainer(final Fragment fragment, String tag) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.window, fragment, tag)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void addFragmentOnTop(Fragment fragment, String tag) {
+//        hideKeyboard();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold, R.anim.hold, R.anim.frag_fade_out)
+                .add(R.id.window, fragment, tag)
+                .addToBackStack(null)
+                .commit();
+    }
+
+
+    @Override
+    public void replaceContainerWithFragment(final Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold)
+                .replace(R.id.window, fragment)
+                .addToBackStack(null)
+                .commit();
+
+    }
+
+
 
     //fragment with our settings layout
     public static class LinutePreferenceFragment extends PreferenceFragment {
@@ -97,6 +148,7 @@ public class SettingActivity extends BaseSocketActivity {
         Preference mChangeEmail;
         Preference mChangePhoneNumber;
         Preference mManageAccount;
+        Preference mTalkToUs;
         Preference mGiveFeedback;
         Preference mPrivacyPolicy;
         Preference mTermsOfService;
@@ -105,6 +157,8 @@ public class SettingActivity extends BaseSocketActivity {
         Preference mNotification;
         Preference mAbout;
         Preference mChangePassword;
+
+        Preference mChangeCollege;
 
         private Realm mRealm;
 
@@ -123,6 +177,7 @@ public class SettingActivity extends BaseSocketActivity {
             mChangeEmail = findPreference("change_email");
             mChangePhoneNumber = findPreference("change_phone_number");
             mManageAccount = findPreference("manage_account");
+            mTalkToUs = findPreference("talk_to_us");
             mGiveFeedback = findPreference("give_feedback");
             mPrivacyPolicy = findPreference("privacy policy");
             mTermsOfService = findPreference("terms_of_service");
@@ -131,6 +186,9 @@ public class SettingActivity extends BaseSocketActivity {
             mNotification = findPreference("notifications");
             mAbout = findPreference("version");
             mChangePassword = findPreference("change_password");
+
+            mChangeCollege = findPreference("change_college");
+
 
             DeviceInfoSingleton info = DeviceInfoSingleton.getInstance(getActivity());
             mAbout.setSummary("v" + info.getVersionCode() + "api" + API_Methods.VERSION + (API_Methods.IS_DEV_BUILD ? " @"+new Date(BuildConfig.TIMESTAMP).toLocaleString() : ""));
@@ -262,17 +320,33 @@ public class SettingActivity extends BaseSocketActivity {
                 }
             });
 
+            mTalkToUs.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    ArrayList<User> users = new ArrayList();
+                    users.add(new User("56be0e665e504abb121290b0","TaptHQ", "", null));
+
+                    ChatFragment.newInstance(null, users);
+//                    ((AppCompatActivity)getActivity()).getSupportFragmentManager().beginTransaction().add(ChatFragment.newInstance(null, users),"").commit();
+                    ((BaseTaptActivity)getActivity())
+                            .addFragmentOnTop(ChatFragment.newInstance(null, users), "Chat");
+                    return true;
+                }
+            });
+
             mGiveFeedback.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent intent = new Intent(Intent.ACTION_SENDTO);
+                    /*Intent intent = new Intent(Intent.ACTION_SENDTO);
                     intent.setData(Uri.parse("mailto:")); // only email apps should handle this
                     intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@tapt.io"});
                     intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback");
                     intent.putExtra(android.content.Intent.EXTRA_TEXT, "Replace this text with any feedback you'd like to give us!");
                     if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
                         startActivity(intent);
-                    }
+                    }*/
+                    Intent intent = new Intent(getActivity(), FeedbackActivity.class);
+                    startActivity(intent);
                     return true;
                 }
             });
@@ -284,6 +358,20 @@ public class SettingActivity extends BaseSocketActivity {
                     return true;
                 }
             });
+
+            if(!API_Methods.IS_DEV_BUILD) {
+                PreferenceCategory misc = (PreferenceCategory) findPreference("misc");
+                misc.removePreference(mChangeCollege);
+            }else{
+                mChangeCollege.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        Intent intent = new Intent(LinutePreferenceFragment.this.getActivity(), CollegePickerActivity.class);
+                        startActivity(intent);
+                        return true;
+                    }
+                });
+            }
         }
 
         @Override

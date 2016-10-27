@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.Global;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -46,6 +47,16 @@ import rx.schedulers.Schedulers;
  */
 public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter.GoToTrend {
 
+    private static GlobalFragment instance;
+
+    public static GlobalFragment getInstance() {
+        if (instance == null) {
+            instance = new GlobalFragment();
+        }
+        return instance;
+    }
+
+
     private static final String TAG = GlobalFragment.class.getSimpleName();
 
     private RecyclerView vRecycler;
@@ -53,7 +64,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     private GlobalChoicesAdapter mGlobalChoicesAdapter;
     private ArrayList<GlobalChoiceItem> mGlobalChoiceItems = new ArrayList<>();
     private Toolbar vToolbar;
-    private Handler mHandler = new Handler();
+    private Handler mHandler;
     private AppBarLayout vAppBarLayout;
 
     private View vNotificationIndicator;
@@ -63,6 +74,12 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     private View vUpdateNotification;
 
     private View vEmpty;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mHandler = new Handler();
+    }
 
     @Nullable
     @Override
@@ -133,7 +150,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) getActivity();
                 if (activity != null)
-                    activity.addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
+                    activity.addFragmentToContainer(RoomsActivityFragment.getInstance(), RoomsActivityFragment.TAG);
             }
         });
         vNotificationIndicator = chat.findViewById(R.id.notification);
@@ -215,13 +232,19 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
         }
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        getChoices();
+    }
+
     public void getChoices() {
 
-        if (getActivity() == null) return;
+//        if (getActivity() == null) return;
 
         setFragmentState(FragmentState.LOADING_DATA);
 
-        new LSDKGlobal(getActivity()).getTrending(new Callback() {
+        new LSDKGlobal(getContext()).getTrending(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
@@ -274,15 +297,19 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    vSwipe.setRefreshing(false);
+                                    if(isViewLoaded()){
+                                        vSwipe.setRefreshing(false);
+                                    }
                                     mHandler.removeCallbacksAndMessages(null);
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
                                             mGlobalChoiceItems.clear();
                                             mGlobalChoiceItems.addAll(tempList);
-                                            mGlobalChoicesAdapter.notifyDataSetChanged();
-                                            vEmpty.setVisibility(mGlobalChoiceItems.isEmpty() ? View.VISIBLE : View.GONE);
+                                            if(isViewLoaded()){
+                                                mGlobalChoicesAdapter.notifyDataSetChanged();
+                                                vEmpty.setVisibility(mGlobalChoiceItems.isEmpty() ? View.VISIBLE : View.GONE);
+                                            }
                                         }
                                     });
 
@@ -297,7 +324,8 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                                 @Override
                                 public void run() {
                                     Utils.showServerErrorToast(getActivity());
-                                    vSwipe.setRefreshing(false);
+                                    if (vSwipe != null)
+                                        vSwipe.setRefreshing(false);
                                 }
                             });
                         }
@@ -308,13 +336,18 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                             @Override
                             public void run() {
                                 Utils.showServerErrorToast(getActivity());
-                                vSwipe.setRefreshing(false);
+                                if (vSwipe != null)
+                                    vSwipe.setRefreshing(false);
                             }
                         });
                     }
                 }
             }
         });
+    }
+
+    private boolean isViewLoaded() {
+        return getView() != null;
     }
 
     @Override

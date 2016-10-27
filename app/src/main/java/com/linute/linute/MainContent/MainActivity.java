@@ -35,8 +35,6 @@ import com.bumptech.glide.signature.StringSignature;
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
 import com.linute.linute.API.API_Methods;
-import com.linute.linute.API.LSDKFriends;
-import com.linute.linute.Database.TaptUser;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
 import com.linute.linute.MainContent.Chat.ChatRoom;
@@ -83,12 +81,8 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.realm.Realm;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 public class MainActivity extends BaseTaptActivity {
 
@@ -220,6 +214,19 @@ public class MainActivity extends BaseTaptActivity {
                 .setRateText("Wasup! We see you come here often, how are you liking it so far?")
                 .setUpperBound(4)
                 .showAfter(10);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                preloadFragments();
+            }
+        }).start();
+    }
+
+    private void preloadFragments(){
+        GlobalFragment global = GlobalFragment.getInstance();
+        RoomsActivityFragment rooms = RoomsActivityFragment.getInstance();
+        getSupportFragmentManager().beginTransaction().attach(global).attach(rooms).commit();
     }
 
 
@@ -227,8 +234,13 @@ public class MainActivity extends BaseTaptActivity {
 
 
     public void getPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-            new AlertDialog.Builder(this)
+
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERM);
+
+        }/*else {
+            *//*new AlertDialog.Builder(this)
                     .setTitle("Need location permission")
                     .setMessage("Tapt needs access to your location for geo filters")
                     .setPositiveButton("Allow", new DialogInterface.OnClickListener() {
@@ -240,10 +252,8 @@ public class MainActivity extends BaseTaptActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
-                     }}).show();
-        }else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERM);
-        }
+                     }}).show();*//*
+        }*/
     }
 
     @Override
@@ -326,7 +336,7 @@ public class MainActivity extends BaseTaptActivity {
                     fragment = new Profile();
                     break;
                 case FRAGMENT_INDEXES.GLOBAL:
-                    fragment = new GlobalFragment();
+                    fragment = GlobalFragment.getInstance();
                     break;
                 default:
                     fragment = null;
@@ -952,7 +962,7 @@ public class MainActivity extends BaseTaptActivity {
 
             //boolean empty = room.roomId == null || room.roomId.isEmpty();
             if (getSupportFragmentManager().findFragmentByTag(RoomsActivityFragment.TAG) == null)
-                addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
+                addFragmentToContainer(RoomsActivityFragment.getInstance(), RoomsActivityFragment.TAG);
             addFragmentToContainer(ChatFragment.newInstance(room));
             /*addFragmentToContainer(ChatFragment.newInstance(
                     empty ? null : room,

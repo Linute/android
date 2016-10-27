@@ -35,7 +35,6 @@ import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.CreateContent.Gallery.GalleryActivity;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.SquareCamera.CameraActivity;
@@ -298,7 +297,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity) getActivity()).addFragmentToContainer(ChatSettingsFragment.newInstance(mChatRoom));
+                ((BaseTaptActivity) getActivity()).addFragmentToContainer(ChatSettingsFragment.newInstance(mChatRoom));
             }
         });
 
