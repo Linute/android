@@ -31,6 +31,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import okhttp3.Call;
@@ -106,6 +107,8 @@ public class FeedFragment extends BaseFeedFragment {
         return 0;
     }*/
 
+    private ArrayList<Poll> mTempPolls = new ArrayList<>();
+
     @Override
     public void onResume() {
         super.onResume();
@@ -120,6 +123,7 @@ public class FeedFragment extends BaseFeedFragment {
                 && !mSectionTwo
                 && fragment.getCampusFeedNeedsUpdating()) {
             getPosts();
+            getPolls();
             fragment.setCampusFeedNeedsUpdating(false);
         } else if (!fragment.getInitiallyPresentedFragmentWasCampus()
                 && mSectionTwo
@@ -265,20 +269,6 @@ public class FeedFragment extends BaseFeedFragment {
         );
     }
 
-    //NOTE: TEST FUNCTION
-    private Poll getPollItem(){
-        Poll p = new Poll(new JSONObject());
-        p.setTotalCount(100);
-        p.setTitle("TITLE");
-        ArrayList<PollChoiceItem> items = new ArrayList<>();
-        items.add(new PollChoiceItem("choice 1", 10, "#FBB72E"));
-        items.add(new PollChoiceItem("choice 2", 70, "#D0021B"));
-        items.add(new PollChoiceItem("choice 3", 10, "#56bb1d"));
-        items.add(new PollChoiceItem("choice 4", 10, "#48BEF7"));
-        p.setPollChoiceItems(items);
-        return p;
-    }
-
     @Override
     public ArrayList<BaseFeedItem> getFeedArray() {
         return mPosts;
@@ -347,10 +337,9 @@ public class FeedFragment extends BaseFeedFragment {
                         try {
 
                             jsonObject = new JSONObject(response.body().string());
-                            Log.d(TAG, "onResponse: "+jsonObject.toString(4));
-                            mSkip = jsonObject.getInt("skip");
 
-                            jsonArray = jsonObject.getJSONArray("events");
+                            //Log.d(TAG, "onResponse: "+jsonObject.toString(4));
+                            mSkip = jsonObject.getInt("skip");
 
                             if (mSkip == 0) {
                                 mFeedDone = true; //no more feed to load
@@ -362,9 +351,16 @@ public class FeedFragment extends BaseFeedFragment {
 
                             final ArrayList<BaseFeedItem> refreshedPosts = new ArrayList<>();
 
-                            // TODO: USED FOR TESTING. REMOVE LATER
-                            refreshedPosts.add(getPollItem());
+                            jsonArray = jsonObject.getJSONArray("polls");
+                            for (int i = jsonArray.length() - 1; i >= 0; i--){
+                                try {
+                                    refreshedPosts.add(new Poll(jsonArray.getJSONObject(i)));
+                                }catch (JSONException e){
+                                    e.printStackTrace();
+                                }
+                            }
 
+                            jsonArray = jsonObject.getJSONArray("events");
                             for (int i = jsonArray.length() - 1; i >= 0; i--) {
                                 try {
                                     refreshedPosts.add(new Post(jsonArray.getJSONObject(i)));
@@ -440,6 +436,31 @@ public class FeedFragment extends BaseFeedFragment {
                     }
                 }
         );
+    }
+
+    @Override
+    protected void getPolls() {
+        if (getContext() == null) return;
+        new LSDKEvents(getContext()).getPolls(null, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        JSONObject object = new JSONObject(response.body().string());
+                        Log.d(TAG, "onResponse: " + object.toString(4));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else {
+                    Log.d(TAG, "onResponse: "+response.code() + " " + response.body().string());
+                }
+            }
+        });
     }
 
     private void noInternet() {

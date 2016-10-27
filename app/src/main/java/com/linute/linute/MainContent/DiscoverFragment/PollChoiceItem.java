@@ -5,6 +5,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.ColorInt;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by QiFeng on 10/21/16.
  */
@@ -13,17 +16,21 @@ public class PollChoiceItem implements Parcelable {
     public final String mOptionText;
     private int mVotes;
     public final int mColor;
+    public final String id;
 
-    public PollChoiceItem(String text, int votes, String color){
-        mOptionText = text;
-        mVotes = votes;
-        mColor = Color.parseColor(color);
+    public PollChoiceItem(JSONObject object)throws JSONException{
+        mOptionText = object.getString("text");
+        mVotes = object.getInt("votes");
+        id = object.getString("id");
+        mColor = Color.parseColor("#"+object.getString("color"));
+
     }
 
     protected PollChoiceItem(Parcel in) {
         mOptionText = in.readString();
         mVotes = in.readInt();
         mColor = in.readInt();
+        id = in.readString();
     }
 
     public static final Creator<PollChoiceItem> CREATOR = new Creator<PollChoiceItem>() {
@@ -56,5 +63,6 @@ public class PollChoiceItem implements Parcelable {
         parcel.writeString(mOptionText);
         parcel.writeInt(mVotes);
         parcel.writeInt(mColor);
+        parcel.writeString(id);
     }
 }

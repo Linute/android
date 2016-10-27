@@ -3,6 +3,8 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -14,24 +16,32 @@ import java.util.ArrayList;
 public class Poll extends BaseFeedItem implements Parcelable{
 
     private String mTitle;
+    private String mDescription;
     private int mTotalCount;
     private String mTrendId;
     private boolean mShowTrend;
-    private boolean mIsHidden;
     private ArrayList<PollChoiceItem> mPollChoiceItems;
+    private int mPosition;
+    private boolean mHasVoted = false;
 
 
-    public Poll(JSONObject object){
-        super("");
-    }
+    public Poll(JSONObject object) throws JSONException{
+        super(object.getString("id"));
 
+        mTitle = object.getString("title");
+        mDescription = object.getString("description");
+        mPosition = object.getInt("position");
+        mTrendId = object.getString("trend");
 
-    public boolean isHidden() {
-        return mIsHidden;
-    }
+        mPollChoiceItems = new ArrayList<>();
+        JSONArray options = object.getJSONArray("options");
+        for (int i = 0; i < options.length(); i++){
+            mPollChoiceItems.add(new PollChoiceItem(options.getJSONObject(i)));
+        }
 
-    public void setHidden(boolean hidden) {
-        mIsHidden = hidden;
+        mTotalCount = object.getInt("totalVotes");
+
+        mHasVoted = !object.isNull("vote");
     }
 
     public boolean isShowTrend() {
@@ -78,21 +88,25 @@ public class Poll extends BaseFeedItem implements Parcelable{
     public void writeToParcel(Parcel parcel, int i) {
         super.writeToParcel(parcel, i);
         parcel.writeString(mTitle);
+        parcel.writeString(mDescription);
         parcel.writeInt(mTotalCount);
         parcel.writeString(mTrendId);
         parcel.writeByte((byte) (mShowTrend ? 1 : 0));
-        parcel.writeByte((byte) (mIsHidden ? 1 : 0));
         parcel.writeList(mPollChoiceItems);
+        parcel.writeInt(mPosition);
+        parcel.writeByte((byte) (mHasVoted ? 1 : 0));
     }
 
     protected Poll(Parcel in) {
         super(in);
         mTitle = in.readString();
+        mDescription = in.readString();
         mTotalCount = in.readInt();
         mTrendId = in.readString();
         mShowTrend = in.readByte() == 1;
-        mIsHidden = in.readByte() == 1;
         mPollChoiceItems = new ArrayList<>();
         in.readList(mPollChoiceItems, PollChoiceItem.class.getClassLoader());
+        mPosition = in.readInt();
+        mHasVoted = in.readByte() == 1;
     }
 }

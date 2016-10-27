@@ -135,6 +135,11 @@ public class TrendingPostsFragment extends BaseFeedFragment {
         new LSDKEvents(getContext()).getEvents(getUrlPathEnding(), getParams(-1, 20), getPostsCallback());
     }
 
+    @Override
+    protected void getPolls() {
+
+    }
+
     private String getUrlPathEnding(){
         switch (mGlobalItem.type){
             case GlobalChoiceItem.TYPE_HEADER_FRIEND:

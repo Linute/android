@@ -110,4 +110,15 @@ public class LSDKEvents {
         return API_Methods.put("comments/"+commentId, header, params, callback);
     }
 
+    public Call getPolls(String trend, Callback callback){
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+        Map<String, Object> params = new HashMap<>();
+
+        if (trend != null){
+            params.put("trend", trend);
+        }
+
+        return API_Methods.get(new String[]{"polls"}, header, params, callback);
+    }
+
 }
