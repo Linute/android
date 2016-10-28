@@ -31,7 +31,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import okhttp3.Call;
@@ -350,13 +349,18 @@ public class FeedFragment extends BaseFeedFragment {
 
                             final ArrayList<BaseFeedItem> refreshedPosts = new ArrayList<>();
 
-                            jsonArray = jsonObject.getJSONArray("polls");
-                            for (int i = jsonArray.length() - 1; i >= 0; i--){
-                                try {
-                                    refreshedPosts.add(new Poll(jsonArray.getJSONObject(i)));
-                                }catch (JSONException e){
-                                    e.printStackTrace();
+                            //TODO remove this
+                            try{
+                                jsonArray = jsonObject.getJSONArray("polls");
+                                for (int i = jsonArray.length() - 1; i >= 0; i--) {
+                                    try {
+                                        refreshedPosts.add(new Poll(jsonArray.getJSONObject(i)));
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
+                            }catch(JSONException e){
+                                e.printStackTrace();
                             }
 
                             jsonArray = jsonObject.getJSONArray("events");
