@@ -36,7 +36,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:singleLine="true"
+                android:textStyle="bold"
+                android:lines="1"
                 android:textColor="@color/secondaryColor"
                 android:textSize="@dimen/header_font_size"
                 tools:text="John Snow"/>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/feed_item_bar_height"
@@ -47,6 +46,7 @@
             android:textColor="@color/twentyfive_black"
             android:textSize="12sp"
             tools:text="237"/>
+
     </LinearLayout>
 
     <LinearLayout

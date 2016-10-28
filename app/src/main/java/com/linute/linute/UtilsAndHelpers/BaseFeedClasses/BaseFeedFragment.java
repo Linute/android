@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
+import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.SendTo.SendToFragment;
@@ -84,34 +85,50 @@ public abstract class BaseFeedFragment extends BaseFragment {
         mFeedAdapter.setRequestManager(Glide.with(this));
         mFeedAdapter.setPostAction(new BaseFeedAdapter.PostAction() {
             @Override
-            public void clickedOptions(final Post p, final int position) {
+            public void clickedOptions(final BaseFeedItem bfi, final int position) {
                 if (getContext() == null || mUserId == null || disableOptions()) return;
 
-                final boolean isOwner = p.getUserId().equals(mUserId);
                 String[] options;
-                if (isOwner) {
-                    options = new String[]{"Delete post", p.getPrivacy() == 1 ? "Reveal identity" : "Make anonymous", "Share post"};
-                } else {
-                    options = new String[]{"Report post", p.isPostHidden() ? "Unhide post" : "Hide post", "Share post"};
-                }
-                mAlertDialog = new AlertDialog.Builder(getContext())
-                        .setItems(options, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                switch (which) {
-                                    case 0:
-                                        if (isOwner) confirmDeletePost(p, position);
-                                        else confirmReportPost(p);
-                                        return;
-                                    case 1:
-                                        if (isOwner) confirmToggleAnon(p, position);
-                                        else confirmToggleHidden(p, position);
-                                        return;
-                                    case 2:
-                                        sharePost(p);
+
+                if (bfi instanceof Post) {
+                    final Post p = (Post) bfi;
+                    final boolean isOwner = p.getUserId().equals(mUserId);
+                    if (isOwner) {
+                        options = new String[]{"Delete post", p.getPrivacy() == 1 ? "Reveal identity" : "Make anonymous", "Share post"};
+                    } else {
+                        options = new String[]{"Report post", p.isPostHidden() ? "Unhide post" : "Hide post", "Share post"};
+                    }
+                    mAlertDialog = new AlertDialog.Builder(getContext())
+                            .setItems(options, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which) {
+                                        case 0:
+                                            if (isOwner) confirmDeletePost(p, position);
+                                            else confirmReportPost(p);
+                                            return;
+                                        case 1:
+                                            if (isOwner) confirmToggleAnon(p, position);
+                                            else confirmToggleHidden(p, position);
+                                            return;
+                                        case 2:
+                                            sharePost(p);
+                                    }
                                 }
-                            }
-                        }).show();
+                            }).show();
+                }
+                else {
+                    options = new String[]{"Hide poll"};
+                    mAlertDialog = new AlertDialog.Builder((getContext()))
+                            .setItems(options, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    if (i == 0){
+                                        confirmToggleHidden(bfi, position);
+                                    }
+                                }
+                            }).show();
+                }
             }
         });
 
@@ -425,27 +442,46 @@ public abstract class BaseFeedFragment extends BaseFragment {
         });
     }
 
-    private void confirmToggleHidden(final Post p, final int pos) {
+    private void confirmToggleHidden(final BaseFeedItem bfi, final int pos) {
         if (getActivity() == null) return;
-        mAlertDialog = new AlertDialog.Builder(getActivity())
-                .setTitle(p.isPostHidden() ? "Unhide post" : "Hide it")
-                .setMessage(p.isPostHidden() ? "This will make this post viewable on your feed. Still want to go ahead with it?" : "This will remove this post from your feed, go ahead with it?")
-                .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        toggleHidden(p, pos);
-                    }
-                })
-                .setNegativeButton("no, thanks", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .show();
+
+        if (bfi instanceof Post) {
+            final Post p = (Post) bfi;
+            mAlertDialog = new AlertDialog.Builder(getActivity())
+                    .setTitle(p.isPostHidden() ? "Unhide post" : "Hide it")
+                    .setMessage(p.isPostHidden() ? "This will make this post viewable on your feed. Still want to go ahead with it?" : "This will remove this post from your feed, go ahead with it?")
+                    .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            toggleHidden(p, pos);
+                        }
+                    })
+                    .setNegativeButton("no, thanks", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+        }else{
+            mAlertDialog = new AlertDialog.Builder(getActivity())
+                    .setTitle("Hide item")
+                    .setMessage("This will hide this item from the feed. Are you sure you want to continue?")
+                    .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            toggleHidden(bfi, pos);
+                        }
+                    }).setNegativeButton("no", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    }).show();
+        }
     }
 
-    private void toggleHidden(Post p, int position) {
+    private void toggleHidden(BaseFeedItem bfi, int position) {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
@@ -455,8 +491,8 @@ public abstract class BaseFeedFragment extends BaseFragment {
         }
 
         int pos = position;
-        if (!getFeedArray().get(position).equals(p)){
-            pos = getFeedArray().indexOf(p);
+        if (!getFeedArray().get(position).equals(bfi)){
+            pos = getFeedArray().indexOf(bfi);
         }
 
         final int pos1 = pos;
@@ -470,21 +506,36 @@ public abstract class BaseFeedFragment extends BaseFragment {
             });
         }
 
-        Toast.makeText(activity,
-                p.isPostHidden() ? "Post unhidden" : "Post hidden",
-                Toast.LENGTH_SHORT).show();
-
         if (notifyFeedNeedsUpdating())
             activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
 
-        JSONObject emit = new JSONObject();
-        try {
-            emit.put("hide", !p.isPostHidden());
-            emit.put("room", p.getId());
-            TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:hide", emit);
-        } catch (JSONException e) {
-            Utils.showServerErrorToast(activity);
-            e.printStackTrace();
+        if (bfi instanceof Post) {
+            Post p = (Post) bfi;
+            Toast.makeText(activity,
+                    p.isPostHidden() ? "Post unhidden" : "Post hidden",
+                    Toast.LENGTH_SHORT).show();
+
+            JSONObject emit = new JSONObject();
+            try {
+                emit.put("hide", !p.isPostHidden());
+                emit.put("room", p.getId());
+                TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:hide", emit);
+            } catch (JSONException e) {
+                Utils.showServerErrorToast(activity);
+                e.printStackTrace();
+            }
+        }else if (bfi instanceof Poll){
+            Toast.makeText(activity, "Poll hidden", Toast.LENGTH_SHORT).show();
+
+            JSONObject emit = new JSONObject();
+            try {
+                emit.put("hide", true);
+                emit.put("poll", bfi.getId());
+                TaptSocket.getInstance().emit(API_Methods.VERSION + ":polls:hide", emit);
+            }catch (JSONException e){
+                Utils.showServerErrorToast(activity);
+                e.printStackTrace();
+            }
         }
     }
 

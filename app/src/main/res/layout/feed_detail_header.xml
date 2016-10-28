@@ -43,7 +43,7 @@
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:lines="1"
-        android:singleLine="true"
+        android:textStyle="bold"
         android:textColor="@color/user_name_blue"
         android:textSize="@dimen/header_font_size"
         tools:text="John Snow" />

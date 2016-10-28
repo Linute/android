@@ -3,6 +3,7 @@ package com.linute.linute.UtilsAndHelpers.BaseFeedClasses;
 import android.support.v7.widget.RecyclerView;
 
 import com.bumptech.glide.RequestManager;
+import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 
@@ -58,6 +59,6 @@ public abstract class BaseFeedAdapter extends RecyclerView.Adapter<RecyclerView.
 
 
     public interface PostAction{
-        void clickedOptions(Post p, int position);
+        void clickedOptions(BaseFeedItem bfi, int position);
     }
 }

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
-             android:layout_height="32dp"
+             android:layout_height="wrap_content"
              android:layout_margin="4dp"
+             android:minHeight="32dp"
              android:orientation="vertical">
 
     <ProgressBar
@@ -10,8 +12,10 @@
         style="?android:progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_gravity="center"
         android:indeterminate="false"
         android:max="100"
+        android:minHeight="32dp"
         android:progress="20"
         android:progressDrawable="@drawable/rating_progressbar"
     />
@@ -20,17 +24,18 @@
         android:id="@+id/rating_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start|center_vertical"
-        android:layout_marginStart="16dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        tools:text="232334 sdsdsd sd sd sdf sdf dsf dsf ds dsd sd sd sds ds ds ds ds dsd 32"
     />
 
 
-    <TextView
-        android:id="@+id/rating_percent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|center_vertical"
-        android:layout_marginEnd="16dp"
-    />
+    <!--<TextView-->
+    <!--android:id="@+id/rating_percent"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="end|center_vertical"-->
+    <!--android:layout_marginEnd="16dp"-->
+    <!--/>-->
 
 </FrameLayout>

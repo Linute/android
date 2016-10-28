@@ -72,7 +72,8 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
                     "That's all folks!"
             );
         }else if (viewType == POLL){
-            return new PollViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.feeddetail_poll, parent, false));
+            return new PollViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.feeddetail_poll, parent, false),
+                    mPostAction);
         }
 
         return null;
