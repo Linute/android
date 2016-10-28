@@ -67,12 +67,20 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
     private FrameLayout[] mPostColorSelectorViews = new FrameLayout[6];
 
     private int mCurrentlySelected = 0;
+    private String mTrendId = null;
+
+    public static final String EXTRA_TREND_ID = "trend_id";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_status);
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
+        Intent intent = getIntent();
+        if(intent != null){
+            mTrendId = intent.getStringExtra(EXTRA_TREND_ID);
+        }
 
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.postContentToolbar);
@@ -337,7 +345,8 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
                             null,
                             null,
                             mSharedPreferences.getString("userID", ""),
-                            mSharedPreferences.getString("userToken", "")
+                            mSharedPreferences.getString("userToken", ""),
+                            mTrendId
                     );
 
 

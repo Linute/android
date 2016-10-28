@@ -44,7 +44,8 @@ public class PendingUploadPost implements Parcelable {
                              ArrayList<String> stickers,
                              ArrayList<String> filters,
                              String owner,
-                             String userToken
+                             String userToken,
+                             String trendId
     ){
         mId = id;
         mCollegeId = collegeId;
@@ -60,6 +61,7 @@ public class PendingUploadPost implements Parcelable {
         mFilters = filters;
         mOwner = owner;
         mUserToken = userToken;
+        mTrends.add(trendId);
     }
 
 

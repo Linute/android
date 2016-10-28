@@ -108,6 +108,7 @@ public class EditFragment extends BaseFragment {
     private static final String ARG_DIMEN = "dimen";
     private static final String ARG_CAMERA_TYPE = "camera_type";
     public static final int REQUEST_LOCATION = 23;
+    public static final String ARG_TREND_ID = "trend_id";
 
 
     private ViewGroup mContentContainer;
@@ -123,6 +124,7 @@ public class EditFragment extends BaseFragment {
     private Menu mMenu;
     private Toolbar mToolbar;
     private Bitmap mContentBitmap;
+    private String mTrendId;
 
     public enum ContentType {
         None, Photo, Video, UploadedPhoto, UploadedVideo
@@ -154,7 +156,7 @@ public class EditFragment extends BaseFragment {
     View mContentView;
 
 
-    public static EditFragment newInstance(Uri uri, ContentType contentType, ContentSubType contentSubType, int returnType, Dimens dimens/*, int cameraType*/) {
+    /*public static EditFragment newInstance(Uri uri, ContentType contentType, ContentSubType contentSubType, int returnType, Dimens dimens*//*, int cameraType*//*) {
 
         Bundle args = new Bundle();
         args.putParcelable(ARG_URI, uri);
@@ -166,7 +168,23 @@ public class EditFragment extends BaseFragment {
         EditFragment fragment = new EditFragment();
         fragment.setArguments(args);
         return fragment;
+    }*/
+
+    public static EditFragment newInstance(Uri uri, ContentType contentType, ContentSubType contentSubType, int returnType, Dimens dimens, String trendId) {
+
+        Bundle args = new Bundle();
+        args.putParcelable(ARG_URI, uri);
+        args.putInt(ARG_CONTENT_TYPE, contentType.ordinal());
+        args.putSerializable(ARG_CONTENT_SUB_TYPE, contentSubType);
+        args.putInt(ARG_RETURN_TYPE, returnType);
+        args.putParcelable(ARG_DIMEN, dimens);
+        args.putString(ARG_TREND_ID, trendId);
+//        args.putInt(ARG_CAMERA_TYPE, cameraType);
+        EditFragment fragment = new EditFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -190,6 +208,8 @@ public class EditFragment extends BaseFragment {
 //        mCameraType = args.getInt(ARG_CAMERA_TYPE);
         mReturnType = args.getInt(ARG_RETURN_TYPE);
         mDimens = args.getParcelable(ARG_DIMEN);
+        mTrendId = args.getString(ARG_TREND_ID, null);
+
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
@@ -959,7 +979,8 @@ public class EditFragment extends BaseFragment {
                                                 options.stickers,
                                                 options.filters,
                                                 mUserId,
-                                                mUserToken
+                                                mUserToken,
+                                                mTrendId
                                         );
 
                                 Intent result = new Intent();
@@ -1364,7 +1385,8 @@ public class EditFragment extends BaseFragment {
                 options.stickers,
                 options.filters,
                 mUserId,
-                mUserToken
+                mUserToken,
+                mTrendId
         );
 
         showProgress(false);

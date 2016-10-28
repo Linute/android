@@ -98,15 +98,18 @@ public class CameraFragment extends Fragment {
     private boolean mVideoProcessing = false;
 
     private EditFragment.ContentSubType contentType = EditFragment.ContentSubType.None;
+    private String mTrendId = null;
 
     private static final String KEY_CONTENT_TYPE = "content_type";
+    private static final String KEY_TREND_ID = "trend_id";
     private Toolbar mToolbar;
 
 
-    public static Fragment newInstance(EditFragment.ContentSubType type) {
+    public static Fragment newInstance(EditFragment.ContentSubType type, String trendId) {
         CameraFragment cameraFragment = new CameraFragment();
         Bundle args = new Bundle();
         args.putSerializable(KEY_CONTENT_TYPE, type);
+        args.putString(KEY_TREND_ID, trendId);
         cameraFragment.setArguments(args);
         return cameraFragment;
     }
@@ -136,6 +139,7 @@ public class CameraFragment extends Fragment {
         Bundle args = getArguments();
         if(args != null){
             contentType = (EditFragment.ContentSubType)args.getSerializable(KEY_CONTENT_TYPE);
+            mTrendId = args.getString(KEY_TREND_ID);
         }
 
     }
@@ -388,7 +392,7 @@ public class CameraFragment extends Fragment {
                         .beginTransaction()
                         .replace(
                                 R.id.fragment_container,
-                                EditFragment.newInstance(uri, EditFragment.ContentType.Video, contentType, returnType, videoDimen),
+                                EditFragment.newInstance(uri, EditFragment.ContentType.Video, contentType, returnType, videoDimen, mTrendId ),
                                 EditFragment.TAG)
                         .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                         .commit();
@@ -768,7 +772,7 @@ public class CameraFragment extends Fragment {
                                                                 .beginTransaction()
                                                                 .replace(
                                                                         R.id.fragment_container,
-                                                                        EditFragment.newInstance(uri, EditFragment.ContentType.Photo, contentType, returnType, photoDimens),
+                                                                        EditFragment.newInstance(uri, EditFragment.ContentType.Photo, contentType, returnType, photoDimens, mTrendId),
                                                                         EditFragment.TAG)
                                                                 .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                                                                 .commit();

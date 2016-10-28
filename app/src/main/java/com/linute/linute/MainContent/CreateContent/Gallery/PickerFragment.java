@@ -19,7 +19,6 @@ import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +49,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
     public static final String PICKER_TYPE_KEY = "picker_type_key";
     public static final String RETURN_TYPE_KEY = "return_type";
     public static final String KEY_CONTENT_SUBTYPE = "content_type";
+    public static final String ARG_TREND_ID = "trend_id";
 
     public ArrayList<GalleryItem> mUnfilteredGalleryItems = new ArrayList<>();
     public ArrayList<GalleryItem> mFiltedGalleryItems = new ArrayList<>();
@@ -79,6 +79,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
     private ArrayAdapter mSpinnerAdapter;
     private AppCompatSpinner vSpinner;
     private EditFragment.ContentSubType mContentSubType;
+    private String mTrendId = null;
 
     public PickerFragment() {
 
@@ -94,17 +95,31 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         return fragment;
     }
 
+    public static PickerFragment newInstance(int type, int returntype, EditFragment.ContentSubType contentSubType, String trendId) {
+        Bundle args = new Bundle();
+        PickerFragment fragment = new PickerFragment();
+        args.putInt(PICKER_TYPE_KEY, type);
+        args.putInt(RETURN_TYPE_KEY, returntype);
+        args.putSerializable(KEY_CONTENT_SUBTYPE, contentSubType);
+        args.putString(ARG_TREND_ID, trendId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mPickerType = getArguments().getInt(PICKER_TYPE_KEY, GalleryActivity.PICK_ALL);
-            mReturnType = getArguments().getInt(RETURN_TYPE_KEY, RETURN_URI);
-            mContentSubType = (EditFragment.ContentSubType) getArguments().getSerializable(KEY_CONTENT_SUBTYPE);
+        Bundle args = getArguments();
+        if (args != null) {
+            mPickerType = args.getInt(PICKER_TYPE_KEY, GalleryActivity.PICK_ALL);
+            mReturnType = args.getInt(RETURN_TYPE_KEY, RETURN_URI);
+            mContentSubType = (EditFragment.ContentSubType) args.getSerializable(KEY_CONTENT_SUBTYPE);
             if (mContentSubType == null) {
                 mContentSubType = EditFragment.ContentSubType.None;
             }
+            mTrendId = args.getString(ARG_TREND_ID);
         }
     }
 
@@ -304,7 +319,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
                                 EditFragment.ContentType.UploadedVideo,
                                 mContentSubType,
                                 mReturnType,
-                                dim),
+                                dim, mTrendId),
                         EditFragment.TAG
                 );
             } else {
@@ -341,7 +356,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         dimens.setRotation(rotation);
 
         goToFragment(
-                EditFragment.newInstance(Uri.parse(item.path), EditFragment.ContentType.UploadedPhoto, mContentSubType, mReturnType, dimens),
+                EditFragment.newInstance(Uri.parse(item.path), EditFragment.ContentType.UploadedPhoto, mContentSubType, mReturnType, dimens, mTrendId),
                 EditFragment.TAG
         );
     }

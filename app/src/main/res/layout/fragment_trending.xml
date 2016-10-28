@@ -65,4 +65,7 @@
     />
 
 
+    <include layout="@layout/layout_create_menu1" />
+
+
 </android.support.design.widget.CoordinatorLayout>

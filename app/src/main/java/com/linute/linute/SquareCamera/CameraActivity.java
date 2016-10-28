@@ -9,7 +9,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.R;
@@ -36,6 +35,7 @@ public class CameraActivity extends BaseSocketActivity {
     //public final static String GALLERY_TYPE = "gallery_filters";
     public final static String ANON_KEY = "anon_key";
     public final static String CONTENT_SUB_TYPE = "content_sub_type";
+    public final static String TREND_ID = "trend_id";
 
     public EditFragment.ContentSubType contentType = EditFragment.ContentSubType.None;
 
@@ -46,6 +46,7 @@ public class CameraActivity extends BaseSocketActivity {
     public static final String TAG = CameraActivity.class.getSimpleName();
 
     protected boolean mHasWriteAndCameraPermission = false;
+    private String mTrendId;
 
     /**
      * need the following intent:
@@ -64,6 +65,8 @@ public class CameraActivity extends BaseSocketActivity {
             mCameraType = i.getParcelableExtra(CAMERA_TYPE);
             if (mCameraType == null)
                 mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
+
+            mTrendId = i.getStringExtra(TREND_ID);
 
             mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
             contentType = (EditFragment.ContentSubType)i.getSerializableExtra(CONTENT_SUB_TYPE);
@@ -84,7 +87,7 @@ public class CameraActivity extends BaseSocketActivity {
         if (savedInstanceState == null && mHasWriteAndCameraPermission) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, CameraFragment.newInstance(contentType), CameraFragment.TAG)
+                    .replace(R.id.fragment_container, CameraFragment.newInstance(contentType, mTrendId), CameraFragment.TAG)
                     .commit();
         }
     }
@@ -172,7 +175,7 @@ public class CameraActivity extends BaseSocketActivity {
     protected void launchCameraFragment() {
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, CameraFragment.newInstance(contentType), CameraFragment.TAG)
+                .replace(R.id.fragment_container, CameraFragment.newInstance(contentType, mTrendId), CameraFragment.TAG)
                 .commit();
     }
 

@@ -1,13 +1,13 @@
 package com.linute.linute.MainContent.CreateContent.Gallery;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.R;
@@ -29,19 +29,23 @@ public class GalleryActivity extends BaseSocketActivity {
     public static final String ARG_GALLERY_TYPE = "gallery_type";
     public static final String ARG_RETURN_TYPE = "return_type";
     public static final String ARG_CONTENT_SUB_TYPE = "content_type";
+    public static final String ARG_TREND_ID = "trend_id";
 
     public static final int PICK_IMAGE = 0;
     public static final int PICK_VIDEO = 1;
     public static final int PICK_ALL = 2;
+    private String mTrendId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery);
 
-        mGalleryType = getIntent().getIntExtra(ARG_GALLERY_TYPE, PICK_ALL);
-        mReturnType = getIntent().getIntExtra(ARG_RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
-        mContentSubType = (EditFragment.ContentSubType)getIntent().getSerializableExtra(ARG_CONTENT_SUB_TYPE);
+        Intent intent = getIntent();
+        mGalleryType = intent.getIntExtra(ARG_GALLERY_TYPE, PICK_ALL);
+        mReturnType = intent.getIntExtra(ARG_RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
+        mContentSubType = (EditFragment.ContentSubType) intent.getSerializableExtra(ARG_CONTENT_SUB_TYPE);
+        mTrendId = intent.getStringExtra(ARG_TREND_ID);
         if(mContentSubType == null){mContentSubType = EditFragment.ContentSubType.None;}
 
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -68,7 +72,7 @@ public class GalleryActivity extends BaseSocketActivity {
 
     private void addPickerFragment() {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, PickerFragment.newInstance(mGalleryType, mReturnType, mContentSubType)).commit();
+                .replace(R.id.fragment_container, PickerFragment.newInstance(mGalleryType, mReturnType, mContentSubType,mTrendId)).commit();
     }
 
 
