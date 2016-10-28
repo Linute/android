@@ -47,9 +47,6 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
 
     private SignUpInfo mSignUpInfo;
 
-    public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
-            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.edu", Pattern.CASE_INSENSITIVE);
-
     public static SignUpEmailFragment newInstance(College college) {
         SignUpEmailFragment fragment = new SignUpEmailFragment();
         Bundle args = new Bundle();
@@ -116,7 +113,7 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
                 vPassword.setError(null);
                 String email = vEmail.getText().toString().trim().toLowerCase();
 
-                if (!VALID_EMAIL_ADDRESS_REGEX.matcher(email).matches()) {
+                if (!Utils.VALID_EMAIL_ADDRESS_REGEX.matcher(email).matches()) {
                     vEmail.setError("Invalid edu email");
                     vEmail.requestFocus();
                     return;

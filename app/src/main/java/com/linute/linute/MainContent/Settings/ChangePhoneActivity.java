@@ -117,13 +117,13 @@ public class ChangePhoneActivity extends BaseSocketActivity {
         //check if there is already a phone number associated with account
         String phone = mSharedPreferences.getString("phone", "");
 
-        Log.v(TAG, phone);
+        //Log.v(TAG, phone);
 
         //if no number associated, check if theres a temp number stored
         if (phone.equals("null") || phone.equals(""))
             phone = mTempSharedPref.getString("tempPhone", "");
 
-        Log.v(TAG, phone);
+        //Log.v(TAG, phone);
 
         mPhoneNumber.append(phone.equals("") ? "+1" : phone);
     }
@@ -133,7 +133,7 @@ public class ChangePhoneActivity extends BaseSocketActivity {
         mViewSwitcher.setOutAnimation(this, R.anim.slide_out_left);
 
         //if there is already a code present, go to confirmation
-        if (!mTempSharedPref.getString("tempCode", "").equals("")) {
+        if (!mTempSharedPref.getString("tempPhone", "").equals("")) {
             mViewSwitcher.showNext();
         }
     }
@@ -222,7 +222,8 @@ public class ChangePhoneActivity extends BaseSocketActivity {
                 if (response.isSuccessful()) {
                     try {
                         String code = new JSONObject(response.body().string()).getString("pinCode");
-                        persistTempData(phone, code);//save information
+                        persistTempData(phone);//save information
+                        //Log.d(TAG, "onResponse: "+code);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() { //show next view
@@ -243,18 +244,47 @@ public class ChangePhoneActivity extends BaseSocketActivity {
     }
 
     private void checkConfirmation() {
-        String correctCode = mTempSharedPref.getString("tempCode", "");
+        mConfirmation.setError(null);
         String enteredCode = mConfirmation.getText().toString();
-
-        if (!correctCode.equals(enteredCode)) {
-            mConfirmation.setError(getString(R.string.change_phone_invalid_code));
-            mConfirmation.requestFocus();
-            return;
-        }
-
         showProgress(true, mSecondViewButtons, mProgressBar2, mConfirmation);
+
+        final String phone = mTempSharedPref.getString("tempPhone", "");
+        mUser.checkPhonePincode(phone, enteredCode, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.showBadConnectionToast(ChangePhoneActivity.this);
+                        showProgress(false, mSecondViewButtons, mProgressBar2, mConfirmation);
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()){
+                    updateInformation(phone);
+                }else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showProgress(false, mSecondViewButtons, mProgressBar2, mConfirmation);
+                            mConfirmation.setError("Invalid pin");
+                            mConfirmation.requestFocus();
+                        }
+                    });
+                }
+                response.body().close();
+            }
+        });
+
+
+    }
+
+    private void updateInformation(String phone){
         Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("phone", mTempSharedPref.getString("tempPhone", ""));
+        userInfo.put("phone", phone);
 
         mUser.updateUserInfo(userInfo, null, new Callback() {
             @Override
@@ -287,7 +317,6 @@ public class ChangePhoneActivity extends BaseSocketActivity {
                 }
             }
         });
-
     }
 
     private boolean isValidPhoneNumber(String number) {
@@ -305,13 +334,12 @@ public class ChangePhoneActivity extends BaseSocketActivity {
         return !phone.equals(mSharedPreferences.getString("phone", ""));
     }
 
-    private void persistTempData(String tempPhone, String code) {
+    private void persistTempData(String tempPhone) {
         mTempSharedPref.edit().putString("tempPhone", tempPhone).apply();
-        mTempSharedPref.edit().putString("tempCode", code).apply();
     }
 
     private void persistData(LinuteUser user) {
-        Log.v(TAG, user.getPhone());
+        //Log.v(TAG, user.getPhone());
         mSharedPreferences.edit().putString("phone", user.getPhone()).apply();
     }
 

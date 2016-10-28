@@ -7,13 +7,14 @@
     <include android:id="@+id/changeemail_toolbar"
              layout="@layout/tool_bar"/>
 
-    <ViewFlipper android:id="@+id/changeemail_view_flipper"
-                 android:layout_width="match_parent"
-                 android:layout_height="match_parent"
-                 android:layout_below="@id/changeemail_toolbar">
+    <ViewFlipper
+        android:id="@+id/changeemail_view_flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/changeemail_toolbar">
 
         <FrameLayout android:layout_width="match_parent"
-                      android:layout_height="match_parent"
+                     android:layout_height="match_parent"
         >
 
             <EditText
@@ -23,22 +24,23 @@
                 android:layout_margin="@dimen/activity_horizontal_margin"
                 android:hint="@string/prompt_email"
                 android:inputType="textEmailAddress"
-                android:singleLine="true"
+                android:lines="1"
             />
 
 
-            <Button android:id="@+id/changeemail_save_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:text="GET CODE"
+            <Button
+                android:id="@+id/changeemail_save_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:text="GET CODE"
             />
 
         </FrameLayout>
 
 
         <FrameLayout android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                     android:layout_height="match_parent">
 
             <EditText android:id="@+id/changeemail_pin_code"
                       android:layout_width="match_parent"

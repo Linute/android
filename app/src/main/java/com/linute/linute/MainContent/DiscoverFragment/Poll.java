@@ -23,7 +23,7 @@ public class Poll extends BaseFeedItem implements Parcelable{
     private boolean mShowTrend;
     private ArrayList<PollChoiceItem> mPollChoiceItems;
     private int mPosition;
-    private boolean mHasVoted = false;
+    private String mVotedFor;
 
 
     public Poll(JSONObject object) throws JSONException{
@@ -48,7 +48,7 @@ public class Poll extends BaseFeedItem implements Parcelable{
 
         mTotalCount = object.getInt("totalVotes");
 
-        mHasVoted = !object.isNull("vote");
+        mVotedFor = object.isNull("vote") ? null : object.getString("vote");
     }
 
     public boolean isShowTrend() {
@@ -87,12 +87,17 @@ public class Poll extends BaseFeedItem implements Parcelable{
         mPollChoiceItems = pollChoiceItems;
     }
 
-    public boolean hasVoted() {
-        return mHasVoted;
+    public String getVotedFor() {
+        return mVotedFor;
     }
 
-    public void setHasVoted(boolean hasVoted) {
-        mHasVoted = hasVoted;
+    public void setVotedFor(String votedFor) {
+        mVotedFor = votedFor;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Poll && ((Poll)obj).getId().equals(getId());
     }
 
     @Override
@@ -105,7 +110,7 @@ public class Poll extends BaseFeedItem implements Parcelable{
         parcel.writeByte((byte) (mShowTrend ? 1 : 0));
         parcel.writeList(mPollChoiceItems);
         parcel.writeInt(mPosition);
-        parcel.writeByte((byte) (mHasVoted ? 1 : 0));
+        parcel.writeString(mVotedFor);
     }
 
     public static final Creator<Poll> CREATOR = new Creator<Poll>() {
@@ -130,6 +135,6 @@ public class Poll extends BaseFeedItem implements Parcelable{
         mPollChoiceItems = new ArrayList<>();
         in.readList(mPollChoiceItems, PollChoiceItem.class.getClassLoader());
         mPosition = in.readInt();
-        mHasVoted = in.readByte() == 1;
+        mVotedFor = in.readString();
     }
 }

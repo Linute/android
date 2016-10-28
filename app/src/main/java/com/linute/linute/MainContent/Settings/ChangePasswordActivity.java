@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent.Settings;
 
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
@@ -9,7 +8,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.linute.linute.API.LSDKUser;
@@ -159,19 +157,49 @@ public class ChangePasswordActivity extends BaseSocketActivity implements View.O
     }
 
     private void checkPin() {
-        //// TODO: 10/25/16  // FIXME: 10/25/16
-        String pincode = vPasswordText.getText().toString();
-        if (pincode.equals(vPasswordText.getText().toString())){
-            passwordEntry();
-        }else {
-            vPasswordText.setError("Incorrect pin code");
-            showProgress(false);
-        }
+
+        new LSDKUser(this).checkPincode(mEmail, vPasswordText.getText().toString(), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.showBadConnectionToast(ChangePasswordActivity.this);
+                        showProgress(false);
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showProgress(false);
+                            passwordEntry();
+                        }
+                    });
+                }else{
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            vPasswordText.setError("Invalid pin");
+                            showProgress(false);
+                            vPasswordText.requestFocus();
+                        }
+                    });
+                }
+                response.body().close();
+            }
+        });
+
     }
 
     private void passwordEntry(){
         mState = VerificationStatus.ChangingPassword;
         vPasswordText.setHint("New password");
+        vPasswordText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
         vPasswordText.setError(null);
         vPasswordText.setText("");
         vButton.setText("Change password");

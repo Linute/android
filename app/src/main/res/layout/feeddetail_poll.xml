@@ -11,7 +11,7 @@
               android:layout_height="wrap_content"
               android:layout_gravity="center_horizontal"
               android:layout_margin="@dimen/activity_horizontal_margin"
-              android:textColor="#6187B0"
+              android:textColor="@color/user_name_blue"
               android:textStyle="bold"
               tools:text="title"/>
 
@@ -33,10 +33,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:textStyle="bold"
             android:lines="1"
-            android:textColor="#6187B0"
+            android:textColor="@color/user_name_blue"
             android:textSize="12sp"
+            android:textStyle="bold"
             tools:text="23 votes"
         />
 

@@ -55,7 +55,11 @@ public class RatingBar extends FrameLayout implements View.OnClickListener{
         drawable.getDrawable(0).setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
     }
 
-
+    public void removeColorFilters(){
+        LayerDrawable drawable = ((LayerDrawable)vProgressBar.getProgressDrawable());
+        drawable.getDrawable(1).setColorFilter(null);
+        drawable.getDrawable(0).setColorFilter(null);
+    }
 
     public void setOptionTextStyle(Typeface typeface){
         vOptionText.setTypeface(typeface);
