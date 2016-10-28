@@ -1,4 +1,4 @@
-package com.linute.linute.MainContent.EditScreen;
+package com.linute.linute.MainContent.EditScreen.Tools;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,6 +18,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.linute.linute.MainContent.EditScreen.Dimens;
+import com.linute.linute.MainContent.EditScreen.EditFragment;
+import com.linute.linute.MainContent.EditScreen.MoveZoomImageView;
+import com.linute.linute.MainContent.EditScreen.PostOptions.ContentType;
+import com.linute.linute.MainContent.EditScreen.ProcessingOptions;
 import com.linute.linute.R;
 
 /**
@@ -66,7 +71,7 @@ public class CropTool extends EditContentTool {
     private Rect imageBounds;
 
 
-    public CropTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, MoveZoomImageView activatable, Dimens dimens, EditFragment.RequestDisableToolListener listener, View contentView) {
+    public CropTool(Uri uri, ContentType type, ViewGroup overlays, MoveZoomImageView activatable, Dimens dimens, EditFragment.RequestDisableToolListener listener, View contentView) {
         super(uri, type, overlays);
         mActivatable = activatable;
         mDimens = dimens;
@@ -517,7 +522,7 @@ public class CropTool extends EditContentTool {
     }
 
     @Override
-    public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
+    public void processContent(Uri uri, ContentType contentType, ProcessingOptions options) {
 
         mActivatable.getImageBounds(imageBounds);
         updateCropperBounds();

@@ -1,4 +1,4 @@
-package com.linute.linute.MainContent.EditScreen;
+package com.linute.linute.MainContent.EditScreen.Tools;
 
 import android.content.Context;
 import android.net.Uri;
@@ -12,6 +12,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.linute.linute.MainContent.EditScreen.EditFragment;
+import com.linute.linute.MainContent.EditScreen.PostOptions.ContentType;
+import com.linute.linute.MainContent.EditScreen.ProcessingOptions;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -19,13 +22,13 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 /**
  * Created by mikhail on 8/22/16.
  */
-public class CommentPrivacyTool extends EditContentTool {
+public class PrivacySettingTool extends EditContentTool {
 
     private boolean isAnonCommentsDisabled = ProcessingOptions.DEFAULT_ANON_COMMENTS_DISABLED;
     private boolean postAsAnon = ProcessingOptions.DEFAULT_POST_AS_ANON;
     private final FrameLayout mMidTextTarget;
 
-    public CommentPrivacyTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, final EditFragment frag) {
+    public PrivacySettingTool(Uri uri, ContentType type, ViewGroup overlays, final EditFragment frag) {
         super(uri, type, overlays);
         mMidTextTarget = new FrameLayout(overlays.getContext());
         mMidTextTarget.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -36,6 +39,7 @@ public class CommentPrivacyTool extends EditContentTool {
             }
         });
         mOverlaysView.addView(mMidTextTarget);
+
     }
 
     @Override
@@ -48,7 +52,7 @@ public class CommentPrivacyTool extends EditContentTool {
         TextView postingAsLeftText = (TextView) leftSwitch.findViewById(R.id.text_heading_left);
         TextView postingAsRightText = (TextView) leftSwitch.findViewById(R.id.text_heading_right);
         SwitchCompat postingAsSwitch = (SwitchCompat) leftSwitch.findViewById(R.id.switch_main);
-        postingAsHeader.setText("Commenting as");
+        postingAsHeader.setText("Posting as");
 
         postingAsLeftText.setText("");
         postingAsRightText.setText("");
@@ -56,27 +60,38 @@ public class CommentPrivacyTool extends EditContentTool {
         postingAsSwitch.setTextOff("Self");
 
         View rightSwitch = root.findViewById(R.id.switch_right);
-        rightSwitch.setVisibility(View.GONE);
+        TextView anonCommentsHeader = (TextView) rightSwitch.findViewById(R.id.text_heading_top);
+        TextView anonCommentsLeftText = (TextView) rightSwitch.findViewById(R.id.text_heading_left);
+        TextView anonCommentsRightText = (TextView) rightSwitch.findViewById(R.id.text_heading_right);
+        SwitchCompat anonCommentsSwitch = (SwitchCompat) rightSwitch.findViewById(R.id.switch_main);
+        anonCommentsHeader.setText("Anon comments");
 
         if (!postingAsSwitch.getShowText()) {
+//            postingAsSwitch.setShowText(false);
             postingAsLeftText.setText("Self");
             postingAsRightText.setText("Anon");
+
+//            anonCommentsSwitch.setShowText(false);
+            anonCommentsLeftText.setText("Yes");
+            anonCommentsRightText.setText("No");
 
         } else {
             postingAsSwitch.setTextOff("Self");
             postingAsSwitch.setTextOn("Anon");
 
+            anonCommentsSwitch.setTextOff("No");
+            anonCommentsSwitch.setTextOn("Yes");
         }
 
         final ImageView profileImageView = (ImageView)root.findViewById(R.id.image_profile);
-        profileImageView.setVisibility(View.GONE);
+
 
         postingAsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 postAsAnon = b;
                 if(b){
-                    profileImageView.setImageResource(R.drawable.ic_anon);
+                    profileImageView.setImageResource(R.drawable.anon_switch_on);
                 }else{
                     String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
                     Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
@@ -84,22 +99,21 @@ public class CommentPrivacyTool extends EditContentTool {
             }
         });
 
+        anonCommentsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                isAnonCommentsDisabled = !b;
+            }
+        });
 
         String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
         Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
 
 
         postingAsSwitch.setChecked(postAsAnon);
+        anonCommentsSwitch.setChecked(!isAnonCommentsDisabled);
 
         return root;
-    }
-
-
-
-    @Override
-    public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
-        options.isAnonCommentsDisabled = isAnonCommentsDisabled;
-        options.postAsAnon = postAsAnon;
     }
 
     @Override
@@ -112,6 +126,12 @@ public class CommentPrivacyTool extends EditContentTool {
     public void onClose() {
         super.onClose();
         mMidTextTarget.setClickable(false);
+    }
+
+    @Override
+    public void processContent(Uri uri, ContentType contentType, ProcessingOptions options) {
+        options.isAnonCommentsDisabled = isAnonCommentsDisabled;
+        options.postAsAnon = postAsAnon;
     }
 
     @Override

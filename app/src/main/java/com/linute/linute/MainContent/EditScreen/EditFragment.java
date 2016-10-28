@@ -51,6 +51,13 @@ import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.linute.linute.MainContent.EditScreen.Tools.CommentPrivacyTool;
+import com.linute.linute.MainContent.EditScreen.Tools.CropTool;
+import com.linute.linute.MainContent.EditScreen.Tools.EditContentTool;
+import com.linute.linute.MainContent.EditScreen.Tools.OverlaysTool;
+import com.linute.linute.MainContent.EditScreen.Tools.PrivacySettingTool;
+import com.linute.linute.MainContent.EditScreen.Tools.StickersTool;
+import com.linute.linute.MainContent.EditScreen.Tools.TextTool;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
@@ -61,6 +68,9 @@ import com.linute.linute.SquareCamera.ScreenSizeSingleton;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
+
+import com.linute.linute.MainContent.EditScreen.PostOptions.ContentType;
+import com.linute.linute.MainContent.EditScreen.PostOptions.ContentSubType;
 
 import org.bson.types.ObjectId;
 
@@ -126,13 +136,7 @@ public class EditFragment extends BaseFragment {
     private Bitmap mContentBitmap;
     private String mTrendId;
 
-    public enum ContentType {
-        None, Photo, Video, UploadedPhoto, UploadedVideo
-    }
 
-    public enum ContentSubType {
-        None, Post, Chat, Comment, Comment_No_Anon
-    }
 
     private Uri mUri;
     private ContentType mContentType;
@@ -1398,7 +1402,7 @@ public class EditFragment extends BaseFragment {
         getActivity().finish();
     }
 
-    static interface RequestDisableToolListener {
+    public static interface RequestDisableToolListener {
         void requestDisable(Class<? extends EditContentTool> tool, boolean disable);
     }
 

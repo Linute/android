@@ -1,4 +1,4 @@
-package com.linute.linute.MainContent.EditScreen;
+package com.linute.linute.MainContent.EditScreen.Tools;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
@@ -22,9 +22,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.linute.linute.MainContent.EditScreen.Dimens;
+import com.linute.linute.MainContent.EditScreen.EditFragment;
+import com.linute.linute.MainContent.EditScreen.PostOptions.ContentType;
+import com.linute.linute.MainContent.EditScreen.ProcessingOptions;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
-
 /**
  * Created by mikhail on 8/23/16.
  */
@@ -87,7 +90,7 @@ public class TextTool extends EditContentTool {
 
     TextMode[] textModes;
 
-    public TextTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, Dimens dim, final EditFragment frag) {
+    public TextTool(Uri uri, ContentType type, ViewGroup overlays, Dimens dim, final EditFragment frag) {
         super(uri, type, overlays);
         mTextContainer = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
         Typeface font = Typeface.createFromAsset(overlays.getContext().getAssets(), "Veneer.otf");
@@ -445,7 +448,7 @@ public class TextTool extends EditContentTool {
     }
 
     @Override
-    public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
+    public void processContent(Uri uri, ContentType contentType, ProcessingOptions options) {
         if (mSelected == MID_TEXT_INDEX) {
             hideKeyboard(midET);
             updateMidETVisibility();

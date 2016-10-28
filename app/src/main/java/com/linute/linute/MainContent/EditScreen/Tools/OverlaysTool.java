@@ -1,4 +1,4 @@
-package com.linute.linute.MainContent.EditScreen;
+package com.linute.linute.MainContent.EditScreen.Tools;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,7 +11,6 @@ import android.os.Looper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +19,8 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.linute.linute.MainContent.EditScreen.PostOptions.ContentType;
+import com.linute.linute.MainContent.EditScreen.ProcessingOptions;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 
@@ -40,11 +41,11 @@ public class OverlaysTool extends EditContentTool {
 
     private Overlay mSelectedOverlay;
 
-    public OverlaysTool(final Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, RequestManager manager) {
+    public OverlaysTool(final Uri uri, ContentType type, ViewGroup overlaysView, RequestManager manager) {
         super(uri, type, overlaysView);
 
         //image
-        if (type == EditFragment.ContentType.Photo || type == EditFragment.ContentType.UploadedPhoto)
+        if (type == ContentType.Photo || type == ContentType.UploadedPhoto)
             setImageBackground(uri, overlaysView.getResources().getDisplayMetrics().widthPixels);
         else  //video
             setVideoBackground(uri, overlaysView.getResources().getDisplayMetrics().widthPixels);
@@ -188,7 +189,7 @@ public class OverlaysTool extends EditContentTool {
     }
 
     @Override
-    public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
+    public void processContent(Uri uri, ContentType contentType, ProcessingOptions options) {
         options.filters.clear();
         if (mSelectedOverlay != null) {
             options.filters.add(mSelectedOverlay.filename);
