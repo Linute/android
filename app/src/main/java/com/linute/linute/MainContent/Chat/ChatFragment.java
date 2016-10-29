@@ -351,6 +351,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+//        mLinearLayoutManager.setAutoMeasureEnabled(false);
+        recList.setHasFixedSize(true);
         mLinearLayoutManager.setStackFromEnd(true);
         recList.setLayoutManager(mLinearLayoutManager);
         recList.setAdapter(mChatAdapter);
