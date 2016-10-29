@@ -24,6 +24,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
@@ -893,9 +894,10 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
     }
 
     @Override
-    public void clickedOptions(final Post p, final int position) {
+    public void clickedOptions(final BaseFeedItem bfi, final int position) {
         if (getContext() == null || mViewerId == null || mSwipeRefreshLayout.isRefreshing()) return;
 
+        final Post p = (Post) bfi;
         final boolean isOwner = p.getUserId().equals(mViewerId);
         String[] options;
         if (isOwner) {

@@ -24,12 +24,17 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 
 /**
  * Created by QiFeng on 11/28/15.
  */
 public class Utils {
+
+    public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
+            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.edu", Pattern.CASE_INSENSITIVE);
+
     public static String CONTENT_TYPE = "application/json";
 
     public static SimpleDateFormat getDateFormat(){

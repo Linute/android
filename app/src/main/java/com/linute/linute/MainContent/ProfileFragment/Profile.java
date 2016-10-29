@@ -24,6 +24,7 @@ import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
@@ -596,9 +597,10 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
     };
 
     @Override
-    public void clickedOptions(final Post p, final int position) {
+    public void clickedOptions(final BaseFeedItem bfi, final int position) {
         if (getContext() == null || mUserid == null || mSwipeRefreshLayout.isRefreshing()) return;
 
+        final Post p = (Post) bfi;
         final boolean isOwner = p.getUserId().equals(mUserid);
         String[] options;
         if (isOwner) {

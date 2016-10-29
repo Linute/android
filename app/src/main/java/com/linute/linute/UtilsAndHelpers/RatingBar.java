@@ -3,6 +3,7 @@ package com.linute.linute.UtilsAndHelpers;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.support.annotation.ColorInt;
@@ -12,6 +13,7 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.linute.linute.MainContent.DiscoverFragment.PollChoiceItem;
 import com.linute.linute.R;
 
 /**
@@ -21,8 +23,8 @@ public class RatingBar extends FrameLayout implements View.OnClickListener{
 
     private ProgressBar vProgressBar;
     private TextView vOptionText;
-    private TextView vPercentText;
-    private int mChoice;
+    //private TextView vPercentText;
+    private PollChoiceItem mChoice;
     private OnClickChoice mOnClickChoice;
 
     public RatingBar(Context context) {
@@ -31,7 +33,7 @@ public class RatingBar extends FrameLayout implements View.OnClickListener{
         setOnClickListener(this);
         vProgressBar = (ProgressBar) findViewById(R.id.rating_progress);
         vOptionText = (TextView) findViewById(R.id.rating_text);
-        vPercentText = (TextView) findViewById(R.id.rating_percent);
+        //vPercentText = (TextView) findViewById(R.id.rating_percent);
     }
 
     public RatingBar(Context context, AttributeSet attrs) {
@@ -48,13 +50,23 @@ public class RatingBar extends FrameLayout implements View.OnClickListener{
     }
 
     public void setProgressColor(@ColorInt int color){
-        ((LayerDrawable)vProgressBar.getProgressDrawable()).getDrawable(1).setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        LayerDrawable drawable = ((LayerDrawable)vProgressBar.getProgressDrawable());
+        drawable.getDrawable(1).setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        drawable.getDrawable(0).setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+    }
+
+    public void removeColorFilters(){
+        LayerDrawable drawable = ((LayerDrawable)vProgressBar.getProgressDrawable());
+        drawable.getDrawable(1).setColorFilter(null);
+        drawable.getDrawable(0).setColorFilter(null);
+    }
+
+    public void setOptionTextStyle(Typeface typeface){
+        vOptionText.setTypeface(typeface);
     }
 
     public void setProgress(int progress){
         vProgressBar.setProgress(progress);
-        String text = progress+"%";
-        vPercentText.setText(text);
     }
 
     public void setOptionText(String text){
@@ -65,11 +77,7 @@ public class RatingBar extends FrameLayout implements View.OnClickListener{
         vOptionText.setTextColor(color);
     }
 
-    public void setPercentTextColor(@ColorInt int color){
-        vPercentText.setTextColor(color);
-    }
-
-    public void setChoice(int choice) {
+    public void setChoice(PollChoiceItem choice) {
         mChoice = choice;
     }
 
@@ -85,6 +93,6 @@ public class RatingBar extends FrameLayout implements View.OnClickListener{
     }
 
     public interface OnClickChoice{
-        void click(int choice);
+        void click(PollChoiceItem choice);
     }
 }

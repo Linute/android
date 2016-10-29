@@ -11,6 +11,8 @@
               android:layout_height="wrap_content"
               android:layout_gravity="center_horizontal"
               android:layout_margin="@dimen/activity_horizontal_margin"
+              android:textColor="@color/user_name_blue"
+              android:textStyle="bold"
               tools:text="title"/>
 
     <LinearLayout
@@ -18,6 +20,45 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/feed_item_bar_height"
+        android:orientation="horizontal"
+    >
+
+        <TextView
+            android:id="@+id/votes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:lines="1"
+            android:textColor="@color/user_name_blue"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            tools:text="23 votes"
+        />
+
+        <android.support.v4.widget.Space
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+        />
+
+        <ImageView
+            android:id="@+id/more"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:paddingBottom="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="8dp"
+            android:src="@drawable/ic_hardware_keyboard_control"
+        />
+
+    </LinearLayout>
 
 
 </LinearLayout>

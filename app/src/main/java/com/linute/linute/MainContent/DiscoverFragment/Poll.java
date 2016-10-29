@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,20 +19,26 @@ public class Poll extends BaseFeedItem implements Parcelable{
     private String mTitle;
     private String mDescription;
     private int mTotalCount;
-    private String mTrendId;
+    private String[] mTrendIds;
     private boolean mShowTrend;
     private ArrayList<PollChoiceItem> mPollChoiceItems;
     private int mPosition;
-    private boolean mHasVoted = false;
+    private String mVotedFor;
 
 
     public Poll(JSONObject object) throws JSONException{
         super(object.getString("id"));
 
+       // Log.d("POLL", "Poll: "+object.toString(4));
+
         mTitle = object.getString("title");
         mDescription = object.getString("description");
         mPosition = object.getInt("position");
-        mTrendId = object.getString("trend");
+
+        JSONArray trends = object.getJSONArray("trends");
+        mTrendIds = new String[trends.length()];
+        for (int i = 0; i < trends.length(); i++)
+            mTrendIds[i] = trends.getString(i);
 
         mPollChoiceItems = new ArrayList<>();
         JSONArray options = object.getJSONArray("options");
@@ -41,7 +48,7 @@ public class Poll extends BaseFeedItem implements Parcelable{
 
         mTotalCount = object.getInt("totalVotes");
 
-        mHasVoted = !object.isNull("vote");
+        mVotedFor = object.isNull("vote") ? null : object.getString("vote");
     }
 
     public boolean isShowTrend() {
@@ -52,12 +59,8 @@ public class Poll extends BaseFeedItem implements Parcelable{
         mShowTrend = showTrend;
     }
 
-    public String getTrendId() {
-        return mTrendId;
-    }
-
-    public void setTrendId(String trendId) {
-        mTrendId = trendId;
+    public String[] getTrendIds() {
+        return mTrendIds;
     }
 
     public String getTitle() {
@@ -72,8 +75,8 @@ public class Poll extends BaseFeedItem implements Parcelable{
         return mTotalCount;
     }
 
-    public void setTotalCount(int totalCount) {
-        mTotalCount = totalCount;
+    public void incrementTotalCount(){
+        mTotalCount++;
     }
 
     public ArrayList<PollChoiceItem> getPollChoiceItems() {
@@ -84,29 +87,54 @@ public class Poll extends BaseFeedItem implements Parcelable{
         mPollChoiceItems = pollChoiceItems;
     }
 
+    public String getVotedFor() {
+        return mVotedFor;
+    }
+
+    public void setVotedFor(String votedFor) {
+        mVotedFor = votedFor;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Poll && ((Poll)obj).getId().equals(getId());
+    }
+
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         super.writeToParcel(parcel, i);
         parcel.writeString(mTitle);
         parcel.writeString(mDescription);
         parcel.writeInt(mTotalCount);
-        parcel.writeString(mTrendId);
+        parcel.writeStringArray(mTrendIds);
         parcel.writeByte((byte) (mShowTrend ? 1 : 0));
         parcel.writeList(mPollChoiceItems);
         parcel.writeInt(mPosition);
-        parcel.writeByte((byte) (mHasVoted ? 1 : 0));
+        parcel.writeString(mVotedFor);
     }
+
+    public static final Creator<Poll> CREATOR = new Creator<Poll>() {
+        @Override
+        public Poll createFromParcel(Parcel in) {
+            return new Poll(in);
+        }
+
+        @Override
+        public Poll[] newArray(int size) {
+            return new Poll[size];
+        }
+    };
 
     protected Poll(Parcel in) {
         super(in);
         mTitle = in.readString();
         mDescription = in.readString();
         mTotalCount = in.readInt();
-        mTrendId = in.readString();
+        mTrendIds = in.createStringArray();
         mShowTrend = in.readByte() == 1;
         mPollChoiceItems = new ArrayList<>();
         in.readList(mPollChoiceItems, PollChoiceItem.class.getClassLoader());
         mPosition = in.readInt();
-        mHasVoted = in.readByte() == 1;
+        mVotedFor = in.readString();
     }
 }

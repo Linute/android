@@ -41,7 +41,6 @@ public class ChangeEmailActivity extends BaseSocketActivity {
     private EditText mEmailText;
     private String mSavedEmail;
 
-    private String mPincode;
     private EditText mPinCodeText;
 
     private View mSaveButton;
@@ -195,8 +194,6 @@ public class ChangeEmailActivity extends BaseSocketActivity {
                     try {
 
                         JSONObject json = new JSONObject(response.body().string());
-
-                        mPincode = json.getString("pinCode");
                         mSavedEmail = email;
 
                         runOnUiThread(new Runnable() {
@@ -233,19 +230,46 @@ public class ChangeEmailActivity extends BaseSocketActivity {
 
 
     private void checkVerifyCode() {
-        if (mPincode.equals(mPinCodeText.getText().toString())) {
-            saveEmail();
-        } else {
-            mPinCodeText.setError("Invalid pin");
-            mPinCodeText.requestFocus();
-        }
+        showProgress(true);
+        mPinCodeText.setError(null);
+        new LSDKUser(this).checkPincode(mSavedEmail, mPinCodeText.getText().toString(), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.showBadConnectionToast(ChangeEmailActivity.this);
+                        showProgress(false);
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+
+                    saveEmail();
+
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showProgress(false);
+                            mPinCodeText.setError("Invalid pin");
+                            mPinCodeText.requestFocus();
+                        }
+                    });
+                }
+                response.body().close();
+            }
+        });
+
+
     }
 
     private void saveEmail() {
 
         LSDKUser user = new LSDKUser(this);
-
-        showProgress(true);
 
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("email", mSavedEmail);
@@ -318,11 +342,9 @@ public class ChangeEmailActivity extends BaseSocketActivity {
             mEmailText.requestFocus();
             return false;
         }
-        // no @                     //not edu email             //@cuny.edu
-        if (!email.contains("@") || !email.endsWith(".edu") || email.startsWith("@") ||
-                email.contains("@.") || email.contains(" ")) {
-            //me@.edu                   //whitespace
-            mEmailText.setError(getString(R.string.error_invalid_email));
+
+        if (!Utils.VALID_EMAIL_ADDRESS_REGEX.matcher(email).matches()) {
+            mEmailText.setError("Invalid edu email");
             mEmailText.requestFocus();
             return false;
         }

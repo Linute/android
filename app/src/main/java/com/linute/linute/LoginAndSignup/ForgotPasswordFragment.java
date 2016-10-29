@@ -42,7 +42,6 @@ public class ForgotPasswordFragment extends Fragment {
 
     private ViewFlipper mViewFlipper;
 
-    private String mPinCode;
     private String mEmailString;
 
     private int mCurrentViewFlipperIndex;
@@ -128,7 +127,6 @@ public class ForgotPasswordFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString("mSavedEmail", mEmailString);
-        outState.putString("mSavedPin", mPinCode);
         outState.putInt("mCurrentFlipperIndex", mCurrentViewFlipperIndex);
         outState.putString("mUserID", mUserID);
         outState.putString("userToken", mUserToken);
@@ -139,7 +137,6 @@ public class ForgotPasswordFragment extends Fragment {
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
-            mPinCode = savedInstanceState.getString("mSavedPin");
             mCurrentViewFlipperIndex = savedInstanceState.getInt("mCurrentFlipperIndex");
             mEmailString = savedInstanceState.getString("mSavedEmail");
             mUserID = savedInstanceState.getString("mUserID");
@@ -216,23 +213,59 @@ public class ForgotPasswordFragment extends Fragment {
         mViewFlipper.showPrevious();
         mCurrentViewFlipperIndex--;
         mEmailString = null;
-        mPinCode = null;
         setToGoBackAnimation(false);  //change animations
     }
 
 
     public void verifyCode() {
-        showProgress(true, 1);
+        mPinCodeView.setError(null);
+        if (getContext() != null) {
+            showProgress(true, 1);
+            new LSDKUser(getContext()).checkPincode(mUserToken, mEmailString, mPinCodeView.getText().toString(), new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    if (getActivity() != null){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (getActivity() != null)
+                                    Utils.showBadConnectionToast(getActivity());
 
-        if (mPinCode != null && mPinCodeView.getText().toString().equals(mPinCode)) {
-            mViewFlipper.showNext();
-            mCurrentViewFlipperIndex++;
-        } else {
-            mPinCodeView.setError("Invalid code");
-            mPinCodeView.requestFocus();
+                                showProgress(false, 1);
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+
+                    if (response.isSuccessful()){
+                        if (getActivity() != null){
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mCurrentViewFlipperIndex++;
+                                    mViewFlipper.showNext();
+                                }
+                            });
+                        }
+                    }else {
+                        if (getActivity() != null){
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showProgress(false, 1);
+                                    mPinCodeView.setError("Invalid pin");
+                                    mPinCodeView.requestFocus();
+                                }
+                            });
+                        }
+                    }
+                    response.body().close();
+                }
+            });
         }
-
-        showProgress(false, 1);
     }
 
     private void setToGoBackAnimation(boolean goBack) {
@@ -241,7 +274,6 @@ public class ForgotPasswordFragment extends Fragment {
         mViewFlipper.setOutAnimation(getActivity(), goBack ? R.anim.slide_out_right : R.anim.slide_out_left);
 
     }
-
 
     private void showProgress(final boolean show, final int currentViewIndex) {
 
@@ -312,9 +344,6 @@ public class ForgotPasswordFragment extends Fragment {
                     if (response.isSuccessful()) {
                         try {
                             JSONObject jsonObject = new JSONObject(response.body().string());
-
-                            //Log.i(TAG, "onResponse: "+jsonObject);
-                            mPinCode = jsonObject.getString("pinCode");
 
                             JSONObject user = jsonObject.getJSONObject("user");
                             mUserID = user.getString("id");

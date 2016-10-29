@@ -61,7 +61,8 @@ public class FeedAdapter extends BaseFeedAdapter {
 
             case POLL:
                 return new PollViewHolder(
-                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feeddetail_poll, parent, false)
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feeddetail_poll, parent, false),
+                        mPostAction
                 );
             case IMAGE_POST:
                 return new ImageFeedHolder(
