@@ -32,6 +32,7 @@ public class PendingUploadPost implements Parcelable {
 
     private ArrayList<String> mStickers;
     private ArrayList<String> mFilters;
+    private String mTrendId;
 
     public PendingUploadPost(String id,
                              String collegeId,
@@ -61,7 +62,7 @@ public class PendingUploadPost implements Parcelable {
         mFilters = filters;
         mOwner = owner;
         mUserToken = userToken;
-        mTrends.add(trendId);
+        mTrendId = trendId;
     }
 
 
@@ -140,6 +141,10 @@ public class PendingUploadPost implements Parcelable {
         return mFilters;
     }
 
+    public String getTrendId() {
+        return mTrendId;
+    }
+
     protected PendingUploadPost(Parcel in) {
         mId = in.readString();
         mCollegeId = in.readString();
@@ -161,6 +166,7 @@ public class PendingUploadPost implements Parcelable {
         in.readStringList(mStickers);
         mFilters = new ArrayList<>();
         in.readStringList(mFilters);
+        mTrendId = in.readString();
     }
 
     @Override
@@ -181,6 +187,7 @@ public class PendingUploadPost implements Parcelable {
         dest.writeStringList(mTrends);
         dest.writeStringList(mStickers);
         dest.writeStringList(mFilters);
+        dest.writeString(mTrendId);
     }
 
     public static final Creator<PendingUploadPost> CREATOR = new Creator<PendingUploadPost>() {

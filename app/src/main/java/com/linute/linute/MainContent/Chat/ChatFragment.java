@@ -34,7 +34,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.CreateContent.Gallery.GalleryActivity;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
-import com.linute.linute.MainContent.EditScreen.EditFragment;
+import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.SquareCamera.CameraActivity;
@@ -324,17 +324,18 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Intent i;
+                        PostOptions postOptions = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Chat, null);
                         if (which == 0) {
                             i = new Intent(getContext(), CameraActivity.class);
-                            i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_STATUS).add(CameraType.CAMERA_VIDEO));
-                            i.putExtra(CameraActivity.CONTENT_SUB_TYPE, EditFragment.ContentSubType.Chat);
+                            i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_STATUS).add(CameraType.CAMERA_VIDEO));
+                            i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, postOptions);
                         } else {
                             i = new Intent(getContext(), GalleryActivity.class);
                             i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, GalleryActivity.PICK_ALL);
-                            i.putExtra(GalleryActivity.ARG_CONTENT_SUB_TYPE, EditFragment.ContentSubType.Chat);
+                            i.putExtra(GalleryActivity.ARG_POST_OPTIONS, postOptions);
                         }
 
-                        i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
+                        i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.RETURN_URI);
 
                         startActivityForResult(i, ATTACH_PHOTO_OR_IMAGE);
                     }

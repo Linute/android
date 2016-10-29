@@ -51,6 +51,7 @@ import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.linute.linute.MainContent.EditScreen.PostOptions.ContentType;
 import com.linute.linute.MainContent.EditScreen.Tools.CommentPrivacyTool;
 import com.linute.linute.MainContent.EditScreen.Tools.CropTool;
 import com.linute.linute.MainContent.EditScreen.Tools.EditContentTool;
@@ -68,9 +69,6 @@ import com.linute.linute.SquareCamera.ScreenSizeSingleton;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
-
-import com.linute.linute.MainContent.EditScreen.PostOptions.ContentType;
-import com.linute.linute.MainContent.EditScreen.PostOptions.ContentSubType;
 
 import org.bson.types.ObjectId;
 
@@ -118,7 +116,7 @@ public class EditFragment extends BaseFragment {
     private static final String ARG_DIMEN = "dimen";
     private static final String ARG_CAMERA_TYPE = "camera_type";
     public static final int REQUEST_LOCATION = 23;
-    public static final String ARG_TREND_ID = "trend_id";
+    public static final String ARG_POST_OPTIONS = "arg_post_options";
 
 
     private ViewGroup mContentContainer;
@@ -134,13 +132,11 @@ public class EditFragment extends BaseFragment {
     private Menu mMenu;
     private Toolbar mToolbar;
     private Bitmap mContentBitmap;
-    private String mTrendId;
 
 
 
     private Uri mUri;
-    private ContentType mContentType;
-    private ContentSubType mContentSubType = ContentSubType.None;
+    private PostOptions mPostOptions;
     private Dimens mDimens;
 
     private EditContentTool[] mTools;
@@ -174,15 +170,13 @@ public class EditFragment extends BaseFragment {
         return fragment;
     }*/
 
-    public static EditFragment newInstance(Uri uri, ContentType contentType, ContentSubType contentSubType, int returnType, Dimens dimens, String trendId) {
+    public static EditFragment newInstance(Uri uri,int returnType, Dimens dimens, PostOptions options) {
 
         Bundle args = new Bundle();
         args.putParcelable(ARG_URI, uri);
-        args.putInt(ARG_CONTENT_TYPE, contentType.ordinal());
-        args.putSerializable(ARG_CONTENT_SUB_TYPE, contentSubType);
+        args.putParcelable(ARG_POST_OPTIONS, options);
         args.putInt(ARG_RETURN_TYPE, returnType);
         args.putParcelable(ARG_DIMEN, dimens);
-        args.putString(ARG_TREND_ID, trendId);
 //        args.putInt(ARG_CAMERA_TYPE, cameraType);
         EditFragment fragment = new EditFragment();
         fragment.setArguments(args);
@@ -201,18 +195,11 @@ public class EditFragment extends BaseFragment {
 
         Bundle args = getArguments();
         mUri = args.getParcelable(ARG_URI);
-        mContentType = ContentType.values()[args.getInt(ARG_CONTENT_TYPE)];
-        mContentSubType = (ContentSubType) args.getSerializable(ARG_CONTENT_SUB_TYPE);
-        if (mContentType == ContentType.None) {
-            mContentType = ContentType.Photo;
-        }
-        if (mContentSubType == ContentSubType.None) {
-            mContentSubType = ContentSubType.Post;
-        }
+        mPostOptions = args.getParcelable(ARG_POST_OPTIONS);
+
 //        mCameraType = args.getInt(ARG_CAMERA_TYPE);
         mReturnType = args.getInt(ARG_RETURN_TYPE);
         mDimens = args.getParcelable(ARG_DIMEN);
-        mTrendId = args.getString(ARG_TREND_ID, null);
 
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -220,7 +207,7 @@ public class EditFragment extends BaseFragment {
         mUserId = sharedPreferences.getString("userID", "");
         mUserToken = sharedPreferences.getString("userToken", "");
 
-        if (mContentType == ContentType.Video || mContentType == ContentType.UploadedVideo) {
+        if (mPostOptions.type == ContentType.Video || mPostOptions.type == ContentType.UploadedVideo) {
             mFfmpeg = FFmpeg.getInstance(getContext());
             try {
                 mFfmpeg.loadBinary(new LoadBinaryResponseHandler() {
@@ -306,7 +293,7 @@ public class EditFragment extends BaseFragment {
             }
         });
         String menuTitle = null;
-        switch (mContentSubType) {
+        switch (mPostOptions.subType) {
             case Comment:
                 menuTitle = null;
                 break;
@@ -349,7 +336,7 @@ public class EditFragment extends BaseFragment {
             mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
             mOverlaysContainer = (ViewGroup) root.findViewById(R.id.overlays);
 
-            setupMainContent(mUri, mContentType, metrics);
+            setupMainContent(mUri, mPostOptions.type, metrics);
 
             mTools = setupTools(mOverlaysContainer);
             mIsDisabled = new boolean[mTools.length];
@@ -418,7 +405,7 @@ public class EditFragment extends BaseFragment {
             }
 
             //for photos, mToolOptionView needs to load before making toolOptionView, so that crop icons can properly be measured
-            if (mContentType == ContentType.Photo | mContentType == ContentType.UploadedPhoto) {
+            if (mPostOptions.type == ContentType.Photo | mPostOptions.type == ContentType.UploadedPhoto) {
                 mToolOptionsView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                     @Override
                     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
@@ -776,16 +763,16 @@ public class EditFragment extends BaseFragment {
         TextTool textTool;
 
 
-        switch (mContentType) {
+        switch (mPostOptions.type) {
             case UploadedPhoto:
             case Photo:
-                switch (mContentSubType) {
+                switch (mPostOptions.subType) {
                     case Post:
-                        overlaysTool = new OverlaysTool(mUri, mContentType, overlay, Glide.with(this));
-                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
-                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
-                        cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
-                        privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay, this);
+                        overlaysTool = new OverlaysTool(mUri, mPostOptions.type, overlay, Glide.with(this));
+                        stickersTool = new StickersTool(mUri, mPostOptions.type, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mPostOptions.type, overlay, mDimens, this);
+                        cropTool = new CropTool(mUri, mPostOptions.type, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        privacySettingTool = new PrivacySettingTool(mUri, mPostOptions.type, overlay, this);
                         return new EditContentTool[]{
                                 privacySettingTool,
                                 cropTool,
@@ -794,19 +781,19 @@ public class EditFragment extends BaseFragment {
                                 overlaysTool
                         };
                     case Chat:
-                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
-                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
-                        cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        stickersTool = new StickersTool(mUri, mPostOptions.type, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mPostOptions.type, overlay, mDimens, this);
+                        cropTool = new CropTool(mUri, mPostOptions.type, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
                         return new EditContentTool[]{
                                 textTool,
                                 cropTool,
                                 stickersTool
                         };
                     case Comment:
-                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
-                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
-                        cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
-                        commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay, this);
+                        stickersTool = new StickersTool(mUri, mPostOptions.type, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mPostOptions.type, overlay, mDimens, this);
+                        cropTool = new CropTool(mUri, mPostOptions.type, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        commentPrivacyTool = new CommentPrivacyTool(mUri, mPostOptions.type, overlay, this);
                         return new EditContentTool[]{
                                 commentPrivacyTool,
                                 cropTool,
@@ -814,9 +801,9 @@ public class EditFragment extends BaseFragment {
                                 stickersTool
                         };
                     case Comment_No_Anon:
-                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
-                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
-                        cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        stickersTool = new StickersTool(mUri, mPostOptions.type, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mPostOptions.type, overlay, mDimens, this);
+                        cropTool = new CropTool(mUri, mPostOptions.type, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
                         return new EditContentTool[]{
                                 cropTool,
                                 textTool,
@@ -827,36 +814,36 @@ public class EditFragment extends BaseFragment {
             case Video:
                 //retriever = new MediaMetadataRetriever();
                 //retriever.setDataSource(mUri.getPath());
-                switch (mContentSubType) {
+                switch (mPostOptions.subType) {
                     case Post:
-                        overlaysTool = new OverlaysTool(mUri, mContentType, overlay, Glide.with(this));
-                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
-                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
+                        overlaysTool = new OverlaysTool(mUri, mPostOptions.type, overlay, Glide.with(this));
+                        stickersTool = new StickersTool(mUri, mPostOptions.type, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mPostOptions.type, overlay, mDimens, this);
                         return new EditContentTool[]{
-                                new PrivacySettingTool(mUri, mContentType, overlay, this),
+                                new PrivacySettingTool(mUri, mPostOptions.type, overlay, this),
                                 textTool,
                                 stickersTool,
                                 overlaysTool
                         };
                     case Chat:
-                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
-                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
+                        stickersTool = new StickersTool(mUri, mPostOptions.type, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mPostOptions.type, overlay, mDimens, this);
                         return new EditContentTool[]{
                                 textTool,
                                 stickersTool
                         };
                     case Comment:
-                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
-                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
-                        commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay, this);
+                        stickersTool = new StickersTool(mUri, mPostOptions.type, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mPostOptions.type, overlay, mDimens, this);
+                        commentPrivacyTool = new CommentPrivacyTool(mUri, mPostOptions.type, overlay, this);
                         return new EditContentTool[]{
                                 commentPrivacyTool,
                                 textTool,
                                 stickersTool
                         };
                     case Comment_No_Anon:
-                        stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
-                        textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
+                        stickersTool = new StickersTool(mUri, mPostOptions.type, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
+                        textTool = new TextTool(mUri, mPostOptions.type, overlay, mDimens, this);
                         return new EditContentTool[]{
                                 textTool,
                                 stickersTool
@@ -874,7 +861,7 @@ public class EditFragment extends BaseFragment {
         }
 
         for (EditContentTool tool : mTools) {
-            tool.processContent(mUri, mContentType, options);
+            tool.processContent(mUri, mPostOptions.type, options);
         }
 
 
@@ -882,7 +869,7 @@ public class EditFragment extends BaseFragment {
     }
 
     private void beginUpload(ProcessingOptions options) {
-        switch (mContentType) {
+        switch (mPostOptions.type) {
             case Video:
             case UploadedVideo:
                 processVideo(options);
@@ -984,7 +971,7 @@ public class EditFragment extends BaseFragment {
                                                 options.filters,
                                                 mUserId,
                                                 mUserToken,
-                                                mTrendId
+                                                mPostOptions.trendId
                                         );
 
                                 Intent result = new Intent();
@@ -1083,7 +1070,7 @@ public class EditFragment extends BaseFragment {
 
     @Override
     public void onDestroy() {
-        if (mContentType == ContentType.Video && mDimens.deleteVideoWhenFinished)
+        if (mPostOptions.type == ContentType.Video && mDimens.deleteVideoWhenFinished)
             ImageUtility.deleteCachedVideo(mUri);
 
         super.onDestroy();
@@ -1390,7 +1377,7 @@ public class EditFragment extends BaseFragment {
                 options.filters,
                 mUserId,
                 mUserToken,
-                mTrendId
+                mPostOptions.trendId
         );
 
         showProgress(false);

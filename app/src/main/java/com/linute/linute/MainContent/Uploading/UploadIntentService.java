@@ -116,6 +116,10 @@ public class UploadIntentService extends IntentService {
             params.put("trends", new JSONArray(p.getTrends()));
             params.put("users", new JSONArray(p.getPeople()));
 
+            if(p.getTrendId() != null){
+                params.put("trend", p.getTrendId());
+            }
+
             try {
                 jsonObject.put("coordinates", coord);
                 params.put("geo", jsonObject);

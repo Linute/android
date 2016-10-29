@@ -48,7 +48,7 @@ import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.MainContent.CreateContent.Gallery.GalleryActivity;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
-import com.linute.linute.MainContent.EditScreen.EditFragment;
+import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
@@ -332,24 +332,26 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Intent i;
+                        PostOptions options = new PostOptions();
                         if (which == 0) {
                             i = new Intent(getContext(), CameraActivity.class);
-                            i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE));
-                            i.putExtra(CameraActivity.CONTENT_SUB_TYPE, mFeedDetail.getPost().isCommentAnonDisabled() ? EditFragment.ContentSubType.Comment_No_Anon : EditFragment.ContentSubType.Comment);
+                            i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE));
+                            options.subType =  mFeedDetail.getPost().isCommentAnonDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
                         } else {
                             i = new Intent(getContext(), GalleryActivity.class);
                             i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, GalleryActivity.PICK_IMAGE);
-                            i.putExtra(GalleryActivity.ARG_CONTENT_SUB_TYPE, mFeedDetail.getPost().isCommentAnonDisabled() ? EditFragment.ContentSubType.Comment_No_Anon : EditFragment.ContentSubType.Comment);
+                            options.subType = mFeedDetail.getPost().isCommentAnonDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
                         }
 
                         if (mFeedDetail.getPost().isCommentAnonDisabled()) {
-                            i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
-                            i.putExtra(CameraActivity.ANON_KEY, false);
+                            i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.RETURN_URI);
+                            i.putExtra(CameraActivity.EXRTA_ANON, false);
                         } else {
-                            i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
-                            i.putExtra(CameraActivity.ANON_KEY, mCheckBox.isChecked());
+                            i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
+                            i.putExtra(CameraActivity.EXRTA_ANON, mCheckBox.isChecked());
                         }
 
+                        i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, options);
                         startActivityForResult(i, CAMERA_GALLERY_REQUEST);
                     }
                 }).show();
