@@ -197,7 +197,6 @@ public class UploadIntentService extends IntentService {
             intent.putExtra("NOTIFICATION", LinuteConstants.FEED_DETAIL);
             intent.putExtra("show_update", false);
             intent.putExtra("event", eventID);
-
         }
 
         return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
@@ -224,7 +223,7 @@ public class UploadIntentService extends IntentService {
     }
 
 
-    private void failedToPost(PendingUploadPost p) {
+    private void failedToPost(final PendingUploadPost p) {
         Intent i = new Intent(this, UploadIntentService.class);
         i.putExtra(PendingUploadPost.PENDING_POST_KEY, p);
         mBuilder.setProgress(0, 0, false)
@@ -232,7 +231,7 @@ public class UploadIntentService extends IntentService {
                 .setContentTitle("File failed to upload")
                 .setContentText("Tap to retry")
                 .setAutoCancel(true)
-                .setContentIntent(PendingIntent.getService(this, 0, i, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT));
+                .setContentIntent(PendingIntent.getService(this, notificationId, i, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT));
 
         mNotificationManager.cancel(ID);
         mNotificationManager.notify(notificationId++, mBuilder.build());
