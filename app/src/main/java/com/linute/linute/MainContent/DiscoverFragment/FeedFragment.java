@@ -354,8 +354,10 @@ public class FeedFragment extends BaseFeedFragment {
                                 jsonArray = jsonObject.getJSONArray("polls");
                                 for (int i = jsonArray.length() - 1; i >= 0; i--) {
                                     try {
-                                        refreshedPosts.add(new Poll(jsonArray.getJSONObject(i)));
-                                        hasTopItem = true;
+                                        if(!jsonArray.getJSONObject(i).getBoolean("isHidden")) {
+                                            refreshedPosts.add(new Poll(jsonArray.getJSONObject(i)));
+                                            hasTopItem = true;
+                                        }
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
