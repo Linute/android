@@ -67,6 +67,8 @@ public abstract class BaseFeedFragment extends BaseFragment {
 
 
     protected Handler mHandler = new Handler(); //handler for recview
+    protected boolean hasTopItem = false;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -500,7 +502,10 @@ public abstract class BaseFeedFragment extends BaseFragment {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    getFeedArray().remove(pos1);
+                    BaseFeedItem item = getFeedArray().remove(pos1);
+                    if(item instanceof Poll && pos1 == 0){
+                        hasTopItem = false;
+                    }
                     mFeedAdapter.notifyItemRemoved(pos1);
                 }
             });

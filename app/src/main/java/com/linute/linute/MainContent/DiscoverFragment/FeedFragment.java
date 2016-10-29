@@ -355,6 +355,7 @@ public class FeedFragment extends BaseFeedFragment {
                                 for (int i = jsonArray.length() - 1; i >= 0; i--) {
                                     try {
                                         refreshedPosts.add(new Poll(jsonArray.getJSONObject(i)));
+                                        hasTopItem = true;
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
@@ -467,7 +468,7 @@ public class FeedFragment extends BaseFeedFragment {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mPosts.add(0, post);
+                mPosts.add(hasTopItem ? 1 : 0, post);
                 if (mFeedAdapter != null) {
                     mFeedAdapter.notifyItemInserted(0);
                 }
