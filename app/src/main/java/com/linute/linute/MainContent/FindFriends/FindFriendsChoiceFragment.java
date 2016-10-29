@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -53,6 +54,8 @@ public class FindFriendsChoiceFragment extends BaseFragment {
     private boolean mOnlyFragmentInStack = false;
 
     private BaseFindFriendsFragment[] mFindFriendsFragments;
+
+//    private static FindFriendsChoiceFragment instance;
 
     public static FindFriendsChoiceFragment newInstance(boolean onlyFragmentInStack) {
         Bundle b = new Bundle();
@@ -110,16 +113,18 @@ public class FindFriendsChoiceFragment extends BaseFragment {
                         R.drawable.ic_action_navigation_arrow_back_inverted
         );
 
+        final MainActivity activity = (MainActivity) getActivity();
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity activity = (MainActivity) getActivity();
                 if (activity != null) {
                     if (mOnlyFragmentInStack) activity.openDrawer();
                     else getFragmentManager().popBackStack();
                 }
             }
         });
+        activity.lockDrawer(mOnlyFragmentInStack ? DrawerLayout.LOCK_MODE_UNLOCKED : DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+
 
         mViewPager.setAdapter(fragmentPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -178,6 +183,9 @@ public class FindFriendsChoiceFragment extends BaseFragment {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(mNotificationEventAction1);
         }
+        MainActivity activity = (MainActivity) getActivity();
+        activity.lockDrawer(mOnlyFragmentInStack ? DrawerLayout.LOCK_MODE_UNLOCKED : DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+
     }
 
     @Override
@@ -185,6 +193,8 @@ public class FindFriendsChoiceFragment extends BaseFragment {
         super.onPause();
 
         hideKeyboard();
+        MainActivity activity = (MainActivity) getActivity();
+        if(activity != null)activity.lockDrawer(DrawerLayout.LOCK_MODE_UNLOCKED);
 
         if (mNotificationSubscription != null) {
             mNotificationSubscription.unsubscribe();

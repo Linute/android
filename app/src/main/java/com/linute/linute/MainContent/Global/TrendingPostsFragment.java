@@ -7,6 +7,8 @@ import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +23,13 @@ import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EditScreen.PostOptions;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedFragment;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -169,6 +173,24 @@ public class TrendingPostsFragment extends BaseFeedFragment {
             mFloatingActionsMenu.setVisibility(View.GONE);
         }
 
+        if(mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_FRIEND) {
+            MenuInflater menuInflater = getActivity().getMenuInflater();
+//            toolbar.setMenu(menuInflater.inflate(R.menu.menu_global_friends,););
+            toolbar.inflateMenu(R.menu.menu_global_friends);
+            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()){
+                        case R.id.find_friends:
+                            ((BaseTaptActivity)getActivity()).addFragmentToContainer(FindFriendsChoiceFragment.newInstance(false));
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+            });
+
+        }
 
         return root;
     }
