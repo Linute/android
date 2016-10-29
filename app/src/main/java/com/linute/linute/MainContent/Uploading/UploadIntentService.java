@@ -169,8 +169,11 @@ public class UploadIntentService extends IntentService {
                         .setContentIntent(getIntent(p.getId(), p.getCollegeId()))
                         .setContentText(getPostText(p.getType()));
                 mNotificationManager.notify(ID, mBuilder.build());
+                stopSelf();
             } else {
                 failedToPost(p);
+                stopSelf();
+
             }
 
             image.recycle();
