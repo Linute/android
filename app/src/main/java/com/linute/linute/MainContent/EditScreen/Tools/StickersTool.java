@@ -1,4 +1,4 @@
-package com.linute.linute.MainContent.EditScreen;
+package com.linute.linute.MainContent.EditScreen.Tools;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -20,6 +20,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.linute.linute.MainContent.EditScreen.PostOptions.ContentType;
+import com.linute.linute.MainContent.EditScreen.ProcessingOptions;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.overlay.ManipulableImageView;
 
@@ -41,7 +43,7 @@ public class StickersTool extends EditContentTool {
     private ArrayList<PlacedSticker> mPlacedStickers = new ArrayList<>();
 
 
-    public StickersTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, ImageView trashCan) {
+    public StickersTool(Uri uri, ContentType type, ViewGroup overlaysView, ImageView trashCan) {
         super(uri, type, overlaysView);
 
         View container = LayoutInflater.from(overlaysView.getContext()).inflate(R.layout.tool_overlay_stickers, overlaysView, false);
@@ -145,7 +147,7 @@ public class StickersTool extends EditContentTool {
 
 
     @Override
-    public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
+    public void processContent(Uri uri, ContentType contentType, ProcessingOptions options) {
         mTrashCanIV.setVisibility(View.GONE);
         options.stickers.clear();
         for(PlacedSticker sticker:mPlacedStickers){

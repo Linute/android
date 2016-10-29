@@ -1,6 +1,7 @@
 package com.linute.linute.SquareCamera;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -132,6 +133,14 @@ public class CustomCameraPreview extends SquareCameraPreview {
                 }
             });
         }
+    }
+
+    public Bitmap getBitmap(int width, int height) {
+        if (isAvailable() && width > 0 && height > 0) {
+            return getBitmap(Bitmap.createBitmap(getResources().getDisplayMetrics(),
+                    width, height, Bitmap.Config.RGB_565));
+        }
+        return null;
     }
 
     public void setIsFocusReady(final boolean isFocusReady) {

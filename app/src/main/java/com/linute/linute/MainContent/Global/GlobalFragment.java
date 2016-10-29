@@ -251,7 +251,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            vSwipe.setRefreshing(false);
+                            if(isViewLoaded()) vSwipe.setRefreshing(false);
                             Utils.showBadConnectionToast(getActivity());
                         }
                     });

@@ -19,7 +19,6 @@ import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +29,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.linute.linute.MainContent.EditScreen.Dimens;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
+import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.GridSpacingItemDecoration;
 
@@ -47,9 +47,9 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         PickerAdapter.GalleryItemSelected, AdapterView.OnItemSelectedListener {
 
     public static final String TAG = PickerFragment.class.getSimpleName();
-    public static final String PICKER_TYPE_KEY = "picker_type_key";
-    public static final String RETURN_TYPE_KEY = "return_type";
-    public static final String KEY_CONTENT_SUBTYPE = "content_type";
+    public static final String ARG_PICKER_TYPE = "picker_type_key";
+    public static final String ARG_RETURN_TYPE = "return_type";
+    public static final String ARG_POST_OPTIONS = "content_type";
 
     public ArrayList<GalleryItem> mUnfilteredGalleryItems = new ArrayList<>();
     public ArrayList<GalleryItem> mFiltedGalleryItems = new ArrayList<>();
@@ -78,33 +78,33 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
     private AlertDialog mAlertDialog;
     private ArrayAdapter mSpinnerAdapter;
     private AppCompatSpinner vSpinner;
-    private EditFragment.ContentSubType mContentSubType;
+    private PostOptions mPostOptions;
 
     public PickerFragment() {
 
     }
 
-    public static PickerFragment newInstance(int type, int returntype, EditFragment.ContentSubType contentSubType) {
+    public static PickerFragment newInstance(int type, int returntype, PostOptions postOptions) {
         Bundle args = new Bundle();
         PickerFragment fragment = new PickerFragment();
-        args.putInt(PICKER_TYPE_KEY, type);
-        args.putInt(RETURN_TYPE_KEY, returntype);
-        args.putSerializable(KEY_CONTENT_SUBTYPE, contentSubType);
+        args.putInt(ARG_PICKER_TYPE, type);
+        args.putInt(ARG_RETURN_TYPE, returntype);
+        args.putParcelable(ARG_POST_OPTIONS, postOptions);
         fragment.setArguments(args);
         return fragment;
     }
+
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mPickerType = getArguments().getInt(PICKER_TYPE_KEY, GalleryActivity.PICK_ALL);
-            mReturnType = getArguments().getInt(RETURN_TYPE_KEY, RETURN_URI);
-            mContentSubType = (EditFragment.ContentSubType) getArguments().getSerializable(KEY_CONTENT_SUBTYPE);
-            if (mContentSubType == null) {
-                mContentSubType = EditFragment.ContentSubType.None;
-            }
+        Bundle args = getArguments();
+        if (args != null) {
+            mPickerType = args.getInt(ARG_PICKER_TYPE, GalleryActivity.PICK_ALL);
+            mReturnType = args.getInt(ARG_RETURN_TYPE, RETURN_URI);
+            mPostOptions = args.getParcelable(ARG_POST_OPTIONS);
         }
     }
 
@@ -298,13 +298,13 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
                 dim.setRotation(Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)));
                 dim.setNeedsCropping(dim.getRotation());
 
+                mPostOptions.type = PostOptions.ContentType.UploadedVideo;
+
                 goToFragment(
                         EditFragment.newInstance(
                                 path,
-                                EditFragment.ContentType.UploadedVideo,
-                                mContentSubType,
                                 mReturnType,
-                                dim),
+                                dim, mPostOptions),
                         EditFragment.TAG
                 );
             } else {
@@ -340,8 +340,10 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         Dimens dimens = new Dimens(options.outWidth, options.outHeight);
         dimens.setRotation(rotation);
 
+        mPostOptions.type = PostOptions.ContentType.UploadedPhoto;
+
         goToFragment(
-                EditFragment.newInstance(Uri.parse(item.path), EditFragment.ContentType.UploadedPhoto, mContentSubType, mReturnType, dimens),
+                EditFragment.newInstance(Uri.parse(item.path), mReturnType, dimens, mPostOptions),
                 EditFragment.TAG
         );
     }

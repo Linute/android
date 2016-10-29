@@ -1,23 +1,35 @@
 package com.linute.linute.MainContent.Global;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.MainContent.CreateContent.CreateStatusActivity;
+import com.linute.linute.MainContent.CreateContent.Gallery.GalleryActivity;
 import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
+import com.linute.linute.MainContent.EditScreen.PostOptions;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.CameraActivity;
+import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedFragment;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -34,6 +46,8 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
+import static com.linute.linute.MainContent.MainActivity.PHOTO_STATUS_POSTED;
+
 /**
  * Created by QiFeng on 5/14/16.
  */
@@ -48,6 +62,7 @@ public class TrendingPostsFragment extends BaseFeedFragment {
 
     private View mProgressBar;
     private AppBarLayout vAppBarLayout;
+    private FloatingActionsMenu mFloatingActionsMenu;
 
 
     public static TrendingPostsFragment newInstance(GlobalChoiceItem item) {
@@ -97,11 +112,85 @@ public class TrendingPostsFragment extends BaseFeedFragment {
             }
         });
 
-        if (mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_FRIEND){
-            //later
-        }
 
         mProgressBar = root.findViewById(R.id.progress_bar);
+
+        mFloatingActionsMenu = (FloatingActionsMenu) root.findViewById(R.id.create_menu);
+        final View fabCloseOverlay = root.findViewById(R.id.fab_close_overlay);
+        fabCloseOverlay.setOnTouchListener(
+                new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        if (mFloatingActionsMenu.isExpanded())
+                            mFloatingActionsMenu.collapse();
+                        return false;
+                    }
+                });
+
+        mFloatingActionsMenu.findViewById(R.id.create_camera).
+                setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (getActivity() == null) return;
+                                PostOptions postOptions = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, mGlobalItem.key);
+                                Intent i = new Intent(getActivity(), CameraActivity.class);
+                                i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
+                                i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.SEND_POST);
+                                i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, postOptions);
+                                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                            }
+                        }
+                );
+
+        mFloatingActionsMenu.findViewById(R.id.create_upload).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (getActivity() == null) return;
+                        Intent i = new Intent(getActivity(), GalleryActivity.class);
+                        PostOptions postOptions = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, mGlobalItem.key);
+                        i.putExtra(GalleryActivity.ARG_RETURN_TYPE, CameraActivity.SEND_POST);
+                        i.putExtra(GalleryActivity.ARG_POST_OPTIONS, postOptions);
+                        getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                    }
+                }
+        );
+
+        mFloatingActionsMenu.findViewById(R.id.create_text).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (getActivity() == null) return;
+                        Intent i = new Intent(getActivity(), CreateStatusActivity.class);
+                        i.putExtra(CreateStatusActivity.EXTRA_TREND_ID, mGlobalItem.key);
+                        getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                    }
+                });
+
+
+        if (mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_FRIEND || mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_HOT){
+            mFloatingActionsMenu.setVisibility(View.GONE);
+        }
+
+        if(mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_FRIEND) {
+            MenuInflater menuInflater = getActivity().getMenuInflater();
+//            toolbar.setMenu(menuInflater.inflate(R.menu.menu_global_friends,););
+            toolbar.inflateMenu(R.menu.menu_global_friends);
+            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()){
+                        case R.id.find_friends:
+                            ((BaseTaptActivity)getActivity()).addFragmentToContainer(FindFriendsChoiceFragment.newInstance(false));
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+            });
+
+        }
 
         return root;
     }

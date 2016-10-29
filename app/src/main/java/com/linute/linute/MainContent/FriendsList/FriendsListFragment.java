@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKFriends;
-import com.linute.linute.MainContent.EditScreen.EditFragment;
+import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
@@ -124,9 +124,10 @@ public class FriendsListFragment extends BaseFragment {
                                     Log.i(TAG, "Empty List Text Clicked (No Followers)");
                                     BaseTaptActivity acc = (BaseTaptActivity) getActivity();
                                     Intent i = new Intent(getActivity(), CameraActivity.class);
-                                    i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
-                                    i.putExtra(CameraActivity.CONTENT_SUB_TYPE, EditFragment.ContentSubType.Post);
-                                    i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
+                                    PostOptions options = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, null);
+                                    i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
+                                    i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, options);
+                                    i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.SEND_POST);
                                     acc.startActivityForResult(i, MainActivity.PHOTO_STATUS_POSTED);
                                 }
                             }

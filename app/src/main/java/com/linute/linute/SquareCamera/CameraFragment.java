@@ -41,6 +41,7 @@ import android.widget.ProgressBar;
 
 import com.linute.linute.MainContent.EditScreen.Dimens;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
+import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.R;
 
 import java.io.IOException;
@@ -97,16 +98,16 @@ public class CameraFragment extends Fragment {
     private boolean mIsSafeToTakePhoto = false;
     private boolean mVideoProcessing = false;
 
-    private EditFragment.ContentSubType contentType = EditFragment.ContentSubType.None;
+    private PostOptions mPostOptions;
 
-    private static final String KEY_CONTENT_TYPE = "content_type";
+    private static final String ARG_POST_OPTIONS = "content_type";
     private Toolbar mToolbar;
 
 
-    public static Fragment newInstance(EditFragment.ContentSubType type) {
+    public static Fragment newInstance(PostOptions options) {
         CameraFragment cameraFragment = new CameraFragment();
         Bundle args = new Bundle();
-        args.putSerializable(KEY_CONTENT_TYPE, type);
+        args.putParcelable(ARG_POST_OPTIONS, options);
         cameraFragment.setArguments(args);
         return cameraFragment;
     }
@@ -135,7 +136,7 @@ public class CameraFragment extends Fragment {
 
         Bundle args = getArguments();
         if(args != null){
-            contentType = (EditFragment.ContentSubType)args.getSerializable(KEY_CONTENT_TYPE);
+            mPostOptions = args.getParcelable(ARG_POST_OPTIONS);
         }
 
     }
@@ -384,11 +385,12 @@ public class CameraFragment extends Fragment {
             try {
                 final int returnType = ((CameraActivity) getActivity()).getReturnType();
 
+                mPostOptions.type = PostOptions.ContentType.Video;
                 getFragmentManager()
                         .beginTransaction()
                         .replace(
                                 R.id.fragment_container,
-                                EditFragment.newInstance(uri, EditFragment.ContentType.Video, contentType, returnType, videoDimen),
+                                EditFragment.newInstance(uri, returnType, videoDimen, mPostOptions ),
                                 EditFragment.TAG)
                         .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                         .commit();
@@ -764,11 +766,13 @@ public class CameraFragment extends Fragment {
 
                                                         Dimens photoDimens = new Dimens(options.outWidth, options.outHeight);
 
+                                                        mPostOptions.type = PostOptions.ContentType.Photo;
+
                                                         getFragmentManager()
                                                                 .beginTransaction()
                                                                 .replace(
                                                                         R.id.fragment_container,
-                                                                        EditFragment.newInstance(uri, EditFragment.ContentType.Photo, contentType, returnType, photoDimens),
+                                                                        EditFragment.newInstance(uri, returnType, photoDimens, mPostOptions),
                                                                         EditFragment.TAG)
                                                                 .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                                                                 .commit();
@@ -786,16 +790,13 @@ public class CameraFragment extends Fragment {
     private Uri saveBitmap() {
         //Log.d(TAG, "saveBitmap: "+mPreviewView.getBitmap().getWidth());
         //Log.i(TAG, "saveBitmap: "+(int)(mPreviewView.getBitmap().getWidth() * 6f / 5f));
-        Bitmap previewBitmap = mPreviewView.getBitmap();
+        int width = mPreviewView.getWidth();
+        Bitmap previewBitmap = mPreviewView.getBitmap(width,
+                ScreenSizeSingleton.getSingleton().mHasRatioRequirement ?
+                        (int) (width * 6f / 5f) :
+                        width);
         Uri uri = ImageUtility.savePicture(getContext(),
-                Bitmap.createBitmap(previewBitmap,
-                        0,
-                        0,
-                        previewBitmap.getWidth(),
-                        ScreenSizeSingleton.getSingleton().mHasRatioRequirement ?
-                                (int) (previewBitmap.getWidth() * 6f / 5f) :
-                                previewBitmap.getWidth()
-                )
+                previewBitmap
         );
         previewBitmap.recycle();
         return uri;

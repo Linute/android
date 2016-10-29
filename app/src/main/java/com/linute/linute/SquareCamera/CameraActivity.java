@@ -9,9 +9,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
 import com.linute.linute.MainContent.EditScreen.EditFragment;
+import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 
@@ -31,14 +31,13 @@ public class CameraActivity extends BaseSocketActivity {
 
     //if we get send url, we will send result to url,
     //    else, we'll send back a uri
-    public final static String RETURN_TYPE = "send_to_url";
-    public final static String CAMERA_TYPE = "camera_type";
+    public final static String EXTRA_RETURN_TYPE = "send_to_url";
+    public final static String EXTRA_CAMERA_TYPE = "camera_type";
     //public final static String GALLERY_TYPE = "gallery_filters";
-    public final static String ANON_KEY = "anon_key";
-    public final static String CONTENT_SUB_TYPE = "content_sub_type";
+    public final static String EXRTA_ANON = "anon_key";
+    public final static String EXTRA_POST_OPTIONS = "trend_id";
 
-    public EditFragment.ContentSubType contentType = EditFragment.ContentSubType.None;
-
+    private PostOptions mPostOptions;
     private CameraType mCameraType;
     private int mReturnType;
     //private int mGalleryType;
@@ -47,10 +46,12 @@ public class CameraActivity extends BaseSocketActivity {
 
     protected boolean mHasWriteAndCameraPermission = false;
 
+
+
     /**
      * need the following intent:
-     * CameraActivity.CAMERA_TYPE - CAMERA_AND_VIDEO_AND_GALLERY or JUST_CAMERA
-     * CameraActivity.RETURN_TYPE - SEND_POST or RETURN_URI
+     * CameraActivity.EXTRA_CAMERA_TYPE - CAMERA_AND_VIDEO_AND_GALLERY or JUST_CAMERA
+     * CameraActivity.EXTRA_RETURN_TYPE - SEND_POST or RETURN_URI
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,15 +62,13 @@ public class CameraActivity extends BaseSocketActivity {
 
         Intent i = getIntent();
         if (i != null) {
-            mCameraType = i.getParcelableExtra(CAMERA_TYPE);
+            mCameraType = i.getParcelableExtra(EXTRA_CAMERA_TYPE);
             if (mCameraType == null)
                 mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
 
-            mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
-            contentType = (EditFragment.ContentSubType)i.getSerializableExtra(CONTENT_SUB_TYPE);
-            if(contentType == null){
-                contentType = EditFragment.ContentSubType.None;
-            }
+            mPostOptions = i.getParcelableExtra(EXTRA_POST_OPTIONS);
+
+            mReturnType = i.getIntExtra(EXTRA_RETURN_TYPE, RETURN_URI);
             //mGalleryType = i.getIntExtra(GALLERY_TYPE, ALL);
         } else {
             mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
@@ -84,7 +83,7 @@ public class CameraActivity extends BaseSocketActivity {
         if (savedInstanceState == null && mHasWriteAndCameraPermission) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, CameraFragment.newInstance(contentType), CameraFragment.TAG)
+                    .replace(R.id.fragment_container, CameraFragment.newInstance(mPostOptions), CameraFragment.TAG)
                     .commit();
         }
     }
@@ -172,7 +171,7 @@ public class CameraActivity extends BaseSocketActivity {
     protected void launchCameraFragment() {
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, CameraFragment.newInstance(contentType), CameraFragment.TAG)
+                .replace(R.id.fragment_container, CameraFragment.newInstance(mPostOptions), CameraFragment.TAG)
                 .commit();
     }
 

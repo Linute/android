@@ -16,8 +16,8 @@ import android.widget.TextView;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
 import com.linute.linute.MainContent.CreateContent.CreateStatusActivity;
-import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.CreateContent.Gallery.GalleryActivity;
+import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
@@ -175,9 +175,10 @@ public class DiscoverHolderFragment extends BaseFragment {
                             public void onClick(View v) {
                                 if (getActivity() == null) return;
                                 Intent i = new Intent(getActivity(), CameraActivity.class);
-                                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
-                                i.putExtra(CameraActivity.CONTENT_SUB_TYPE, EditFragment.ContentSubType.Post);
-                                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
+                                PostOptions options = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, null);
+                                i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
+                                i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, options);
+                                i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.SEND_POST);
                                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
                             }
                         }
@@ -189,8 +190,9 @@ public class DiscoverHolderFragment extends BaseFragment {
                     public void onClick(View v) {
                         if (getActivity() == null) return;
                         Intent i = new Intent(getActivity(), GalleryActivity.class);
+                        PostOptions options = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, null);
                         i.putExtra(GalleryActivity.ARG_RETURN_TYPE, CameraActivity.SEND_POST);
-                        i.putExtra(GalleryActivity.ARG_CONTENT_SUB_TYPE, EditFragment.ContentSubType.Post);
+                        i.putExtra(GalleryActivity.ARG_POST_OPTIONS, options);
                         getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
                     }
                 }

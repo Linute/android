@@ -8,12 +8,12 @@ import android.os.Parcelable;
  */
 public class Dimens implements Parcelable {
 
-    int height;                         //vid height
-    int width;                          //vid width
-    boolean isFrontFacing;              //image was taken with front facing camera
-    int rotation;                       //image/video rotation
-    boolean deleteVideoWhenFinished;    //delete cached video
-    boolean needsCropping;
+    public int height;                         //vid height
+    public int width;                          //vid width
+    public boolean isFrontFacing;              //image was taken with front facing camera
+    public int rotation;                       //image/video rotation
+    public final boolean deleteVideoWhenFinished;    //delete cached video
+    public boolean needsCropping;
 
 
     //typically used when capturing video

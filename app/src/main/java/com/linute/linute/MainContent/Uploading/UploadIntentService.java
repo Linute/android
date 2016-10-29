@@ -116,6 +116,10 @@ public class UploadIntentService extends IntentService {
             params.put("trends", new JSONArray(p.getTrends()));
             params.put("users", new JSONArray(p.getPeople()));
 
+            if(p.getTrendId() != null){
+                params.put("trend", p.getTrendId());
+            }
+
             try {
                 jsonObject.put("coordinates", coord);
                 params.put("geo", jsonObject);
@@ -165,8 +169,11 @@ public class UploadIntentService extends IntentService {
                         .setContentIntent(getIntent(p.getId(), p.getCollegeId()))
                         .setContentText(getPostText(p.getType()));
                 mNotificationManager.notify(ID, mBuilder.build());
+                stopSelf();
             } else {
                 failedToPost(p);
+                stopSelf();
+
             }
 
             image.recycle();
