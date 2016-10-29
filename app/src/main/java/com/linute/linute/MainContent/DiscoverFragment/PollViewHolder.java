@@ -31,7 +31,7 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
     private LinearLayout vRatingBarsContainer;
     private LinkedList<RatingBar> mRatingBars;
     private Poll mPoll;
-    private BaseFeedAdapter.PostAction mActions;
+    //private BaseFeedAdapter.PostAction mActions;
 
     @ColorInt
     private int mBlackColor;
@@ -39,7 +39,7 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
     @ColorInt
     private int mGreyColor;
 
-    public PollViewHolder(View itemView, BaseFeedAdapter.PostAction actions) {
+    public PollViewHolder(View itemView/*, BaseFeedAdapter.PostAction actions*/) {
         super(itemView);
         mBlackColor = ContextCompat.getColor(itemView.getContext(), R.color.eighty_black);
         mGreyColor = ContextCompat.getColor(itemView.getContext(), R.color.inactive_grey);
@@ -47,14 +47,14 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
         vRatingBarsContainer = (LinearLayout) itemView.findViewById(R.id.rating_content);
         vTitle = (TextView) itemView.findViewById(R.id.title);
         vVotes = (TextView) itemView.findViewById(R.id.votes);
-        mActions = actions;
-        itemView.findViewById(R.id.more).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mActions != null)
-                    mActions.clickedOptions(mPoll, getAdapterPosition());
-            }
-        });
+        //mActions = actions;
+//        itemView.findViewById(R.id.more).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (mActions != null)
+//                    mActions.clickedOptions(mPoll, getAdapterPosition());
+//            }
+//        });
     }
 
 

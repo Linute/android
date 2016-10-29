@@ -40,23 +40,23 @@
             tools:text="23 votes"
         />
 
-        <android.support.v4.widget.Space
-            android:layout_width="0px"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-        />
+        <!--<android.support.v4.widget.Space-->
+            <!--android:layout_width="0px"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_weight="1"-->
+        <!--/>-->
 
-        <ImageView
-            android:id="@+id/more"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:paddingBottom="8dp"
-            android:paddingStart="8dp"
-            android:paddingTop="8dp"
-            android:src="@drawable/ic_hardware_keyboard_control"
-        />
+        <!--<ImageView-->
+            <!--android:id="@+id/more"-->
+            <!--android:layout_width="34dp"-->
+            <!--android:layout_height="34dp"-->
+            <!--android:layout_gravity="center_vertical"-->
+            <!--android:layout_marginEnd="@dimen/activity_horizontal_margin"-->
+            <!--android:paddingBottom="8dp"-->
+            <!--android:paddingStart="8dp"-->
+            <!--android:paddingTop="8dp"-->
+            <!--android:src="@drawable/ic_hardware_keyboard_control"-->
+        <!--/>-->
 
     </LinearLayout>
 
