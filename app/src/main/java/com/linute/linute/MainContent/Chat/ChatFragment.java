@@ -766,6 +766,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     JSONArray video = new JSONArray();
                     video.put(Utils.encodeFileBase64(new File(mVideoUri.getPath())));
 
+                    String messageId = ObjectId.get().toString();
+                    postData.put("id", messageId);
                     postData.put("videos", video);
                     postData.put("type", "2");
                     postData.put("owner", mUserId);
@@ -780,6 +782,20 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     postData.put("room", mRoomId);
 
                     mSocket.emit(API_Methods.VERSION + ":messages:new message", postData);
+
+                    //append pending item to chat log
+                    final Chat chat = new Chat(mRoomId, new Date(), "", messageId, mMessageText, false, true);
+                    chat.setType(Chat.TYPE_MESSAGE_ME);
+                    chat.setMessageType(Chat.MESSAGE_IMAGE);
+                    chat.setState(Chat.ChatState.Pending);
+                    recList.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mChatList.add(chat);
+                            scrollToBottom();
+                            mChatAdapter.notifyItemInserted(mChatAdapter.getItemCount());
+                        }
+                    });
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
@@ -806,6 +822,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             MediaStore.Images.Media.getBitmap(getActivity().getContentResolver()
                                     , mImageUri)));
 
+                    String messageId = ObjectId.get().toString();
+                    postData.put("id", messageId);
                     postData.put("images", images);
                     postData.put("type", mAttachType);
                     postData.put("owner", mUserId);
@@ -820,6 +838,21 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     postData.put("room", mRoomId);
 
                     mSocket.emit(API_Methods.VERSION + ":messages:new message", postData);
+
+                    //appends pending item to list
+                    final Chat chat = new Chat(mRoomId, new Date(), "", messageId, mMessageText, false, true);
+                    chat.setType(Chat.TYPE_MESSAGE_ME);
+                    chat.setMessageType(Chat.MESSAGE_IMAGE);
+                    chat.setState(Chat.ChatState.Pending);
+                    recList.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mChatList.add(chat);
+                            scrollToBottom();
+                            mChatAdapter.notifyItemInserted(mChatAdapter.getItemCount());
+                        }
+                    });
+
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
@@ -1584,7 +1617,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         chat.setState(Chat.ChatState.Pending);
         mChatList.add(chat);
         scrollToBottom();
-        mChatAdapter.notifyDataSetChanged();
+        mChatAdapter.notifyItemInserted(mChatAdapter.getItemCount());
+
     }
 
     private void createRoom(final String message) {
