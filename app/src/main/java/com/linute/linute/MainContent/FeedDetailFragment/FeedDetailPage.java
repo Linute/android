@@ -46,6 +46,8 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.MainContent.CreateContent.Gallery.GalleryActivity;
+import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
+import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EditScreen.PostOptions;
@@ -90,10 +92,10 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         SuggestionsResultListener, SuggestionsVisibilityManager, FeedDetailAdapter.CommentActions {
 
     private static final int CAMERA_GALLERY_REQUEST = 65;
-    private static final String TAG = FeedDetail.class.getSimpleName();
+    private static final String TAG = BaseFeedDetail.class.getSimpleName();
     private RecyclerView recList;
 
-    private FeedDetail mFeedDetail;
+    private BaseFeedDetail mFeedDetail;
 
     private FeedDetailAdapter mFeedDetailAdapter;
     private MentionsEditText mCommentEditText;
@@ -131,7 +133,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     private int mNewCommentCount = 0;
 
 
-    public static FeedDetailPage newInstance(Post post) {
+    public static FeedDetailPage newInstance(BaseFeedItem post) {
         FeedDetailPage fragment = new FeedDetailPage();
         Bundle args = new Bundle();
         args.putParcelable("POST", post);
@@ -144,7 +146,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mFeedDetail = new FeedDetail((Post) getArguments().getParcelable("POST"));
+            BaseFeedItem item =  getArguments().getParcelable("POST");
+            mFeedDetail = item instanceof Poll ? new PollFeedDetail((Poll) item) : new PostFeedDetail((Post) item);
         }
 
     }
@@ -316,7 +319,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
 
     private void updateAnonCheckboxState() {
-        if (mFeedDetail.getPost().isCommentAnonDisabled()) {
+        if (mFeedDetail.isAnonCommentsDisabled()) {
             mDisabledImage.setVisibility(View.VISIBLE);
             mCheckBox.setVisibility(View.GONE);
         } else {
@@ -336,14 +339,14 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         if (which == 0) {
                             i = new Intent(getContext(), CameraActivity.class);
                             i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE));
-                            options.subType =  mFeedDetail.getPost().isCommentAnonDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
+                            options.subType =  mFeedDetail.isAnonCommentsDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
                         } else {
                             i = new Intent(getContext(), GalleryActivity.class);
                             i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, GalleryActivity.PICK_IMAGE);
-                            options.subType = mFeedDetail.getPost().isCommentAnonDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
+                            options.subType = mFeedDetail.isAnonCommentsDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
                         }
 
-                        if (mFeedDetail.getPost().isCommentAnonDisabled()) {
+                        if (mFeedDetail.isAnonCommentsDisabled()) {
                             i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.RETURN_URI);
                             i.putExtra(CameraActivity.EXRTA_ANON, false);
                         } else {
@@ -502,7 +505,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     private void displayCommentsAndPost() {
         if (getActivity() == null) return;
 
-        new LSDKEvents(getActivity()).getEventWithId(mFeedDetail.getPostId(), new Callback() {
+
+        Callback callback = new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
@@ -536,8 +540,14 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 try {
                     jsonObject = new JSONObject(response.body().string());
 
-                    mFeedDetail.getPost().updateInfo(jsonObject);
-                    mSkip = mFeedDetail.getPost().getNumOfComments() - 20;
+                    //Log.d(TAG, "onResponse: "+jsonObject.toString(4));
+
+                    mFeedDetail.updateFeedItem(jsonObject);
+                    if (mFeedDetail instanceof PostFeedDetail) {
+                        mSkip = mFeedDetail.getNumOfComments() - 20;
+                    }else {
+                        mSkip = jsonObject.getInt("skip");
+                    }
 
                     final ArrayList<Object> tempComments = new ArrayList<>();
                     comments = jsonObject.getJSONArray("comments");
@@ -596,7 +606,15 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 }
             }
 
-        });
+        };
+
+        if (mFeedDetail instanceof PostFeedDetail)
+            new LSDKEvents(getActivity()).getEventWithId(mFeedDetail.getPostId(), callback);
+        else {
+            Map<String, Object> eventComments = new HashMap<>();
+            eventComments.put("event", mFeedDetail.getPostId());
+            new LSDKEvents(getActivity()).getComments(eventComments, callback);
+        }
     }
 
 
@@ -709,13 +727,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     }
 
     private void showOptionsDialog() {
-        if (mFeedDetail.getPostUserId() == null || getActivity() == null) return;
+        if (getActivity() == null) return;
 
-        if (mFeedDetail.getPostUserId().equals(mViewId)) { //is the viewers post
+        if (mFeedDetail.getPostUserId() != null && mFeedDetail.getPostUserId().equals(mViewId)) { //is the viewers post
             String[] ops = new String[]{
                     "Delete post",
                     mFeedDetail.isAnon() ? "Reveal post" : "Become anonymous",
-                    mFeedDetail.getPost().isPostMuted() ? "Unmute post" : "Mute post"};
+                    mFeedDetail.isMuted() ? "Unmute post" : "Mute post"};
 
             mAlertDialog = new AlertDialog.Builder(getActivity())
                     .setItems(ops, new DialogInterface.OnClickListener() {
@@ -732,8 +750,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     }).show();
         } else {
             String[] ops = new String[]{
-                    mFeedDetail.getPost().isPostMuted() ? "Unmute post" : "Mute post",
-                    mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide post",
+                    mFeedDetail.isMuted() ? "Unmute post" : "Mute post",
+                    mFeedDetail.isHidden() ? "Unhide post" : "Hide post",
                     "Report post"
             };
             mAlertDialog = new AlertDialog.Builder(getActivity())
@@ -892,7 +910,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     public void showRevealConfirm() {
         if (getActivity() == null || !mCommentsRetrieved) return;
-        boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
+        boolean isAnon = mFeedDetail.isAnon();
         mAlertDialog = new AlertDialog.Builder(getActivity())
                 .setTitle(isAnon ? "Reveal yourself" : "Wear a mask")
                 .setMessage(isAnon ? "Show everyone the person behind the mask! Would you like to reveal your identity for this post?" : "Are you sure you want to become anonymous for this comment?")
@@ -921,8 +939,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             return;
         }
 
-        final boolean isMuted = mFeedDetail.getPost().isPostMuted();
-        mFeedDetail.getPost().setPostMuted(!isMuted);
+        final boolean isMuted = mFeedDetail.isMuted();
+        mFeedDetail.setMuted(!isMuted);
 
         JSONObject emit = new JSONObject();
         try {
@@ -942,8 +960,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     public void showHideConfirmation() {
         if (getActivity() == null || !mCommentsRetrieved) return;
         mAlertDialog = new AlertDialog.Builder(getActivity())
-                .setTitle(mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide it")
-                .setMessage(mFeedDetail.getPost().isPostHidden() ? "This will make this post viewable on your feed. Still want to go ahead with it?" : "This will remove this post from your feed, go ahead with it?")
+                .setTitle(mFeedDetail.isHidden() ? "Unhide post" : "Hide it")
+                .setMessage(mFeedDetail.isHidden() ? "This will make this post viewable on your feed. Still want to go ahead with it?" : "This will remove this post from your feed, go ahead with it?")
                 .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -970,8 +988,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             return;
         }
 
-        final boolean isHidden = mFeedDetail.getPost().isPostHidden();
-        mFeedDetail.getPost().setPostHidden(!isHidden);
+        final boolean isHidden = mFeedDetail.isHidden();
+        mFeedDetail.setHidden(!isHidden);
 
         JSONObject emit = new JSONObject();
         try {
@@ -990,7 +1008,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     private void revealPost() {
         if (getActivity() == null || !mViewId.equals(mFeedDetail.getPostUserId())) return;
-        final boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
+        final boolean isAnon = mFeedDetail.isAnon();
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing post..." : "Making post anonymous...", true, false);
         new LSDKEvents(getActivity()).revealEvent(mFeedDetail.getPostId(), !isAnon, new Callback() {
             @Override
@@ -1012,8 +1030,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
                 if (response.isSuccessful()) {
                     try {
-
-                        mFeedDetail.getPost().setPrivacyChanged(true);
+                        ((Post)mFeedDetail.getFeedItem()).setPrivacyChanged(true);
 
                         if (!isAnon) {
                             JSONObject obj = new JSONObject(res);
@@ -1414,7 +1431,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             comment.put("text", commentText);
             comment.put("room", mFeedDetail.getPostId());
 
-            comment.put("privacy", mFeedDetail.getPost().isCommentAnonDisabled() ?
+            comment.put("privacy", mFeedDetail.isAnonCommentsDisabled() ?
                     0 :
                     mCheckBox.isChecked() ? 1 : 0
             );

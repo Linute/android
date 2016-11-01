@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -24,6 +23,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
+import com.linute.linute.MainContent.DiscoverFragment.Poll;
+import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -47,10 +48,11 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     private static final int TYPE_NO_COMMENTS = 4;
     private static final int TYPE_VIDEO_HEADER = 5;
     private static final int TYPE_LOAD_MORE = 6;
+    private static final int TYPE_POLL_HEADER = 7;
 
     private Context context;
 
-    private FeedDetail mFeedDetail;
+    private BaseFeedDetail mFeedDetail;
 
     private MentionedTextAdder mMentionedTextAdder;
     private CommentActions mCommentActions;
@@ -60,7 +62,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     private RequestManager mRequestManager;
 
-    public FeedDetailAdapter(FeedDetail feedDetail, RequestManager manager, Context context) {
+    public FeedDetailAdapter(BaseFeedDetail feedDetail, RequestManager manager, Context context) {
         this.context = context;
         mFeedDetail = feedDetail;
         mRequestManager = manager;
@@ -119,6 +121,10 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 return new LoadMoreViewHolder(LayoutInflater
                         .from(parent.getContext())
                         .inflate(R.layout.feed_detail_load, parent, false));
+            case TYPE_POLL_HEADER:
+                return  new FeedDetailHeaderPollViewHolder(
+                        LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.feed_detail_header_poll, parent, false));
             case TYPE_NO_COMMENTS:
                 return new NoCommentsHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.no_comments_item, parent, false));
         }
@@ -136,11 +142,13 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             ((BaseFeedDetailViewHolder) holder).bindModel((Comment) mFeedDetail.getComments().get(position - 1));
             mItemManger.bindView(holder.itemView, position);
         } else if (holder instanceof FeedDetailHeaderImageViewHolder) {
-            ((FeedDetailHeaderImageViewHolder) holder).bindModel(mFeedDetail.getPost());
+            ((FeedDetailHeaderImageViewHolder) holder).bindModel((Post) mFeedDetail.getFeedItem());
         } else if (holder instanceof FeedDetailHeaderStatusViewHolder) {
-            ((FeedDetailHeaderStatusViewHolder) holder).bindModel(mFeedDetail.getPost());
+            ((FeedDetailHeaderStatusViewHolder) holder).bindModel((Post) mFeedDetail.getFeedItem());
         } else if (holder instanceof FeedDetailHeaderVideoViewHolder) {
-            ((FeedDetailHeaderVideoViewHolder) holder).bindModel(mFeedDetail.getPost());
+            ((FeedDetailHeaderVideoViewHolder) holder).bindModel((Post) mFeedDetail.getFeedItem());
+        } else if (holder instanceof FeedDetailHeaderPollViewHolder){
+            ((FeedDetailHeaderPollViewHolder) holder).bindView((Poll) mFeedDetail.getFeedItem());
         }
     }
 
@@ -152,11 +160,17 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     @Override
     public int getItemViewType(int position) {
         if (isPositionHeader(position)) {
-            if (mFeedDetail.getPost().isImagePost()) {
-                if (mFeedDetail.getPost().isVideoPost()) return TYPE_VIDEO_HEADER;
-                return TYPE_IMAGE_HEADER;
+            if (mFeedDetail instanceof PostFeedDetail) {
+                Post p = (Post) mFeedDetail.getFeedItem();
+                if (p.isImagePost()) {
+                    if (p.isVideoPost()) return TYPE_VIDEO_HEADER;
+                    return TYPE_IMAGE_HEADER;
+                }
+                return TYPE_STATUS_HEADER;
             }
-            return TYPE_STATUS_HEADER;
+            else if (mFeedDetail instanceof PollFeedDetail){
+                return TYPE_POLL_HEADER;
+            }
         }
 
         if (mFeedDetail.getComments().get(position - 1) == null)  //first item is null, means no comments
@@ -311,7 +325,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.VISIBLE);
                 mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.GONE);
                 mSwipeLayout.findViewById(R.id.comment_reveal).setVisibility(
-                        mFeedDetail.getPost().isCommentAnonDisabled() ? View.GONE : View.VISIBLE);
+                        mFeedDetail.isAnonCommentsDisabled() ? View.GONE : View.VISIBLE);
                 mSwipeLayout.findViewById(R.id.comment_report).setVisibility(View.GONE);
             } else {
                 mSwipeLayout.findViewById(R.id.comment_reveal).setVisibility(View.GONE);
@@ -321,7 +335,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                     mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.GONE);
 
                     //viewer is owner of post? then can delete anon comments
-                    if (mFeedDetail.getPost().getUserId().equals(mViewerUserId)) {
+                    if (mFeedDetail.getPostUserId() != null && mFeedDetail.getPostUserId().equals(mViewerUserId)) {
                         mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.VISIBLE);
                     } else {
                         mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.GONE);
