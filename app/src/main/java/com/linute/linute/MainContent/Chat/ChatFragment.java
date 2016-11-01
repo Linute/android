@@ -1693,7 +1693,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount() - 1, Integer.MIN_VALUE);
+//                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount() - 1, Integer.MIN_VALUE);
+                    scrollToPositionFromBottom(0);
                 }
             });
         }
@@ -1715,7 +1716,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount() - mNewMessageCount - 2, 0);
+                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount() - count - 2, 0);
                 }
             });
         }
