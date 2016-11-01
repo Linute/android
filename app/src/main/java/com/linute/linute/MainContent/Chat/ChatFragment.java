@@ -791,7 +791,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     recList.post(new Runnable() {
                         @Override
                         public void run() {
-                            mChatList.add(chat);
+                            if(mOtherUserTyping){
+                                mChatList.add(mChatList.size()-1, chat);
+                            }else{
+                                mChatList.add(chat);
+                            }
                             scrollToBottom();
                             mChatAdapter.notifyItemInserted(mChatAdapter.getItemCount());
                         }
@@ -847,7 +851,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     recList.post(new Runnable() {
                         @Override
                         public void run() {
-                            mChatList.add(chat);
+                            if(mOtherUserTyping){
+                                mChatList.add(mChatList.size()-1, chat);
+                            }else{
+                                mChatList.add(chat);
+                            }
                             scrollToBottom();
                             mChatAdapter.notifyItemInserted(mChatAdapter.getItemCount());
                         }
@@ -1430,7 +1438,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     for (i = mChatList.size() - 1; i >= 0; i--) {
                         if (mChatList.get(i).getMessageId().equals(chat.getMessageId())) {
                             mChatList.set(i, chat);
-                            mChatAdapter.notifyItemChanged(i+1);
+                            mChatAdapter.notifyItemChanged(i + 1);
                             break;
                         }
                     }
@@ -1615,7 +1623,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         Chat chat = new Chat(mRoomId, new Date(), "", messageId, message, false, true);
         chat.setState(Chat.ChatState.Pending);
-        mChatList.add(chat);
+        if(mOtherUserTyping){
+            mChatList.add(mChatList.size()-1, chat);
+        }else{
+            mChatList.add(chat);
+        }
+
         scrollToBottom();
         mChatAdapter.notifyItemInserted(mChatAdapter.getItemCount());
 
