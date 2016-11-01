@@ -1,17 +1,20 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
-import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.RatingBar;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -24,13 +27,16 @@ import java.util.Locale;
 /**
  * Created by QiFeng on 10/21/16.
  */
-public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar.OnClickChoice {
+public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar.OnClickChoice, View.OnClickListener {
 
     private TextView vTitle;
     private TextView vVotes;
     private LinearLayout vRatingBarsContainer;
     private LinkedList<RatingBar> mRatingBars;
     private Poll mPoll;
+    private View vCommentButton;
+    private TextView vCommentsText;
+    private ImageView vCommentIcon;
     //private BaseFeedAdapter.PostAction mActions;
 
     @ColorInt
@@ -47,6 +53,10 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
         vRatingBarsContainer = (LinearLayout) itemView.findViewById(R.id.rating_content);
         vTitle = (TextView) itemView.findViewById(R.id.title);
         vVotes = (TextView) itemView.findViewById(R.id.votes);
+        vCommentButton = itemView.findViewById(R.id.feed_control_bar_comments_button);
+        vCommentButton.setOnClickListener(this);
+        vCommentsText = (TextView) vCommentButton.findViewById(R.id.postNumComments);
+        vCommentIcon = (ImageView) vCommentButton.findViewById(R.id.postComments);
         //mActions = actions;
 //        itemView.findViewById(R.id.more).setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -63,7 +73,8 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
         RatingBar b;
         vTitle.setText(p.getTitle());
 
-        vVotes.setText(p.getTotalCount() == 1 ? "1 vote" : String.format(Locale.US, "%d votes", p.getTotalCount()));
+        vVotes.setText(String.valueOf(p.getTotalCount()));
+        vCommentsText.setText(String.valueOf(mPoll.getNumberOfComments()));
 
         while (p.getPollChoiceItems().size() > mRatingBars.size()) {
             b = new RatingBar(itemView.getContext());
@@ -75,6 +86,12 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
         while (p.getPollChoiceItems().size() < mRatingBars.size()) {
             mRatingBars.removeLast();
             vRatingBarsContainer.removeViewAt(vRatingBarsContainer.getChildCount() - 1);
+        }
+
+        if (mPoll.getNumberOfComments() > 0) {
+            vCommentIcon.clearColorFilter();
+        } else {
+            vCommentIcon.setColorFilter(mGreyColor, PorterDuff.Mode.SRC_ATOP);
         }
 
         PollChoiceItem item;
@@ -101,7 +118,6 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
                 b.setOptionText(item.mOptionText);
             }
         }
-
     }
 
     @Override
@@ -120,7 +136,7 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
                     mPoll.incrementTotalCount();
                     choice.incrementVotes();
 
-                    vVotes.setText(mPoll.getTotalCount() == 1 ? "1 vote" : String.format(Locale.US, "%d votes", mPoll.getTotalCount()));
+                    vVotes.setText(String.valueOf(mPoll.getTotalCount()));
 
                     PollChoiceItem item;
                     RatingBar b;
@@ -139,6 +155,23 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        if(view == vCommentButton){
+            BaseTaptActivity activity = (BaseTaptActivity) itemView.getContext();
+            vCommentButton.setAlpha(.5f);
+            vCommentButton.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    vCommentButton.setAlpha(1);
+                }
+            }, 500);
+            activity.addFragmentToContainer(
+                    FeedDetailPage.newInstance(mPoll)
+            );
         }
     }
 }

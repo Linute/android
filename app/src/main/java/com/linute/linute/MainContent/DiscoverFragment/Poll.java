@@ -25,6 +25,14 @@ public class Poll extends BaseFeedItem implements Parcelable{
     private int mPosition;
     private String mVotedFor;
 
+    //for comment section
+    private String mPostId;
+    private boolean mIsAnonymousCommentsDisabled;
+    private int mNumberOfComments;
+
+    private boolean mHidden;
+    private boolean mMuted;
+
 
     public Poll(JSONObject object) throws JSONException{
         super(object.getString("id"));
@@ -38,7 +46,7 @@ public class Poll extends BaseFeedItem implements Parcelable{
         JSONArray trends = object.getJSONArray("trends");
         mTrendIds = new String[trends.length()];
         for (int i = 0; i < trends.length(); i++)
-            mTrendIds[i] = trends.getString(i);
+            mTrendIds[i] = trends.getJSONObject(i).getString("id");
 
         mPollChoiceItems = new ArrayList<>();
         JSONArray options = object.getJSONArray("options");
@@ -46,17 +54,53 @@ public class Poll extends BaseFeedItem implements Parcelable{
             mPollChoiceItems.add(new PollChoiceItem(options.getJSONObject(i)));
         }
 
+        mHidden = object.getBoolean("isHidden");
+        try{
+            mMuted = object.getBoolean("isMuted");
+        }catch (JSONException e){
+            mMuted = false;
+        }
+
         mTotalCount = object.getInt("totalVotes");
-
         mVotedFor = object.isNull("vote") ? null : object.getString("vote");
+
+        object = object.getJSONObject("post");
+        mPostId = object.getString("id");
+        mIsAnonymousCommentsDisabled = object.getBoolean("isAnonymousCommentsDisabled");
+        mNumberOfComments = object.getInt("numberOfComments");
+
     }
 
-    public boolean isShowTrend() {
-        return mShowTrend;
+    public void setHidden(boolean hidden) {
+        mHidden = hidden;
     }
 
-    public void setShowTrend(boolean showTrend) {
-        mShowTrend = showTrend;
+    public void setMuted(boolean muted) {
+        mMuted = muted;
+    }
+
+    public boolean isHidden() {
+        return mHidden;
+    }
+
+    public boolean isMuted() {
+        return mMuted;
+    }
+
+    public String getPostId() {
+        return mPostId;
+    }
+
+    public boolean isAnonymousCommentsDisabled() {
+        return mIsAnonymousCommentsDisabled;
+    }
+
+    public int getNumberOfComments() {
+        return mNumberOfComments;
+    }
+
+    public void setNumberOfComments(int numberOfComments) {
+        mNumberOfComments = numberOfComments;
     }
 
     public String[] getTrendIds() {
@@ -83,10 +127,6 @@ public class Poll extends BaseFeedItem implements Parcelable{
         return mPollChoiceItems;
     }
 
-    public void setPollChoiceItems(ArrayList<PollChoiceItem> pollChoiceItems) {
-        mPollChoiceItems = pollChoiceItems;
-    }
-
     public String getVotedFor() {
         return mVotedFor;
     }
@@ -111,6 +151,14 @@ public class Poll extends BaseFeedItem implements Parcelable{
         parcel.writeList(mPollChoiceItems);
         parcel.writeInt(mPosition);
         parcel.writeString(mVotedFor);
+
+        parcel.writeString(mPostId);
+        parcel.writeByte((byte)(mIsAnonymousCommentsDisabled ? 1 : 0));
+        parcel.writeInt(mNumberOfComments);
+
+        parcel.writeByte((byte)(mHidden ? 1 : 0));
+        parcel.writeByte((byte)(mMuted ? 1 : 0));
+
     }
 
     public static final Creator<Poll> CREATOR = new Creator<Poll>() {
@@ -136,5 +184,12 @@ public class Poll extends BaseFeedItem implements Parcelable{
         in.readList(mPollChoiceItems, PollChoiceItem.class.getClassLoader());
         mPosition = in.readInt();
         mVotedFor = in.readString();
+
+        mPostId = in.readString();
+        mIsAnonymousCommentsDisabled = in.readByte() == 1;
+        mNumberOfComments = in.readInt();
+
+        mHidden = in.readByte() == 1;
+        mMuted = in.readByte() == 1;
     }
 }
