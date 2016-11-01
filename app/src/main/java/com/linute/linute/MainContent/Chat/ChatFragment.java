@@ -1444,8 +1444,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     }
                     if (i == -1) {
                         mChatList.add(chat);
-                        mChatAdapter.notifyDataSetChanged();
+                        mChatAdapter.notifyItemInserted(mChatAdapter.getItemCount()-1);
                     }
+                    scrollToBottom();
                 } else {
 
                     Chat previousMessage = getMostRecentMessage();
@@ -1694,11 +1695,18 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 @Override
                 public void run() {
 //                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount() - 1, Integer.MIN_VALUE);
-                    scrollToPositionFromBottom(0);
+                   mLinearLayoutManager.scrollToPosition(mChatAdapter.getItemCount()-1);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(mLinearLayoutManager.findLastCompletelyVisibleItemPosition() != mChatAdapter.getItemCount()-1){
+                                scrollToBottom();
+                            }
+                        }
+                    }, 250);
                 }
             });
         }
-
 /*
         recList.post(new Runnable() {
             @Override
@@ -2050,7 +2058,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                             mChatList.addAll(0, tempChatList);
 //                                            updateTopTimeHeader();
                                             mSkip -= 20;
-                                            mChatAdapter.notifyItemRangeInserted(0, tempChatList.size());
+                                            mChatAdapter.notifyDataSetChanged();
                                             mLoadingMoreMessages = false;
                                         }
                                     });
