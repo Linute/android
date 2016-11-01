@@ -124,6 +124,7 @@ public class MainActivity extends BaseTaptActivity {
         setContentView(R.layout.activity_main);
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        API_Methods.USER_ID = mSharedPreferences.getString("userID", null);
 
         TaptSocket.initSocketConnection(this);
 
