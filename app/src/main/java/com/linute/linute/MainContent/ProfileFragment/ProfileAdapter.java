@@ -45,6 +45,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private static final int TYPE_ITEM_IMAGE = 5;
     private static final int TYPE_EMPTY = 2;
     private static final int TYPE_ITEM_STATUS = 3;
+    public static final int TYPE_ITEM_IMAGE_SMALL = 6;
 
     private Context context;
     private ArrayList<Post> mPosts = new ArrayList<>();
@@ -52,6 +53,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private RequestManager mRequestManager;
 
     private OnClickFollow mOnClickFollow;
+
+    public boolean showThumbnails = false;
 
     private String mUserid;
     private String mCollegeId;
@@ -89,19 +92,23 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         switch (viewType) {
             case TYPE_ITEM_IMAGE:
                 ImageFeedHolder iHolder =  new ImageFeedHolder(
-                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_header_image, parent, false),
+                        inflater.inflate(R.layout.feed_detail_header_image, parent, false),
                         context,
                         mRequestManager,
                         mPostAction
                 );
                 iHolder.setEnableProfileView(false);
                 return iHolder;
+            case TYPE_ITEM_IMAGE_SMALL:
+                ProfileViewHolder iHolderS = new ProfileViewHolder(inflater.inflate(R.layout.profile_grid_item_2, parent, false),context);
+                return iHolderS;
             case TYPE_ITEM_VIDEO:
                 VideoFeedHolder vHolder =  new VideoFeedHolder(
-                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_header_video, parent, false),
+                        inflater.inflate(R.layout.feed_detail_header_video, parent, false),
                         context,
                         mRequestManager,
                         mPostAction
@@ -110,7 +117,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 return vHolder;
             case TYPE_ITEM_STATUS:
                 StatusFeedHolder sHolder =  new StatusFeedHolder(
-                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_header_status, parent, false),
+                        inflater.inflate(R.layout.feed_detail_header_status, parent, false),
                         context,
                         mRequestManager,
                         mPostAction
@@ -118,19 +125,16 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 sHolder.setEnableProfileView(false);
                 return sHolder;
             case TYPE_HEADER_IMAGE:
-                return new ProfileHeaderViewHolder(LayoutInflater
-                        .from(parent.getContext())
+                return new ProfileHeaderViewHolder(inflater
                         .inflate(R.layout.fragment_profile_header3, parent, false));
             case TYPE_HEADER_ACTIONS:
-                return new ProfileHeaderActions(LayoutInflater
-                        .from(parent.getContext())
+                return new ProfileHeaderActions(inflater
                         .inflate(R.layout.fragment_profile_header_part_2, parent, false));
             case TYPE_EMPTY:
-                return new EmptyProfileHolder(LayoutInflater
-                        .from(parent.getContext())
+                return new EmptyProfileHolder(inflater
                         .inflate(R.layout.empty_cell_holders, parent, false), mUser.getUserID().equals(mUserid));
             case LoadMoreViewHolder.FOOTER:
-                return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext())
+                return new LoadMoreViewHolder(inflater
                         .inflate(R.layout.wrapping_footer_dark, parent, false), "", "");
             default:
                 return null;
@@ -155,7 +159,10 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             Post p = mPosts.get(position - 2);
             ((ImageFeedHolder) holder).bindModel(p);
             ImpressionHelper.sendImpressionsAsync(mCollegeId, mUserid, p.getId());
-        } else if (holder instanceof ProfileHeaderViewHolder) {
+        } else if(holder instanceof ProfileViewHolder){
+            ((ProfileViewHolder)holder).bindModel(mPosts.get(position-2));
+        }else
+        if (holder instanceof ProfileHeaderViewHolder) {
             ((ProfileHeaderViewHolder) holder).bindModel(mUser);
         } else if (holder instanceof ProfileHeaderActions) {
             ((ProfileHeaderActions) holder).bindView();
@@ -183,9 +190,15 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             return LoadMoreViewHolder.FOOTER;
         else if (mPosts.get(position - 2) == null)
             return TYPE_EMPTY;
-        else if (mPosts.get(position - 2).isImagePost())
-            return mPosts.get(position - 2).isVideoPost() ? TYPE_ITEM_VIDEO : TYPE_ITEM_IMAGE;
-
+        else if (mPosts.get(position - 2).isImagePost()) {
+            if(showThumbnails) {
+                if (mPosts.get(position - 2).isVideoPost()) return TYPE_ITEM_VIDEO;
+                else return TYPE_ITEM_IMAGE_SMALL;
+            }else{
+                if (mPosts.get(position - 2).isVideoPost()) return TYPE_ITEM_VIDEO;
+                else return TYPE_ITEM_IMAGE;
+            }
+        }
         return TYPE_ITEM_STATUS;
     }
 
@@ -354,6 +367,9 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
         }
     }
+
+    
+
 
     public static abstract class TitleTextListener {
         public boolean shown = false;
