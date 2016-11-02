@@ -724,7 +724,8 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
 
     private Subscription mChatSubscription;
 
-    private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
+    private Action1<NewMessageEvent>
+            mNewMessageSubscriber = new Action1<NewMessageEvent>() {
         @Override
         public void call(NewMessageEvent event) {
             if (!mSwipeRefreshLayout.isRefreshing() && event.getRoomId() != null && getActivity() != null) {
