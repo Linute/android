@@ -50,6 +50,7 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
 
     private CustomBackPressedEditText mPostEditText;
     private TextView mTextView;
+    private TextView mEmptyTextView;
     private View mTextFrame;
 
     private View mPostButton;
@@ -78,7 +79,7 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
         Intent intent = getIntent();
-        if(intent != null){
+        if (intent != null) {
             mTrendId = intent.getStringExtra(EXTRA_TREND_ID);
         }
 
@@ -91,7 +92,7 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
             @Override
             public void onClick(View v) {
                 if (mProgressbar.getVisibility() == View.VISIBLE) return;
-                    hideKeyboard();
+                hideKeyboard();
                 if (mPostEditText.getText().toString().isEmpty()) {
                     setResult(RESULT_CANCELED);
                     finish();
@@ -119,12 +120,14 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
                 }
             }
         });
+        mEmptyTextView = (TextView) findViewById(R.id.text_empty);
+
 
         mPostEditText.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                if(view.getHeight() > 0){
-                    int maxLines = (int)(mPostEditText.getHeight()/mPostEditText.getLineHeight());
+                if (view.getHeight() > 0) {
+                    int maxLines = (int) (mPostEditText.getHeight() / mPostEditText.getLineHeight());
                     mPostEditText.setLines(maxLines);
                     mTextView.setLines(maxLines);
                     view.removeOnLayoutChangeListener(this);
@@ -146,6 +149,8 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
         Typeface font = Typeface.createFromAsset(getAssets(), "Veneer.otf");
         mPostEditText.setTypeface(font);
         mTextView.setTypeface(font);
+        mEmptyTextView.setTypeface(font);
+
 
         mPostEditText.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
@@ -193,6 +198,7 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
 
             @Override
             public void afterTextChanged(Editable s) {
+                mEmptyTextView.setVisibility(s.length() == 0 ? View.VISIBLE : View.GONE);
             }
         });
 
@@ -233,15 +239,15 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
             vAnonComments.setTextOn("Yes");
         }
 
-        final ImageView profileImageView = (ImageView)findViewById(R.id.image_profile);
+        final ImageView profileImageView = (ImageView) findViewById(R.id.image_profile);
         vAnonPost.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(b){
+                if (b) {
                     Glide.with(CreateStatusActivity.this)
                             .load(R.drawable.anon_switch_on)
                             .into(profileImageView);
-                }else {
+                } else {
                     String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
                     Glide.with(CreateStatusActivity.this)
                             .load(profileImageUrl)
@@ -274,7 +280,7 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
         //set to first color
 //        onClick(mPostColorSelectorViews[0]);
 
-        selectStyle((int)(Math.random()*mPostColorSelectorViews.length));
+        selectStyle((int) (Math.random() * mPostColorSelectorViews.length));
 
     }
 
@@ -400,8 +406,9 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
     public void selectStyle(int selected) {
         //change text view and edit text colors
         mPostEditText.setTextColor(mPostTextColors[selected]);
-        mPostEditText.setHintTextColor(ColorUtils.setAlphaComponent(mPostTextColors[selected], 80)); //hint will be 80% of text color
         mTextView.setTextColor(mPostTextColors[selected]);
+        mEmptyTextView.setTextColor(mPostTextColors[selected]);
+        mEmptyTextView.setHintTextColor(ColorUtils.setAlphaComponent(mPostTextColors[selected], 80)); //hint will be 80% of text color
         mTextFrame.setBackgroundColor(mPostBackgroundColors[selected]);
 
         //set selected background
