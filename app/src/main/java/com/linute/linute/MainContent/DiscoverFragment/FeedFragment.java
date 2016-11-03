@@ -84,10 +84,10 @@ public class FeedFragment extends BaseFeedFragment {
             @Override
             public void onClick(View view) {
                 MainActivity activity = (MainActivity) getActivity();
-                if(!TutorialAnimations.isEmptyFeedPlayed(getContext())) {
+                if (!TutorialAnimations.isEmptyFeedPlayed(getContext())) {
                     TutorialAnimations.animateFeedToHottest(activity, view);
-                    TutorialAnimations.setIsEmptyFeedPlayed(getContext(),true);
-                }else{
+                    TutorialAnimations.setIsEmptyFeedPlayed(getContext(), true);
+                } else {
                     activity.selectDrawerItem(MainActivity.FRAGMENT_INDEXES.GLOBAL);
                     activity.replaceContainerWithFragment(activity.getFragment(MainActivity.FRAGMENT_INDEXES.GLOBAL));
 
@@ -275,7 +275,14 @@ public class FeedFragment extends BaseFeedFragment {
     @Override
     protected void initAdapter() {
         if (mFeedAdapter == null) {
-            mFeedAdapter = new FeedAdapter(mPosts, getContext(), mSectionTwo);
+            FeedAdapter f = new FeedAdapter(mPosts, getContext(), mSectionTwo);
+            mFeedAdapter = f;
+            f.setOnVote(new PollViewHolder.OnVote() {
+                @Override
+                public void onVote() {
+                    ((DiscoverHolderFragment)getParentFragment()).notifyFragmentChanged();
+                }
+            });
         }
     }
 
@@ -349,20 +356,19 @@ public class FeedFragment extends BaseFeedFragment {
 
                             final ArrayList<BaseFeedItem> refreshedPosts = new ArrayList<>();
 
-                            //TODO remove this
-                            try{
+                            try {
                                 jsonArray = jsonObject.getJSONArray("polls");
                                 for (int i = jsonArray.length() - 1; i >= 0; i--) {
                                     try {
-                                        if(!jsonArray.getJSONObject(i).getBoolean("isHidden")) {
-                                            refreshedPosts.add(new Poll(jsonArray.getJSONObject(i)));
+                                        if (!jsonArray.getJSONObject(i).getBoolean("isHidden")) {
+                                            refreshedPosts.add(PollsSingleton.getInstance().updateOrAddPoll(new Poll(jsonArray.getJSONObject(i))));
                                             hasTopItem = true;
                                         }
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
                                 }
-                            }catch(JSONException e){
+                            } catch (JSONException e) {
                                 e.printStackTrace();
                             }
 
@@ -482,6 +488,11 @@ public class FeedFragment extends BaseFeedFragment {
 
 
         return true;
+    }
+
+    void notifyChange(){
+        if (mFeedAdapter != null)
+            mFeedAdapter.notifyDataSetChanged();
     }
 
     @Override

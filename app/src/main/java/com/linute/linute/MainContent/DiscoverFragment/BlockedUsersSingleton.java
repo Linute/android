@@ -13,7 +13,6 @@ public class BlockedUsersSingleton {
     private static BlockedUsersSingleton mBlockedUsersSingleton;
     private HashSet<String> mBlockedList;
 
-
     private BlockedUsersSingleton(){}
 
     public static BlockedUsersSingleton getBlockedListSingletion(){

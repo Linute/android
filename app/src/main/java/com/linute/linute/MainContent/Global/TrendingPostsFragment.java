@@ -20,6 +20,7 @@ import com.linute.linute.MainContent.CreateContent.CreateStatusActivity;
 import com.linute.linute.MainContent.CreateContent.Gallery.GalleryActivity;
 import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.Poll;
+import com.linute.linute.MainContent.DiscoverFragment.PollsSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EditScreen.PostOptions;
@@ -397,7 +398,7 @@ public class TrendingPostsFragment extends BaseFeedFragment {
                     try {
                         jsonArray = jsonObject.getJSONArray("polls");
                         for (int i = jsonArray.length() - 1; i >= 0; i++){
-                            refreshedPosts.add(new Poll(jsonArray.getJSONObject(i)));
+                            refreshedPosts.add(PollsSingleton.getInstance().updateOrAddPoll(new Poll(jsonArray.getJSONObject(i))));
                         }
                     }catch (JSONException e){
                         e.printStackTrace();

@@ -42,6 +42,7 @@ import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
 import com.linute.linute.MainContent.Chat.User;
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
+import com.linute.linute.MainContent.DiscoverFragment.PollsSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
@@ -126,6 +127,7 @@ public class MainActivity extends BaseTaptActivity {
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         TaptSocket.initSocketConnection(this);
+        PollsSingleton.init();
 
         EmptyProfileHolder.activity = this;
 

@@ -37,6 +37,7 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
     private View vCommentButton;
     private TextView vCommentsText;
     private ImageView vCommentIcon;
+    private OnVote mOnVote;
     //private BaseFeedAdapter.PostAction mActions;
 
     @ColorInt
@@ -45,8 +46,9 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
     @ColorInt
     private int mGreyColor;
 
-    public PollViewHolder(View itemView/*, BaseFeedAdapter.PostAction actions*/) {
+    public PollViewHolder(View itemView/*, BaseFeedAdapter.PostAction actions*/, OnVote onVote) {
         super(itemView);
+        mOnVote = onVote;
         mBlackColor = ContextCompat.getColor(itemView.getContext(), R.color.eighty_black);
         mGreyColor = ContextCompat.getColor(itemView.getContext(), R.color.inactive_grey);
         mRatingBars = new LinkedList<>();
@@ -132,6 +134,7 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
                         Utils.showBadConnectionToast(itemView.getContext());
                 } else {
                     TaptSocket.getInstance().emit(API_Methods.VERSION + ":polls:vote", object);
+
                     mPoll.setVotedFor(choice.id);
                     mPoll.incrementTotalCount();
                     choice.incrementVotes();
@@ -150,6 +153,9 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
                         b.setOptionText(String.format(Locale.US, "%s (%d)", item.mOptionText, item.getVotes()));
                         b.setProgress((int) ((float) item.getVotes() / mPoll.getTotalCount() * 100));
                     }
+
+                    if (mOnVote != null)
+                        mOnVote.onVote();
                 }
 
             } catch (JSONException e) {
@@ -173,5 +179,10 @@ public class PollViewHolder extends RecyclerView.ViewHolder implements RatingBar
                     FeedDetailPage.newInstance(mPoll)
             );
         }
+    }
+
+
+    public interface OnVote{
+        void onVote();
     }
 }

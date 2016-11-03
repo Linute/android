@@ -40,6 +40,8 @@ public class FeedAdapter extends BaseFeedAdapter {
 
     private boolean mSectionTwo;
 
+    private PollViewHolder.OnVote mOnVote;
+
     public FeedAdapter(List<BaseFeedItem> posts, Context context, boolean sectiontwo) {
         mSectionTwo = sectiontwo;
         mPosts = posts;
@@ -61,8 +63,9 @@ public class FeedAdapter extends BaseFeedAdapter {
 
             case POLL:
                 return new PollViewHolder(
-                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feeddetail_poll, parent, false)
-                        //, mPostAction
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feeddetail_poll, parent, false),
+                        //, mPostAction,
+                        mOnVote
                 );
             case IMAGE_POST:
                 return new ImageFeedHolder(
@@ -150,6 +153,9 @@ public class FeedAdapter extends BaseFeedAdapter {
         return -1;
     }
 
+    public void setOnVote(PollViewHolder.OnVote onVote) {
+        mOnVote = onVote;
+    }
 
     public void setLoadState(short loadState) {
         mLoadState = loadState;
