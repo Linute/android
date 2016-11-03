@@ -193,7 +193,7 @@ public class MainActivity extends BaseTaptActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(MainActivity.this, SettingActivity.class);
-                startActivity(i);
+                startActivityForResult(i, SETTINGS_REQUEST_CODE);
 
             }
         });
@@ -391,6 +391,9 @@ public class MainActivity extends BaseTaptActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult: "+requestCode);
+        Log.d(TAG, "onActivityResult: "+resultCode);
+
         if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) { //came back from settings
             setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header

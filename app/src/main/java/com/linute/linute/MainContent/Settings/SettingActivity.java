@@ -7,7 +7,9 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -66,19 +68,15 @@ public class SettingActivity extends BaseSocketActivity {
         Toolbar toolBar = (Toolbar) findViewById(R.id.settingactivity_toolbar);
         toolBar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolBar.setTitle("Settings");
-        setSupportActionBar(toolBar);
+        toolBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setResult(mUpdateNeeded ? RESULT_OK : RESULT_CANCELED);
+                onBackPressed();
+            }
+        });
     }
 
-    //override up button to go back
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            setResult(mUpdateNeeded ? RESULT_OK : RESULT_CANCELED);
-            onBackPressed();
-            return true;
-        }
-        return false;
-    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
