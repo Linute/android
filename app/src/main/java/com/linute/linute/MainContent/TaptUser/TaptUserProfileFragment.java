@@ -1097,7 +1097,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         if (getActivity() == null || !mViewerId.equals(p.getUserId())) return;
         final boolean isAnon = p.getPrivacy() == 1;
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing post..." : "Making post anonymous...", true, false);
-        new LSDKEvents(getActivity()).revealEvent(p.getId(), !isAnon, new Callback() {
+        new LSDKEvents(getActivity()).revealEvent(p.getId(), !isAnon, p.isPrivacyChanged(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 progressDialog.dismiss();
@@ -1118,7 +1118,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                 if (response.isSuccessful()) {
                     try {
 
-                        p.setPrivacyChanged(true);
+                        p.setPrivacyChanged(!p.isPrivacyChanged());
 
                         if (!isAnon) {
                             JSONObject obj = new JSONObject(res);

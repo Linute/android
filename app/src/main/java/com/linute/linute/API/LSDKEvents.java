@@ -72,12 +72,12 @@ public class LSDKEvents {
         return API_Methods.put("events/"+postID, header,params,callback);
     }
 
-    public Call revealEvent(String postID, boolean makeAnon, Callback callback){
+    public Call revealEvent(String postID, boolean makeAnon, boolean wasPrivacyChanged, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         Map<String, Object> params = new HashMap<>();
         params.put("privacy", makeAnon ? 1 : 0);
-        params.put("isPrivacyChanged", 1);
+        params.put("isPrivacyChanged", !wasPrivacyChanged);
 
 
         return API_Methods.put("events/"+postID, header,params,callback);
@@ -94,10 +94,11 @@ public class LSDKEvents {
         return API_Methods.post("reports", header, params, callback);
     }
 
-    public Call revealComment(String commentId,boolean makeAnon, Callback callback){
+    public Call revealComment(String commentId,boolean makeAnon, boolean wasPrivacyChanged, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
         Map<String, Object> params = new HashMap<>();
         params.put("privacy", makeAnon ? 1 : 0);
+        params.put("isPrivacyChanged", !wasPrivacyChanged);
 
         return API_Methods.put("comments/"+commentId, header, params, callback);
     }

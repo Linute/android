@@ -97,4 +97,14 @@ public class PostFeedDetail extends BaseFeedDetail{
     public void updateFeedItem(JSONObject object) throws JSONException {
         mPost.updateInfo(object);
     }
+
+    @Override
+    public boolean isPrivacyChanged() {
+        return mPost.isPrivacyChanged();
+    }
+
+    @Override
+    public void setIsPrivacyChanged(boolean isPrivacyChanged) {
+        mPost.setPrivacyChanged(isPrivacyChanged);
+    }
 }

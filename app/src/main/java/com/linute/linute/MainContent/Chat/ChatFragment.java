@@ -351,6 +351,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+//        mLinearLayoutManager.setAutoMeasureEnabled(false);
+        recList.setHasFixedSize(true);
         mLinearLayoutManager.setStackFromEnd(true);
         recList.setLayoutManager(mLinearLayoutManager);
         recList.setAdapter(mChatAdapter);
@@ -764,6 +766,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     JSONArray video = new JSONArray();
                     video.put(Utils.encodeFileBase64(new File(mVideoUri.getPath())));
 
+                    String messageId = ObjectId.get().toString();
+                    postData.put("id", messageId);
                     postData.put("videos", video);
                     postData.put("type", "2");
                     postData.put("owner", mUserId);
@@ -778,6 +782,24 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     postData.put("room", mRoomId);
 
                     mSocket.emit(API_Methods.VERSION + ":messages:new message", postData);
+
+                    //append pending item to chat log
+                    final Chat chat = new Chat(mRoomId, new Date(), "", messageId, mMessageText, false, true);
+                    chat.setType(Chat.TYPE_MESSAGE_ME);
+                    chat.setMessageType(Chat.MESSAGE_IMAGE);
+                    chat.setState(Chat.ChatState.Pending);
+                    recList.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(mOtherUserTyping){
+                                mChatList.add(mChatList.size()-1, chat);
+                            }else{
+                                mChatList.add(chat);
+                            }
+                            scrollToBottom();
+                            mChatAdapter.notifyItemInserted(mChatAdapter.getItemCount());
+                        }
+                    });
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
@@ -804,6 +826,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             MediaStore.Images.Media.getBitmap(getActivity().getContentResolver()
                                     , mImageUri)));
 
+                    String messageId = ObjectId.get().toString();
+                    postData.put("id", messageId);
                     postData.put("images", images);
                     postData.put("type", mAttachType);
                     postData.put("owner", mUserId);
@@ -818,6 +842,25 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     postData.put("room", mRoomId);
 
                     mSocket.emit(API_Methods.VERSION + ":messages:new message", postData);
+
+                    //appends pending item to list
+                    final Chat chat = new Chat(mRoomId, new Date(), "", messageId, mMessageText, false, true);
+                    chat.setType(Chat.TYPE_MESSAGE_ME);
+                    chat.setMessageType(Chat.MESSAGE_IMAGE);
+                    chat.setState(Chat.ChatState.Pending);
+                    recList.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(mOtherUserTyping){
+                                mChatList.add(mChatList.size()-1, chat);
+                            }else{
+                                mChatList.add(chat);
+                            }
+                            scrollToBottom();
+                            mChatAdapter.notifyItemInserted(mChatAdapter.getItemCount());
+                        }
+                    });
+
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
@@ -1395,14 +1438,15 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     for (i = mChatList.size() - 1; i >= 0; i--) {
                         if (mChatList.get(i).getMessageId().equals(chat.getMessageId())) {
                             mChatList.set(i, chat);
-                            mChatAdapter.notifyItemChanged(i+1);
+                            mChatAdapter.notifyItemChanged(i + 1);
                             break;
                         }
                     }
                     if (i == -1) {
                         mChatList.add(chat);
-                        mChatAdapter.notifyDataSetChanged();
+                        mChatAdapter.notifyItemInserted(mChatAdapter.getItemCount()-1);
                     }
+                    scrollToBottom();
                 } else {
 
                     Chat previousMessage = getMostRecentMessage();
@@ -1580,9 +1624,15 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         Chat chat = new Chat(mRoomId, new Date(), "", messageId, message, false, true);
         chat.setState(Chat.ChatState.Pending);
-        mChatList.add(chat);
+        if(mOtherUserTyping){
+            mChatList.add(mChatList.size()-1, chat);
+        }else{
+            mChatList.add(chat);
+        }
+
         scrollToBottom();
-        mChatAdapter.notifyDataSetChanged();
+        mChatAdapter.notifyItemInserted(mChatAdapter.getItemCount());
+
     }
 
     private void createRoom(final String message) {
@@ -1644,11 +1694,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount() - 1, Integer.MIN_VALUE);
+//                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount() - 1, Integer.MIN_VALUE);
+                   mLinearLayoutManager.scrollToPosition(mChatAdapter.getItemCount()-1);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(mLinearLayoutManager.findLastCompletelyVisibleItemPosition() != mChatAdapter.getItemCount()-1){
+                                scrollToBottom();
+                            }
+                        }
+                    }, 250);
                 }
             });
         }
-
 /*
         recList.post(new Runnable() {
             @Override
@@ -1666,7 +1724,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount() - mNewMessageCount - 2, 0);
+                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount() - count - 2, 0);
                 }
             });
         }
@@ -2000,7 +2058,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                             mChatList.addAll(0, tempChatList);
 //                                            updateTopTimeHeader();
                                             mSkip -= 20;
-                                            mChatAdapter.notifyItemRangeInserted(0, tempChatList.size());
+                                            mChatAdapter.notifyDataSetChanged();
                                             mLoadingMoreMessages = false;
                                         }
                                     });

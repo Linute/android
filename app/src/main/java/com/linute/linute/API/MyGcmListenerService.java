@@ -74,7 +74,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
         //doesn't post notifications if user is logged out
         SharedPreferences pref = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
-        if(pref.getString("userID", null) == null){
+        if (pref.getString("userID", null) == null) {
             return;
         }
 
@@ -117,8 +117,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
         Intent intent = buildIntent(data, action);
         PendingIntent pendingIntent =
-                PendingIntent.getActivity(this, (int)System.currentTimeMillis(), intent, PendingIntent.FLAG_ONE_SHOT);
-
+                PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_ONE_SHOT);
 
 
         //Log.d(TAG, data.toString());
@@ -130,13 +129,14 @@ public class MyGcmListenerService extends GcmListenerService {
         //String name = data.getString("ownerFullName");
         boolean isAnon = "1".equals(data.getString("privacy"));
         String profileImage = null;
-        switch (action){
+        switch (action) {
             case "messager":
-                try{
+                try {
                     JSONObject image = new JSONObject(data.getString("roomProfileImage"));
                     profileImage = image.getString("original");
-                }catch(JSONException|NullPointerException e){}
-            break;
+                } catch (JSONException | NullPointerException e) {
+                }
+                break;
             default:
                 profileImage = data.getString("ownerProfileImage");
                 profileImage =
@@ -166,8 +166,14 @@ public class MyGcmListenerService extends GcmListenerService {
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
-            if (image != null)
+            if (image != null) {
+                /*ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+                ActivityManager.MemoryInfo info = new ActivityManager.MemoryInfo();
+                manager.getMemoryInfo(info);*/
+
                 notificationBuilder.setLargeIcon(getCircleBitmap(image));
+
+            }
         }
 
         BigInteger notificationId;
@@ -215,9 +221,13 @@ public class MyGcmListenerService extends GcmListenerService {
     }
 
     private static Bitmap getCircleBitmap(File file) {
-        return getCircleBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(file.getAbsolutePath(), opts);
+        opts.inSampleSize = Math.max(opts.outWidth / 192, opts.outHeight / 192);
+        opts.inJustDecodeBounds = false;
+        return getCircleBitmap(BitmapFactory.decodeFile(file.getAbsolutePath(), opts));
     }
-
 
 
     private Intent buildIntent(Bundle data, String action) {
@@ -235,7 +245,7 @@ public class MyGcmListenerService extends GcmListenerService {
         }
 
         if (action == null) {
-            intent = new Intent(this,  MainActivity.class);
+            intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             return intent;
         }
@@ -260,9 +270,9 @@ public class MyGcmListenerService extends GcmListenerService {
                 String myId = Utils.getMyId(getApplicationContext());
 
                 ArrayList<User> usersList = new ArrayList<>(users.length());
-                for(int u=0;u<users.length();u++){
+                for (int u = 0; u < users.length(); u++) {
                     JSONObject userJson = users.getJSONObject(u);
-                    if(!myId.equals(userJson.getString("id"))) {
+                    if (!myId.equals(userJson.getString("id"))) {
                         usersList.add(new User(
                                 userJson.getString("id"),
                                 userJson.getString("firstName"),
@@ -276,7 +286,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
                 ChatRoom chatRoom = new ChatRoom(
                         data.getString("room", ""),
-                        Integer.parseInt(data.getString("roomType", ""+ChatRoom.ROOM_TYPE_GROUP)),
+                        Integer.parseInt(data.getString("roomType", "" + ChatRoom.ROOM_TYPE_GROUP)),
                         data.getString("roomNameOfGroup", null),
                         image.getString("thumbnail"),
                         usersList,
@@ -293,7 +303,7 @@ public class MyGcmListenerService extends GcmListenerService {
                 intent.putExtra("ownerFirstName", data.getString("ownerFullName"));
                 intent.putExtra("ownerLastName", data.getString("ownerLastName"));
                 intent.putExtra("room", data.getString("room"));*/
-            }catch(JSONException e){
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
 

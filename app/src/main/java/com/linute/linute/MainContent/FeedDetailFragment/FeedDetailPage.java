@@ -1010,7 +1010,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         if (getActivity() == null || !mViewId.equals(mFeedDetail.getPostUserId())) return;
         final boolean isAnon = mFeedDetail.isAnon();
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing post..." : "Making post anonymous...", true, false);
-        new LSDKEvents(getActivity()).revealEvent(mFeedDetail.getPostId(), !isAnon, new Callback() {
+        new LSDKEvents(getActivity()).revealEvent(mFeedDetail.getPostId(), !isAnon, mFeedDetail.isPrivacyChanged(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 progressDialog.dismiss();
@@ -1030,7 +1030,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
                 if (response.isSuccessful()) {
                     try {
-                        ((Post)mFeedDetail.getFeedItem()).setPrivacyChanged(true);
+                        ((Post)mFeedDetail.getFeedItem()).setPrivacyChanged(!mFeedDetail.isPrivacyChanged());
 
                         if (!isAnon) {
                             JSONObject obj = new JSONObject(res);
@@ -1603,7 +1603,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing comment..." : "Making comment anonymous...", true, false);
         mFeedDetailAdapter.setDenySwipe(true);
 
-        new LSDKEvents(getActivity()).revealComment(id, !isAnon, new Callback() {
+        new LSDKEvents(getActivity()).revealComment(id, !isAnon, comment.hasPrivacyChanged, new Callback() {
 
             @Override
             public void onFailure(Call call, IOException e) {
@@ -1639,6 +1639,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                         @Override
                                         public void run() {
                                             comment.setIsAnon(!isAnon);
+                                            comment.hasPrivacyChanged = !comment.hasPrivacyChanged;
                                             mFeedDetailAdapter.notifyItemChanged(pos + 1);
                                             Toast.makeText(activity, isAnon ? "You've taken off your mask!" : "Comment made anonymous", Toast.LENGTH_SHORT).show();
                                         }

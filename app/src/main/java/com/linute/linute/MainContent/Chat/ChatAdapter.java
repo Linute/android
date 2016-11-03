@@ -3,7 +3,6 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +40,7 @@ import static com.linute.linute.MainContent.DiscoverFragment.Post.POST_TYPE_VIDE
  * Created by Arman on 1/20/16.
  */
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
     private Context aContext;
     private List<Chat> aChatList;
     private static final DateFormat mDateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
@@ -54,6 +54,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private RequestManager mRequestManager;
 
     private Map<String, User> mUsers;
+
+    private static final int MESSAGE_ME_MEDIA = 20;
+    private static final int MESSAGE_OTHER_PERSON_MEDIA = 21;
 
     static {
         mDateFormat.setTimeZone(TimeZone.getDefault());
@@ -86,9 +89,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case Chat.TYPE_MESSAGE_ME:
+            case MESSAGE_ME_MEDIA:
                 return new ChatViewHolder(LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.fragment_chat_list_item_me, parent, false));
             case Chat.TYPE_MESSAGE_OTHER_PERSON:
+            case MESSAGE_OTHER_PERSON_MEDIA:
                 return new ChatViewHolder(LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.fragment_chat_list_item_you, parent, false));
             case Chat.TYPE_ACTION_TYPING:
@@ -136,7 +141,26 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return position == 0 ? LoadMoreViewHolder.FOOTER : aChatList.get(position - 1).getType();
+        if(position == 0) return LoadMoreViewHolder.FOOTER;
+        else{
+            int type = aChatList.get(position - 1).getType();
+            int mtype = aChatList.get(position - 1).getMessageType();
+            if(type == Chat.TYPE_MESSAGE_ME){
+                if(mtype == Chat.MESSAGE_TEXT){
+                    return Chat.TYPE_MESSAGE_ME;
+                }else{
+                    return MESSAGE_ME_MEDIA;
+                }
+            }else if(type == Chat.TYPE_MESSAGE_OTHER_PERSON){
+                if(mtype == Chat.MESSAGE_TEXT){
+                    return Chat.TYPE_MESSAGE_OTHER_PERSON;
+                }else{
+                    return MESSAGE_OTHER_PERSON_MEDIA;
+                }
+            }else{
+                return type;
+            }
+        }
     }
 
     public boolean isHead(int position) {

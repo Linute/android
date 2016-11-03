@@ -178,7 +178,8 @@ public class API_Methods {
         HashMap<String, String> header = new HashMap<>();
         header.put("Content-Type", Utils.CONTENT_TYPE);
         header.put("authorization", "Basic " + Utils.encode_base64(token));
-        header.put("User-Agent", "(" + Build.BRAND + " " + Build.DEVICE + " " + Build.MODEL + "; Android " + Build.VERSION.RELEASE + ")/ Ver [" + VERSION + "] UserID [" + USER_ID + "]");
+        header.put("User-Agent", "Ver ["+VERSION+"] UserID ["+USER_ID+"] Android");
+//        header.put("User-Agent", "(" + Build.BRAND + " " + Build.DEVICE + " " + Build.MODEL + "; Android " + Build.VERSION.RELEASE + ")/ Ver [" + VERSION + "] UserID [" + USER_ID + "]");
         DeviceInfoSingleton instance = null;
         try {
             instance = DeviceInfoSingleton.getInstance(null);
@@ -202,6 +203,7 @@ public class API_Methods {
         parms.put("stackTrace", trace);
         parms.put("name", throwable.toString());
         parms.put("userAgent", Build.BRAND + " " + Build.DEVICE + " " + Build.MODEL + "; Android " + Build.VERSION.RELEASE + ")/ Ver [" + VERSION + "] UserID [" + USER_ID + "]");
+//        parms.put("userAgent", "Ver [v"+VERSION+"] UserID ["+USER_ID+"] Android");
         parms.put("os", "android");
         return API_Methods.post("errors", getMainHeader(token), parms, cb);
     }

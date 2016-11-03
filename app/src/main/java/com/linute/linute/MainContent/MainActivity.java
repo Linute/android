@@ -125,6 +125,7 @@ public class MainActivity extends BaseTaptActivity {
         setContentView(R.layout.activity_main);
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        API_Methods.USER_ID = mSharedPreferences.getString("userID", null);
 
         TaptSocket.initSocketConnection(this);
         PollsSingleton.init();
@@ -824,6 +825,7 @@ public class MainActivity extends BaseTaptActivity {
                     TaptSocket.getInstance().emit(API_Methods.VERSION + ":badge");
                     final NewMessageEvent chatEvent = new NewMessageEvent(true);
                     chatEvent.setRoomId(chat.roomId);Utils.stripUnsupportedCharacters(activity.getString("messageText"));
+                    chatEvent.setMessage(Utils.stripUnsupportedCharacters(activity.getString("messageText")));
                     NewMessageBus.getInstance().setNewMessage(chatEvent);
 
                 } else {

@@ -1,12 +1,10 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
 import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
-import com.linute.linute.MainContent.DiscoverFragment.Post;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -58,4 +56,8 @@ public abstract class BaseFeedDetail {
     public abstract void setHidden(boolean hide);
 
     public abstract void updateFeedItem(JSONObject object) throws JSONException;
+
+    public abstract boolean isPrivacyChanged();
+
+    public abstract void setIsPrivacyChanged(boolean isPrivacyChanged);
 }
