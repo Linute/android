@@ -71,6 +71,14 @@ public class Poll extends BaseFeedItem implements Parcelable{
 
     }
 
+    public void update(Poll p){
+        mTotalCount = p.mTotalCount;
+        mVotedFor = p.mVotedFor;
+        mNumberOfComments = p.mNumberOfComments;
+        mMuted = p.mMuted;
+        mHidden = p.mHidden;
+    }
+
     public void setHidden(boolean hidden) {
         mHidden = hidden;
     }

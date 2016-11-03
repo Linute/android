@@ -7,6 +7,7 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -127,16 +128,16 @@ public class DiscoverHolderFragment extends BaseFragment {
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                //we will only load the other fragment if it is needed
-                //ex. we start on the campus tab. we won't load the friends tab until we swipe left
-                loadFragmentAtPositionIfNeeded(position);
-                mInitiallyPresentedFragmentWasCampus = position == 0;
             }
 
             @Override
             public void onPageSelected(int position) {
+                //we will only load the other fragment if it is needed
+                //ex. we start on the campus tab. we won't load the friends tab until we swipe left
                 VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
                 if (mFloatingActionsMenu.isExpanded()) mFloatingActionsMenu.collapse();
+                loadFragmentAtPositionIfNeeded(position);
+                mInitiallyPresentedFragmentWasCampus = position == 0;
             }
 
             @Override
@@ -147,14 +148,20 @@ public class DiscoverHolderFragment extends BaseFragment {
 
         tabLayout.setupWithViewPager(mViewPager);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_fire1);
-        tabLayout.setOnTabSelectedListener(
-                new TabLayout.ViewPagerOnTabSelectedListener(mViewPager) {
-                    @Override
-                    public void onTabReselected(TabLayout.Tab tab) {
-                        mFeedFragments[mViewPager.getCurrentItem()].scrollUp();
-                    }
-                }
-        );
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                mFeedFragments[mViewPager.getCurrentItem()].scrollUp();
+            }
+        });
 
         mFloatingActionsMenu = (FloatingActionsMenu) rootView.findViewById(R.id.create_menu);
         final View fabCloseOverlay = rootView.findViewById(R.id.fab_close_overlay);
@@ -255,6 +262,9 @@ public class DiscoverHolderFragment extends BaseFragment {
             mFeedFragments[position].getPosts();
             if (position == 0) mCampusFeedNeedsUpdating = false;
             else mFriendsFeedNeedsUpdating = false;
+        } else if (notifyChange){
+            mFeedFragments[position].notifyChange();
+            notifyChange = false;
         }
     }
 
@@ -342,4 +352,10 @@ public class DiscoverHolderFragment extends BaseFragment {
             }
         }
     };
+
+    private boolean notifyChange = false;
+
+    void notifyFragmentChanged(){
+        notifyChange = true;
+    }
 }

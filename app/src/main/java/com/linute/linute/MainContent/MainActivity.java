@@ -42,6 +42,7 @@ import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
 import com.linute.linute.MainContent.Chat.User;
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
+import com.linute.linute.MainContent.DiscoverFragment.PollsSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
@@ -127,6 +128,7 @@ public class MainActivity extends BaseTaptActivity {
         API_Methods.USER_ID = mSharedPreferences.getString("userID", null);
 
         TaptSocket.initSocketConnection(this);
+        PollsSingleton.init();
 
         EmptyProfileHolder.activity = this;
 
@@ -191,7 +193,7 @@ public class MainActivity extends BaseTaptActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(MainActivity.this, SettingActivity.class);
-                startActivity(i);
+                startActivityForResult(i, SETTINGS_REQUEST_CODE);
 
             }
         });
@@ -389,6 +391,9 @@ public class MainActivity extends BaseTaptActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult: "+requestCode);
+        Log.d(TAG, "onActivityResult: "+resultCode);
+
         if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) { //came back from settings
             setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header

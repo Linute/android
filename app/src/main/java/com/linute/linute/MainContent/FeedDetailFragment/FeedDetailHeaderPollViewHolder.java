@@ -11,7 +11,7 @@ import com.linute.linute.MainContent.DiscoverFragment.PollViewHolder;
 public class FeedDetailHeaderPollViewHolder extends PollViewHolder {
 
     public FeedDetailHeaderPollViewHolder(View itemView) {
-        super(itemView);
+        super(itemView, null);
     }
 
 
