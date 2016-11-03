@@ -31,7 +31,7 @@ import com.linute.linute.R;
 public class CropTool extends EditContentTool {
 
 
-    public static final int FADE_OPEN_OPACITY = 0x33000000;
+    public static final int FADE_OPEN_OPACITY = 0x66000000;
     public static final int FADE_CLOSE_OPACITY = 0xFF000000;
     public static final int INDEX_CUSTOM_CROP = 2;
     public static final int INDEX_SQUARE_CROP = 1;
