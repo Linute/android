@@ -97,4 +97,14 @@ public class PollFeedDetail extends BaseFeedDetail {
     public void updateFeedItem(JSONObject object) throws JSONException {
 
     }
+
+    @Override
+    public boolean isPrivacyChanged() {
+        return false;
+    }
+
+    @Override
+    public void setIsPrivacyChanged(boolean isPrivacyChanged) {
+
+    }
 }
