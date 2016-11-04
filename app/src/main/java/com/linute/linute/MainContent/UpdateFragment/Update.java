@@ -100,12 +100,12 @@ public class Update {
             setUpEvent(json);
 
         String text = getStringFromJson(json, "text");
-        if(!mUserFullName.isEmpty()){
-            mDescription = getStringFromJson(json, "text").replace(mUserFullName+" ","");
+
+        if(isAnon()){
+            mDescription = text.replaceFirst("Anon ", "");
+        }else {
+            mDescription = text.replaceFirst(mUserFullName + " ", "");
         }
-
-        mDescription = getStringFromJson(json, "text").replaceFirst(mUserFullName+" ","");
-
         mDescription = Utils.stripUnsupportedCharacters(mDescription);
 
         mIsViewed = getBooleanFromJson(json, "isViewed");

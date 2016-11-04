@@ -27,6 +27,7 @@ public class ManipulableImageView extends FrameLayout {
     private Bitmap image;
     private Bitmap flipped;
     private boolean drawBorder = false;
+    private boolean mIsActive = true;
 
     private static Map<Bitmap, Bitmap> flips = new HashMap<>();
 
@@ -86,6 +87,10 @@ public class ManipulableImageView extends FrameLayout {
         canvas.drawPoint(mainX, mainY, bPaint);
 
         */
+    }
+
+    public void setIsActive(boolean isActive){
+        this.mIsActive = isActive;
     }
 
     private ViewManipulationListener mCollisionListener;
@@ -178,6 +183,9 @@ public class ManipulableImageView extends FrameLayout {
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
 
+        if(!mIsActive){
+            return false;
+        }
 
         getImageBounds(rect);
         invalidate();

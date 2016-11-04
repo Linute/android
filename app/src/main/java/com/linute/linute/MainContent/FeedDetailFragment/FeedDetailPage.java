@@ -358,11 +358,15 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         if (which == 0) {
                             i = new Intent(getContext(), CameraActivity.class);
                             i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE));
-                            options.subType = mFeedDetail.isAnonCommentsDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
+
+                            options.subType =  mFeedDetail.isAnonCommentsDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
+                            i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, options);
+
                         } else {
                             i = new Intent(getContext(), GalleryActivity.class);
                             i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, GalleryActivity.PICK_IMAGE);
                             options.subType = mFeedDetail.isAnonCommentsDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
+                            i.putExtra(GalleryActivity.ARG_POST_OPTIONS, options);
                         }
 
                         if (mFeedDetail.isAnonCommentsDisabled()) {
@@ -373,7 +377,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                             i.putExtra(CameraActivity.EXRTA_ANON, mCheckBox.isChecked());
                         }
 
-                        i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, options);
                         startActivityForResult(i, CAMERA_GALLERY_REQUEST);
                     }
                 }).show();

@@ -339,7 +339,9 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 
         Dimens dimens = new Dimens(options.outWidth, options.outHeight);
         dimens.setRotation(rotation);
-
+        if(mPostOptions == null){
+            mPostOptions = new PostOptions();
+        }
         mPostOptions.type = PostOptions.ContentType.UploadedPhoto;
 
         goToFragment(
