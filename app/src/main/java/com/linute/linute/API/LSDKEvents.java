@@ -33,9 +33,13 @@ public class LSDKEvents {
 
     public Call getEventWithId(String id, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
-
         String[] path = {"events", id};
+        return API_Methods.get(path, header, null, callback);
+    }
 
+    public Call getPollWithId(String id, Callback callback){
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+        String[] path = {"polls", id};
         return API_Methods.get(path, header, null, callback);
     }
 

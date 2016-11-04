@@ -82,6 +82,7 @@ public class Post extends BaseFeedItem implements Parcelable {
     public Post(String postId) {
         super(postId);
         setPrivacyChanged(false);
+        mCommentAnonDisabled = true;
     }
 
     /**

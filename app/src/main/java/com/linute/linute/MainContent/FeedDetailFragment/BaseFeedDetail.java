@@ -60,4 +60,5 @@ public abstract class BaseFeedDetail {
     public abstract boolean isPrivacyChanged();
 
     public abstract void setIsPrivacyChanged(boolean isPrivacyChanged);
+
 }

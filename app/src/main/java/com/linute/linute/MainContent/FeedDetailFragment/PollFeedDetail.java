@@ -95,7 +95,7 @@ public class PollFeedDetail extends BaseFeedDetail {
 
     @Override
     public void updateFeedItem(JSONObject object) throws JSONException {
-
+        mPoll.update(object);
     }
 
     @Override

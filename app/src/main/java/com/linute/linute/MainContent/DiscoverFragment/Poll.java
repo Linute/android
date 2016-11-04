@@ -68,7 +68,22 @@ public class Poll extends BaseFeedItem implements Parcelable{
         mPostId = object.getString("id");
         mIsAnonymousCommentsDisabled = object.getBoolean("isAnonymousCommentsDisabled");
         mNumberOfComments = object.getInt("numberOfComments");
+    }
 
+    public void update(JSONObject object) throws JSONException{
+        mTotalCount = object.getInt("totalVotes");
+        mVotedFor = object.isNull("vote") ? null : object.getString("vote");
+        try{
+            mMuted = object.getBoolean("isMuted");
+        }catch (JSONException e){
+            mMuted = false;
+        }
+
+        try {
+            mNumberOfComments = object.getJSONObject("post").getInt("numberOfComments");
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
     }
 
     public void update(Poll p){
@@ -78,6 +93,7 @@ public class Poll extends BaseFeedItem implements Parcelable{
         mMuted = p.mMuted;
         mHidden = p.mHidden;
     }
+
 
     public void setHidden(boolean hidden) {
         mHidden = hidden;

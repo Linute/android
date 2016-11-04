@@ -146,7 +146,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            BaseFeedItem item =  getArguments().getParcelable("POST");
+            BaseFeedItem item = getArguments().getParcelable("POST");
             mFeedDetail = item instanceof Poll ? new PollFeedDetail((Poll) item) : new PostFeedDetail((Post) item);
         }
 
@@ -298,7 +298,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         mDisabledImage = mAnonCheckBoxContainer.findViewById(R.id.disabled_icon);
         mCheckBox = (CheckBox) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox);
-        updateAnonCheckboxState();
 
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -311,6 +310,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 }
             }
         });
+        updateAnonCheckboxState();
 
         ImpressionHelper.sendImpressionsAsync(pref.getString("collegeId", ""), mViewId, mFeedDetail.getPostId());
 
@@ -328,6 +328,10 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         }
     }
 
+    private void updateCommentSendState(boolean enable){
+        mSendButton.setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
+    }
+
     private void showCameraGalleryOption() {
         if (getContext() == null) return;
         mAlertDialog = new AlertDialog.Builder(getContext()).setItems(
@@ -339,7 +343,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         if (which == 0) {
                             i = new Intent(getContext(), CameraActivity.class);
                             i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE));
-                            options.subType =  mFeedDetail.isAnonCommentsDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
+                            options.subType = mFeedDetail.isAnonCommentsDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
                         } else {
                             i = new Intent(getContext(), GalleryActivity.class);
                             i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, GalleryActivity.PICK_IMAGE);
@@ -541,13 +545,14 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     jsonObject = new JSONObject(response.body().string());
 
                     //Log.d(TAG, "onResponse: "+jsonObject.toString(4));
-
                     mFeedDetail.updateFeedItem(jsonObject);
-                    if (mFeedDetail instanceof PostFeedDetail) {
-                        mSkip = mFeedDetail.getNumOfComments() - 20;
-                    }else {
-                        mSkip = jsonObject.getInt("skip");
-                    }
+
+                    if (mFeedDetail instanceof PollFeedDetail)
+                        jsonObject = jsonObject.getJSONObject("post");
+
+
+                    final boolean commentsDisabled = jsonObject.getBoolean("isCommentsDisabled");
+                    mSkip = mFeedDetail.getNumOfComments() - 20;
 
                     final ArrayList<Object> tempComments = new ArrayList<>();
                     comments = jsonObject.getJSONArray("comments");
@@ -581,6 +586,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                     mCommentsRetrieved = true;
                                     mFeedDetailAdapter.notifyDataSetChanged();
                                     updateAnonCheckboxState();
+                                    updateCommentSendState(!commentsDisabled);
 
                                     recList.post(new Runnable() {
                                         @Override
@@ -611,9 +617,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         if (mFeedDetail instanceof PostFeedDetail)
             new LSDKEvents(getActivity()).getEventWithId(mFeedDetail.getPostId(), callback);
         else {
-            Map<String, Object> eventComments = new HashMap<>();
-            eventComments.put("event", mFeedDetail.getPostId());
-            new LSDKEvents(getActivity()).getComments(eventComments, callback);
+            new LSDKEvents(getActivity()).getPollWithId(mFeedDetail.getFeedItem().getId(), callback);
         }
     }
 
@@ -1030,7 +1034,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
                 if (response.isSuccessful()) {
                     try {
-                        ((Post)mFeedDetail.getFeedItem()).setPrivacyChanged(!mFeedDetail.isPrivacyChanged());
+                        ((Post) mFeedDetail.getFeedItem()).setPrivacyChanged(!mFeedDetail.isPrivacyChanged());
 
                         if (!isAnon) {
                             JSONObject obj = new JSONObject(res);
@@ -1494,7 +1498,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 (!com.isAnon() && (com.getCommentUserId() == null || !mViewId.equals(com.getCommentUserId()))) ||
                 (com.isAnon() && com.getCommentUserId() == null && !mViewId.equals(mFeedDetail.getPostUserId())))
             return;
-
 
 
         mFeedDetailAdapter.setDenySwipe(true);
