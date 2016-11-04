@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -26,6 +27,7 @@ import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.ModesDisabled;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
@@ -128,27 +130,36 @@ public class TrendingPostsFragment extends BaseFeedFragment {
                     }
                 });
 
-        mFloatingActionsMenu.findViewById(R.id.create_camera).
-                setOnClickListener(
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                if (getActivity() == null) return;
-                                PostOptions postOptions = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, mGlobalItem.key);
-                                Intent i = new Intent(getActivity(), CameraActivity.class);
-                                i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
-                                i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.SEND_POST);
-                                i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, postOptions);
-                                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
-                            }
+        mFloatingActionsMenu.findViewById(R.id.create_camera).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (getActivity() == null) return;
+                        if (denyPost()) {
+                            Toast.makeText(getContext(), "You have been banned from posting", Toast.LENGTH_SHORT).show();
+                            return;
                         }
-                );
+                        PostOptions postOptions = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, mGlobalItem.key);
+                        Intent i = new Intent(getActivity(), CameraActivity.class);
+                        i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
+                        i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.SEND_POST);
+                        i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, postOptions);
+                        getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                    }
+                }
+        );
 
         mFloatingActionsMenu.findViewById(R.id.create_upload).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if (getActivity() == null) return;
+
+                        if (denyPost()) {
+                            Toast.makeText(getContext(), "You have been banned from posting", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
                         Intent i = new Intent(getActivity(), GalleryActivity.class);
                         PostOptions postOptions = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, mGlobalItem.key);
                         i.putExtra(GalleryActivity.ARG_RETURN_TYPE, CameraActivity.SEND_POST);
@@ -163,6 +174,12 @@ public class TrendingPostsFragment extends BaseFeedFragment {
                     @Override
                     public void onClick(View view) {
                         if (getActivity() == null) return;
+
+                        if (denyPost()) {
+                            Toast.makeText(getContext(), "You have been banned from posting", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
                         Intent i = new Intent(getActivity(), CreateStatusActivity.class);
                         i.putExtra(CreateStatusActivity.EXTRA_TREND_ID, mGlobalItem.key);
                         getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
@@ -170,20 +187,20 @@ public class TrendingPostsFragment extends BaseFeedFragment {
                 });
 
 
-        if (mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_FRIEND || mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_HOT){
+        if (mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_FRIEND || mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_HOT) {
             mFloatingActionsMenu.setVisibility(View.GONE);
         }
 
-        if(mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_FRIEND) {
-            MenuInflater menuInflater = getActivity().getMenuInflater();
+        if (mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_FRIEND) {
+            // MenuInflater menuInflater = getActivity().getMenuInflater();
 //            toolbar.setMenu(menuInflater.inflate(R.menu.menu_global_friends,););
             toolbar.inflateMenu(R.menu.menu_global_friends);
             toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    switch (item.getItemId()){
+                    switch (item.getItemId()) {
                         case R.id.find_friends:
-                            ((BaseTaptActivity)getActivity()).addFragmentToContainer(FindFriendsChoiceFragment.newInstance(false));
+                            ((BaseTaptActivity) getActivity()).addFragmentToContainer(FindFriendsChoiceFragment.newInstance(false));
                             return true;
                         default:
                             return false;
@@ -194,6 +211,11 @@ public class TrendingPostsFragment extends BaseFeedFragment {
         }
 
         return root;
+    }
+
+    private boolean denyPost() {
+        ModesDisabled modesDisabled = ModesDisabled.getInstance();
+        return modesDisabled.anonPosts() && modesDisabled.realPosts();
     }
 
 
@@ -226,29 +248,29 @@ public class TrendingPostsFragment extends BaseFeedFragment {
         new LSDKEvents(getContext()).getEvents(getUrlPathEnding(), getParams(-1, 20), getPostsCallback());
     }
 
-    private String getUrlPathEnding(){
-        switch (mGlobalItem.type){
+    private String getUrlPathEnding() {
+        switch (mGlobalItem.type) {
             case GlobalChoiceItem.TYPE_HEADER_FRIEND:
-                return  "friends";
+                return "friends";
             case GlobalChoiceItem.TYPE_HEADER_HOT:
-                return  "hot";
+                return "hot";
             case GlobalChoiceItem.TYPE_TREND:
-                return  "trend";
+                return "trend";
             default:
                 return "hot";
         }
     }
 
-    private Map<String,Object> getParams(int skip, int limit){
+    private Map<String, Object> getParams(int skip, int limit) {
         Map<String, Object> params = new HashMap<>();
-        if (mGlobalItem.type == GlobalChoiceItem.TYPE_TREND){
+        if (mGlobalItem.type == GlobalChoiceItem.TYPE_TREND) {
             params.put("trend", mGlobalItem.key);
         }
 
-        params.put("limit", limit+"");
+        params.put("limit", limit + "");
 
-        if (skip > -1){
-            params.put("skip", skip+"");
+        if (skip > -1) {
+            params.put("skip", skip + "");
         }
 
         return params;
@@ -397,10 +419,10 @@ public class TrendingPostsFragment extends BaseFeedFragment {
                     //get polls
                     try {
                         jsonArray = jsonObject.getJSONArray("polls");
-                        for (int i = jsonArray.length() - 1; i >= 0; i++){
+                        for (int i = jsonArray.length() - 1; i >= 0; i++) {
                             refreshedPosts.add(PollsSingleton.getInstance().updateOrAddPoll(new Poll(jsonArray.getJSONObject(i))));
                         }
-                    }catch (JSONException e){
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
 
@@ -436,7 +458,7 @@ public class TrendingPostsFragment extends BaseFeedFragment {
                                     mProgressBar.setVisibility(View.GONE);
 
                                     if (mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_FRIEND &&
-                                            refreshedPosts.isEmpty() && getView() != null){
+                                            refreshedPosts.isEmpty() && getView() != null) {
                                         getView().findViewById(R.id.no_friends).setVisibility(View.VISIBLE);
                                     }
                                 }

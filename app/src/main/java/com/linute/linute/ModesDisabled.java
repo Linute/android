@@ -21,13 +21,13 @@ public class ModesDisabled {
     }
 
     private ModesDisabled(){
-        mRealPosts = false;
-        mRealComments = false;
-        mAnonComments = false;
-        mAnonPosts = false;
+        mRealPosts = true;
+        mRealComments = true;
+        mAnonComments = true;
+        mAnonPosts = true;
     }
 
-    public boolean isRealPosts() {
+    public boolean realPosts() {
         return mRealPosts;
     }
 
@@ -35,7 +35,7 @@ public class ModesDisabled {
         mRealPosts = realPosts;
     }
 
-    public boolean isRealComments() {
+    public boolean realComments() {
         return mRealComments;
     }
 
@@ -43,7 +43,7 @@ public class ModesDisabled {
         mRealComments = realComments;
     }
 
-    public boolean isAnonPosts() {
+    public boolean anonPosts() {
         return mAnonPosts;
     }
 
@@ -51,7 +51,7 @@ public class ModesDisabled {
         mAnonPosts = anonPosts;
     }
 
-    public boolean isAnonComments() {
+    public boolean anonComments() {
         return mAnonComments;
     }
 

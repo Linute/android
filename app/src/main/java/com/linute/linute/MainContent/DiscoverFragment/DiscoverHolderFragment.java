@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
@@ -25,6 +26,7 @@ import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.ModesDisabled;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
@@ -175,27 +177,34 @@ public class DiscoverHolderFragment extends BaseFragment {
                     }
                 });
 
-        mFloatingActionsMenu.findViewById(R.id.create_camera).
-                setOnClickListener(
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                if (getActivity() == null) return;
-                                Intent i = new Intent(getActivity(), CameraActivity.class);
-                                PostOptions options = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, null);
-                                i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
-                                i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, options);
-                                i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.SEND_POST);
-                                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
-                            }
+        mFloatingActionsMenu.findViewById(R.id.create_camera).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (getActivity() == null) return;
+                        if (denyPost()) {
+                            Toast.makeText(getContext(), "You have been banned from posting", Toast.LENGTH_SHORT).show();
+                            return;
                         }
-                );
+                        Intent i = new Intent(getActivity(), CameraActivity.class);
+                        PostOptions options = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, null);
+                        i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
+                        i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, options);
+                        i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.SEND_POST);
+                        getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                    }
+                }
+        );
 
         mFloatingActionsMenu.findViewById(R.id.create_upload).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if (getActivity() == null) return;
+                        if (denyPost()) {
+                            Toast.makeText(getContext(), "You have been banned from posting", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         Intent i = new Intent(getActivity(), GalleryActivity.class);
                         PostOptions options = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, null);
                         i.putExtra(GalleryActivity.ARG_RETURN_TYPE, CameraActivity.SEND_POST);
@@ -210,6 +219,10 @@ public class DiscoverHolderFragment extends BaseFragment {
                     @Override
                     public void onClick(View view) {
                         if (getActivity() == null) return;
+                        if (denyPost()) {
+                            Toast.makeText(getContext(), "You have been banned from posting", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         Intent i = new Intent(getActivity(), CreateStatusActivity.class);
                         getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
                     }
@@ -221,6 +234,12 @@ public class DiscoverHolderFragment extends BaseFragment {
 
     private boolean mCampusFeedNeedsUpdating = true;
     private boolean mFriendsFeedNeedsUpdating = true;
+
+
+    private boolean denyPost() {
+        ModesDisabled modesDisabled = ModesDisabled.getInstance();
+        return modesDisabled.anonPosts() && modesDisabled.realPosts();
+    }
 
     @Override
     public void setFragmentState(FragmentState state) {
@@ -262,7 +281,7 @@ public class DiscoverHolderFragment extends BaseFragment {
             mFeedFragments[position].getPosts();
             if (position == 0) mCampusFeedNeedsUpdating = false;
             else mFriendsFeedNeedsUpdating = false;
-        } else if (notifyChange){
+        } else if (notifyChange) {
             mFeedFragments[position].notifyChange();
             notifyChange = false;
         }
@@ -355,7 +374,7 @@ public class DiscoverHolderFragment extends BaseFragment {
 
     private boolean notifyChange = false;
 
-    void notifyFragmentChanged(){
+    void notifyFragmentChanged() {
         notifyChange = true;
     }
 }

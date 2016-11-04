@@ -38,6 +38,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
+import com.linute.linute.ModesDisabled;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
@@ -236,6 +237,12 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
 
             vAnonComments.setTextOff("No");
             vAnonComments.setTextOn("Yes");
+        }
+
+        ModesDisabled disabled = ModesDisabled.getInstance();
+        if (disabled.anonPosts() || disabled.realPosts()){
+            vAnonPost.setClickable(false);
+            vAnonPost.setChecked(disabled.realPosts());
         }
 
         final ImageView profileImageView = (ImageView)findViewById(R.id.image_profile);

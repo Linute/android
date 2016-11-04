@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.EditScreen.Tools;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +14,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
+import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.MainContent.EditScreen.PostOptions.ContentType;
 import com.linute.linute.MainContent.EditScreen.ProcessingOptions;
+import com.linute.linute.ModesDisabled;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -28,6 +31,7 @@ public class PrivacySettingTool extends EditContentTool {
     private boolean postAsAnon = ProcessingOptions.DEFAULT_POST_AS_ANON;
     private final FrameLayout mMidTextTarget;
 
+
     public PrivacySettingTool(Uri uri, ContentType type, ViewGroup overlays, final EditFragment frag) {
         super(uri, type, overlays);
         mMidTextTarget = new FrameLayout(overlays.getContext());
@@ -35,7 +39,7 @@ public class PrivacySettingTool extends EditContentTool {
         mMidTextTarget.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((TextTool)frag.selectTool(TextTool.class)).selectTextMode(TextTool.MID_TEXT_INDEX);
+                ((TextTool) frag.selectTool(TextTool.class)).selectTextMode(TextTool.MID_TEXT_INDEX);
             }
         });
         mOverlaysView.addView(mMidTextTarget);
@@ -83,16 +87,16 @@ public class PrivacySettingTool extends EditContentTool {
             anonCommentsSwitch.setTextOn("Yes");
         }
 
-        final ImageView profileImageView = (ImageView)root.findViewById(R.id.image_profile);
+        final ImageView profileImageView = (ImageView) root.findViewById(R.id.image_profile);
 
 
         postingAsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 postAsAnon = b;
-                if(b){
+                if (b) {
                     profileImageView.setImageResource(R.drawable.anon_switch_on);
-                }else{
+                } else {
                     String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
                     Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
                 }
@@ -109,8 +113,14 @@ public class PrivacySettingTool extends EditContentTool {
         String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
         Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
 
+        ModesDisabled modesDisabled = ModesDisabled.getInstance();
+        if (modesDisabled.anonPosts() || modesDisabled.realPosts()) {
+            postingAsSwitch.setClickable(false);
+            postingAsSwitch.setChecked(modesDisabled.realPosts());
+        } else {
+            postingAsSwitch.setChecked(postAsAnon);
+        }
 
-        postingAsSwitch.setChecked(postAsAnon);
         anonCommentsSwitch.setChecked(!isAnonCommentsDisabled);
 
         return root;

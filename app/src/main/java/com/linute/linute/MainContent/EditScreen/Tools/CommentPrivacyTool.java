@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.EditScreen.ProcessingOptions;
+import com.linute.linute.ModesDisabled;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -93,7 +94,13 @@ public class CommentPrivacyTool extends EditContentTool {
         Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
 
 
-        postingAsSwitch.setChecked(postAsAnon);
+        ModesDisabled modesDisabled = ModesDisabled.getInstance();
+        if (modesDisabled.realComments() || modesDisabled.anonComments()){
+            postingAsSwitch.setClickable(false);
+            postingAsSwitch.setChecked(modesDisabled.realComments());
+        }else {
+            postingAsSwitch.setChecked(postAsAnon);
+        }
 
         return root;
     }

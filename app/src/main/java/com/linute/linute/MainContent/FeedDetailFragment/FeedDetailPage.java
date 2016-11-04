@@ -52,6 +52,7 @@ import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.ModesDisabled;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.SquareCamera.CameraActivity;
@@ -295,7 +296,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         View mAnonCheckBoxContainer = rootView.findViewById(R.id.comment_checkbox_container);
 
-
         mDisabledImage = mAnonCheckBoxContainer.findViewById(R.id.disabled_icon);
         mCheckBox = (CheckBox) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox);
 
@@ -310,7 +310,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 }
             }
         });
-        updateAnonCheckboxState();
+
+        updateAnonCheckboxState(false);
 
         ImpressionHelper.sendImpressionsAsync(pref.getString("collegeId", ""), mViewId, mFeedDetail.getPostId());
 
@@ -318,18 +319,32 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     }
 
 
-    private void updateAnonCheckboxState() {
-        if (mFeedDetail.isAnonCommentsDisabled()) {
+    private void updateAnonCheckboxState(boolean sendEnabled) {
+        ModesDisabled disabled = ModesDisabled.getInstance();
+        if (!sendEnabled || (disabled.anonComments() && disabled.realComments())) {
+            mSendButton.setVisibility(View.INVISIBLE);
             mDisabledImage.setVisibility(View.VISIBLE);
             mCheckBox.setVisibility(View.GONE);
         } else {
-            mDisabledImage.setVisibility(View.GONE);
-            mCheckBox.setVisibility(View.VISIBLE);
-        }
-    }
+            if (mFeedDetail.isAnonCommentsDisabled()) { // cant have anon comments
+                mDisabledImage.setVisibility(View.VISIBLE);
+                mCheckBox.setVisibility(View.GONE);
 
-    private void updateCommentSendState(boolean enable){
-        mSendButton.setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
+                //if we blocked their real comments, hide send
+                mSendButton.setVisibility(disabled.realComments() ? View.INVISIBLE : View.VISIBLE);
+
+            } else {
+                if (disabled.anonComments() || disabled.realComments()) {
+                    mCheckBox.setClickable(false);
+                    mCheckBox.setChecked(!disabled.anonComments());
+                }
+
+                mDisabledImage.setVisibility(View.GONE);
+                mCheckBox.setVisibility(View.VISIBLE);
+
+                mSendButton.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     private void showCameraGalleryOption() {
@@ -582,11 +597,10 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                 public void run() {
                                     mFeedDetail.getComments().clear();
                                     mFeedDetail.getComments().addAll(tempComments);
-
                                     mCommentsRetrieved = true;
                                     mFeedDetailAdapter.notifyDataSetChanged();
-                                    updateAnonCheckboxState();
-                                    updateCommentSendState(!commentsDisabled);
+
+                                    updateAnonCheckboxState(!commentsDisabled);
 
                                     recList.post(new Runnable() {
                                         @Override

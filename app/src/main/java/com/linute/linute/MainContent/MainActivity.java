@@ -60,6 +60,7 @@ import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.MainContent.Uploading.UploadIntentService;
+import com.linute.linute.ModesDisabled;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -600,6 +601,7 @@ public class MainActivity extends BaseTaptActivity {
         socket.on("blocked", blocked);
         socket.on("message", message);
         socket.on("alert", alert);
+        socket.on("modes disabled", modesDisabled);
         socket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         socket.on(Socket.EVENT_ERROR, onEventError);
         socket.on(Socket.EVENT_RECONNECT, onReconnect);
@@ -651,7 +653,6 @@ public class MainActivity extends BaseTaptActivity {
         TaptSocket socket = TaptSocket.getInstance();
         if (socket != null) {
             socket.disconnectSocket();
-
             socket.off("activity", newActivity);
             socket.off("new post", newPostListener);
             socket.off("user banned", userBanned);
@@ -665,6 +666,7 @@ public class MainActivity extends BaseTaptActivity {
             socket.off("blocked", blocked);
             socket.off("message", message);
             socket.off("alert", alert);
+            socket.off("modes disabled", modesDisabled);
             socket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             socket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
             socket.off(Socket.EVENT_ERROR, onEventError);
@@ -1298,6 +1300,35 @@ public class MainActivity extends BaseTaptActivity {
                     }
                 });
             } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private Emitter.Listener modesDisabled = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            try {
+                JSONObject object = new JSONObject(args[0].toString()).getJSONObject("modesDisabled");
+                //Log.d(TAG, "call: "+object.toString(4));
+                JSONObject temp;
+                temp = object.getJSONObject("real");
+                ModesDisabled modesDisabled = ModesDisabled.getInstance();
+                modesDisabled.setRealComments(temp.getBoolean("comments"));
+                modesDisabled.setRealPosts(temp.getBoolean("posts"));
+
+                temp = object.getJSONObject("anonymous");
+                modesDisabled.setAnonComments(temp.getBoolean("comments"));
+                modesDisabled.setAnonPosts(temp.getBoolean("posts"));
+
+
+                //test
+                //modesDisabled.setAnonPosts(true);
+                //modesDisabled.setRealPosts(true);
+                //modesDisabled.setRealComments(true);
+                //modesDisabled.setAnonComments(true);
+
+            }catch (JSONException e){
                 e.printStackTrace();
             }
         }
