@@ -306,6 +306,7 @@ public class TextTool extends EditContentTool {
 
         String beforeText;
         int maxWidth;
+        int cursorPos;
 
         public LimitTextWatcher(EditText mTV) {
             this.mTV = mTV;
@@ -317,6 +318,7 @@ public class TextTool extends EditContentTool {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             beforeText = s.toString();
+            cursorPos = mTV.getSelectionStart() - 1;
         }
 
         @Override
@@ -328,7 +330,8 @@ public class TextTool extends EditContentTool {
             float width = mTV.getPaint().measureText(s.toString());
             if (mTV.getLineCount() > mTV.getMaxLines() || width >= maxWidth) {
                 mTV.setText(beforeText);
-                mTV.setSelection(mTV.getText().length());
+                int len = mTV.getText().length();
+                mTV.setSelection(cursorPos >= 0 && cursorPos <= len ? cursorPos : len);
             }
         }
     }

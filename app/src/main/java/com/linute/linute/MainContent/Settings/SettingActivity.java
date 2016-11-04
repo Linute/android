@@ -45,7 +45,6 @@ public class SettingActivity extends BaseSocketActivity {
     public static String TAG = "SettingActivity";
 
     private boolean mUpdateNeeded;
-    private LinutePreferenceFragment mPreferenceFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +57,8 @@ public class SettingActivity extends BaseSocketActivity {
         setUpToolbar();
 
         if (savedInstanceState == null) {
-            mPreferenceFragment = new LinutePreferenceFragment();
-            getFragmentManager().beginTransaction().replace(R.id.setting_fragment, mPreferenceFragment).commit();
+            LinutePreferenceFragment preferenceFragment = new LinutePreferenceFragment();
+            getFragmentManager().beginTransaction().replace(R.id.setting_fragment, preferenceFragment).commit();
         }
 
     }

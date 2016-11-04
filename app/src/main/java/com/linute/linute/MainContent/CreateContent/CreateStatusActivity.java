@@ -24,11 +24,13 @@ import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -105,6 +107,7 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
         toolbar.setTitle("Status");
 
         mPostEditText = (CustomBackPressedEditText) findViewById(R.id.post_create_text);
+
         mTextView = (TextView) findViewById(R.id.textView);
         mPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -174,6 +177,8 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
                 toolbar.setVisibility(hasFocus ? View.GONE : View.VISIBLE);
             }
         });
+
+       // mPostEditText.addTextChangedListener(new LimitTextWatcher(mPostEditText));
 
         mPostEditText.addTextChangedListener(new TextWatcher() {
             String beforeText;
@@ -416,6 +421,7 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
         mPostEditText.clearFocus();
         if (!mPostEditText.getText().toString().isEmpty())
             showTextView();
+        hideKeyboard();
     }
 
     private void hideKeyboard() {
@@ -467,5 +473,32 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
     public boolean hasWritePermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED;
+    }
+
+
+    protected class LimitTextWatcher implements TextWatcher {
+
+        String beforeText;
+
+        public LimitTextWatcher(EditText mTV) {
+            this.mTV = mTV;
+        }
+
+        EditText mTV;
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            Log.d(TAG, "beforeTextChanged: "+s + " "+start + " "+count+" "+after);
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            Log.d(TAG, "ontext "+s + " "+start + " "+count+" ");
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
     }
 }

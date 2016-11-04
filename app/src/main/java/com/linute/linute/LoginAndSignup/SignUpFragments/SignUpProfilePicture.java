@@ -310,6 +310,8 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
         sharedPreferences.putString("userName", user.getUserName());
         sharedPreferences.putString("points", user.getPoints());
 
+        sharedPreferences.putString("lastLoginEmail", user.getEmail());
+
         sharedPreferences.putBoolean("isLoggedIn", true);
 
         sharedPreferences.putBoolean("notif_follow", true);
