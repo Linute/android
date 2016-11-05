@@ -1,8 +1,5 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -20,10 +17,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -36,6 +30,7 @@ import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.AnimationUtils;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DoubleTouchListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -266,16 +261,16 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                     }
 
                     if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        animateLollipop(vTopLayer,
+                        AnimationUtils.animateLollipop(vTopLayer,
                                 (int) x,
                                 (int) y,
-                                (float) getMax(Math.hypot(x, y),
+                                (float) AnimationUtils.getMax(Math.hypot(x, y),
                                         Math.hypot(x, vTopLayer.getHeight() - y),
                                         Math.hypot(vTopLayer.getWidth() - x, y),
                                         Math.hypot(vTopLayer.getWidth() - x, vTopLayer.getHeight() - y)
                                 ));
                     } else {
-                        animatePreLollipop(vTopLayer);
+                        AnimationUtils.animatePreLollipop(vTopLayer);
                     }
 
                     mCommentActions.likeComment(isLiked, mComment.getCommentPostId());
@@ -428,63 +423,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 }
             }
 
-        }
-
-        private double getMax(double a, double b, double c, double d) {
-            return Math.max(Math.max(a, b), Math.max(c, d));
-        }
-
-
-        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-        private void animateLollipop(final View v, int x, int y, float radius) {
-            Animator animator = ViewAnimationUtils.createCircularReveal(v, x, y, 0, radius);
-            animator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    v.animate().alpha(0).withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            v.setVisibility(View.INVISIBLE);
-                        }
-                    });
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-                    super.onAnimationCancel(animation);
-                    v.setVisibility(View.INVISIBLE);
-                }
-            });
-
-            v.setVisibility(View.VISIBLE);
-            animator.start();
-        }
-
-        private void animatePreLollipop(final View layer) {
-            AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
-            a.setDuration(400);
-
-            final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
-            a2.setDuration(200);
-
-            a.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    layer.startAnimation(a2);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-
-            layer.startAnimation(a);
         }
 
         @Override

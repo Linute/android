@@ -23,6 +23,7 @@ public abstract class DoubleTouchListener implements View.OnTouchListener {
             long timeNow = event.getDownTime();
             if(timeNow - tDown < maxDuration){
                 onDoubleTouch((int)event.getX(), (int)event.getY());
+                tDown = 0;
             }else{
                 tDown = timeNow;
             }
