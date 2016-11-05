@@ -1,98 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/comment_swipe_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:id="@+id/feed_detail_main"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/pure_white"
-        android:orientation="horizontal">
+        android:layout_height="match_parent">
 
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/activity_horizontal_margin">
-
-            <com.linute.linute.UtilsAndHelpers.ProfileImageView
-                android:id="@+id/comment_user_image"
-                android:layout_width="@dimen/profile_image_radius"
-                android:layout_height="@dimen/profile_image_radius" />
-
-            <com.makeramen.roundedimageview.RoundedImageView
-                android:id="@+id/privacy_changed"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_gravity="bottom|right"
-                android:src="@drawable/ic_revealed_icon"
-                android:visibility="gone" />
-        </FrameLayout>
+        <View
+            android:id="@+id/feed_detail_hidden_animation"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.3"
+            android:background="@color/red_like"
+            android:visibility="invisible" />
 
         <LinearLayout
-            android:id="@+id/content"
+            android:id="@+id/feed_detail_main"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:orientation="vertical">
+            android:background="?android:attr/selectableItemBackground"
+            android:orientation="horizontal">
+
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/activity_horizontal_margin">
+
+                <com.linute.linute.UtilsAndHelpers.ProfileImageView
+                    android:id="@+id/comment_user_image"
+                    android:layout_width="@dimen/profile_image_radius"
+                    android:layout_height="@dimen/profile_image_radius" />
+
+                <com.makeramen.roundedimageview.RoundedImageView
+                    android:id="@+id/privacy_changed"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="bottom|right"
+                    android:src="@drawable/ic_revealed_icon"
+                    android:visibility="gone" />
+            </FrameLayout>
 
             <LinearLayout
+                android:id="@+id/content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/comment_user_name"
-                    android:layout_width="0px"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:lines="1"
-                    android:textColor="@color/user_name_blue"
-                    android:textSize="@dimen/body_font_size"
-                    android:textStyle="bold"
-                    tools:text="Name NameName Nddsa adasd asdaddame" />
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/comment_time_ago"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="4dp"
-                    android:paddingEnd="16dp"
-                    android:textColor="@color/twentyfive_black"
-                    android:textSize="@dimen/sub_font_size"
-                    tools:text="1h" />
+                    <TextView
+                        android:id="@+id/comment_user_name"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:lines="1"
+                        android:textColor="@color/user_name_blue"
+                        android:textSize="@dimen/body_font_size"
+                        android:textStyle="bold"
+                        tools:text="Name NameName Nddsa adasd asdaddame" />
 
-                <TextView
-                    android:id="@+id/num_likes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:ellipsize="marquee"
-                    android:gravity="center"
-                    android:lines="1"
-                    android:textColor="@color/fifty_black"
-                    android:textSize="@dimen/sub_font_size" />
+                    <TextView
+                        android:id="@+id/comment_time_ago"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="4dp"
+                        android:paddingEnd="16dp"
+                        android:textColor="@color/twentyfive_black"
+                        android:textSize="@dimen/sub_font_size"
+                        tools:text="1h" />
 
-                <ImageView
-                    android:id="@+id/fire_icon"
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="2dp"
-                    android:src="@drawable/ic_fire"
-                    android:tint="@color/red" />
+                    <TextView
+                        android:id="@+id/num_likes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:ellipsize="marquee"
+                        android:gravity="center"
+                        android:lines="1"
+                        android:textColor="@color/fifty_black"
+                        android:textSize="@dimen/sub_font_size" />
+
+                    <ImageView
+                        android:id="@+id/fire_icon"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="2dp"
+                        android:src="@drawable/ic_fire"
+                        android:tint="@color/red" />
+                </LinearLayout>
+
+
             </LinearLayout>
-
-
         </LinearLayout>
-    </LinearLayout>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/feed_detail_touch"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </FrameLayout>

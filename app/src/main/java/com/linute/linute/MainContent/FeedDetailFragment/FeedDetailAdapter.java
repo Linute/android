@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableStringBuilder;
@@ -11,7 +12,9 @@ import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.TypedValue;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +28,9 @@ import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.AnimationUtils;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.DoubleTouchListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.makeramen.roundedimageview.RoundedImageView;
@@ -60,6 +65,9 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     private RequestManager mRequestManager;
 
+    private int contextMenuPosition = -1;
+    private String contextMenuId = null;
+
     public FeedDetailAdapter(BaseFeedDetail feedDetail, RequestManager manager, Context context) {
         this.context = context;
         mFeedDetail = feedDetail;
@@ -79,6 +87,14 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public void setCommentActions(CommentActions actions) {
         mCommentActions = actions;
+    }
+
+    public int getContextMenuPosition() {
+        return contextMenuPosition;
+    }
+
+    public String getContextMenuCommentId() {
+        return contextMenuId;
     }
 
     @Override
@@ -207,12 +223,69 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         private ImageView vFireIcon;
 
         protected Comment mComment;
+        private final View vTopLayer;
 
         protected abstract void bindContent(Comment comment);
 
         public BaseFeedDetailViewHolder(View itemView) {
             super(itemView);
             mLayout = (ViewGroup)itemView.findViewById(R.id.comment_swipe_layout);
+
+            vTopLayer = itemView.findViewById(R.id.feed_detail_hidden_animation);
+
+            itemView.findViewById(R.id.feed_detail_touch).setOnTouchListener(new DoubleTouchListener(750) {
+                @Override
+                public void onDoubleTouch(int x, int y) {
+                    boolean isLiked = mComment.toggleLiked();
+                    if (isLiked) {
+                        mComment.incrementLikes();
+                        setUpLikes(mComment);
+                    } else {
+                        mComment.decrementLikes();
+                        setUpLikes(mComment);
+                    }
+                    vTopLayer.setBackgroundColor(vTopLayer.getResources().getColor(isLiked ? R.color.red_like : R.color.red_unlike));
+                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        AnimationUtils.animateLollipop(vTopLayer,
+                                (int) x,
+                                (int) y,
+                                (float) AnimationUtils.getMax(Math.hypot(x, y),
+                                        Math.hypot(x, vTopLayer.getHeight() - y),
+                                        Math.hypot(vTopLayer.getWidth() - x, y),
+                                        Math.hypot(vTopLayer.getWidth() - x, vTopLayer.getHeight() - y)
+                                ));
+                    } else {
+                        AnimationUtils.animatePreLollipop(vTopLayer);
+                    }
+
+                    mCommentActions.likeComment(isLiked, mComment.getCommentPostId());
+                }
+            });
+
+            itemView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+                @Override
+                public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                    contextMenuPosition = getAdapterPosition();
+                    contextMenuId = mComment.getCommentPostId();
+
+                    if (mComment.getCommentUserId() != null && mViewerUserId.equals(mComment.getCommentUserId())) {
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_DELETE, 0, "Delete");
+                        if(mComment.isAnon()){
+                            menu.add(Menu.NONE, FeedDetailPage.MENU_REVEAL, 0, "Reveal Yourself");
+                        }else{
+                            menu.add(Menu.NONE, FeedDetailPage.MENU_GO_ANON, 0, "Make Anon");
+                        }
+                    }else
+                    if(mComment.isAnon()){
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_LIKE, 0, (mComment.isLiked() ? "Unlike" : "Like"));
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_REPORT, 0, "Report");
+                    }else{
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_LIKE, 0, (mComment.isLiked() ? "Unlike" : "Like"));
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_REPORT, 0, "Report");
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_REPLY, 0, "Reply");
+                    }
+                }
+            });
 
             mLayout.setOnTouchListener(new View.OnTouchListener() {
                 @Override
