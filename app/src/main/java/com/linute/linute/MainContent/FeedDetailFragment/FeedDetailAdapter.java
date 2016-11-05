@@ -21,8 +21,6 @@ import android.widget.TextView;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
-import com.daimajia.swipe.SwipeLayout;
-import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
@@ -40,7 +38,7 @@ import static com.linute.linute.MainContent.DiscoverFragment.Post.POST_TYPE_IMAG
  * Created by Arman on 1/13/16.
  */
 
-public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHolder> {
+public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_IMAGE_HEADER = 0;
     private static final int TYPE_STATUS_HEADER = 1;
     private static final int TYPE_COMMENT_TEXT = 2;
@@ -81,10 +79,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     public void setCommentActions(CommentActions actions) {
         mCommentActions = actions;
-    }
-
-    public boolean getDenySwipe() {
-        return mDenySwipe;
     }
 
     @Override
@@ -140,7 +134,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             ((LoadMoreViewHolder) holder).bindView((LoadMoreItem) mFeedDetail.getComments().get(0));
         } else if (holder instanceof BaseFeedDetailViewHolder) {
             ((BaseFeedDetailViewHolder) holder).bindModel((Comment) mFeedDetail.getComments().get(position - 1));
-            mItemManger.bindView(holder.itemView, position);
+//            mItemManger.bindView(holder.itemView, position);
         } else if (holder instanceof FeedDetailHeaderImageViewHolder) {
             ((FeedDetailHeaderImageViewHolder) holder).bindModel((Post) mFeedDetail.getFeedItem());
         } else if (holder instanceof FeedDetailHeaderStatusViewHolder) {
@@ -191,18 +185,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         return position == 0;
     }
 
-    @Override
-    public int getSwipeLayoutResourceId(int position) {
-        return R.id.comment_swipe_layout;
-    }
-
-
     public void setMentionedTextAdder(MentionedTextAdder mentioned) {
         mMentionedTextAdder = mentioned;
-    }
-
-    public void setDenySwipe(boolean deny) {
-        mDenySwipe = deny;
     }
 
     public void clearContext() {
@@ -213,7 +197,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     //holder for comments
     public abstract class BaseFeedDetailViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private SwipeLayout mSwipeLayout;
+        private ViewGroup mLayout;
 
         protected ImageView vCommentUserImage;
         protected View vPrivacyChanged;
@@ -228,15 +212,9 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
         public BaseFeedDetailViewHolder(View itemView) {
             super(itemView);
-            mSwipeLayout = (SwipeLayout) itemView.findViewById(R.id.comment_swipe_layout);
+            mLayout = (ViewGroup)itemView.findViewById(R.id.comment_swipe_layout);
 
-            View leftControls = mSwipeLayout.findViewById(R.id.left_controls);
-            View rightControls = mSwipeLayout.findViewById(R.id.right_controls);
-
-            mSwipeLayout.setShowMode(SwipeLayout.ShowMode.LayDown);
-            mSwipeLayout.addDrag(SwipeLayout.DragEdge.Right, rightControls);
-            mSwipeLayout.addDrag(SwipeLayout.DragEdge.Left, leftControls);
-            mSwipeLayout.setOnTouchListener(new View.OnTouchListener() {
+            mLayout.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     return mDenySwipe;
@@ -252,15 +230,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
             vCommentUserName.setOnClickListener(this);
             vCommentUserImage.setOnClickListener(this);
-            rightControls.findViewById(R.id.comment_delete).setOnClickListener(this);
-            rightControls.findViewById(R.id.comment_reply).setOnClickListener(this);
-            rightControls.findViewById(R.id.comment_reveal).setOnClickListener(this);
-            rightControls.findViewById(R.id.comment_report).setOnClickListener(this);
-            leftControls.setOnClickListener(this);
-
-            ((ImageView) leftControls.findViewById(R.id.like))
-                    .setColorFilter(ContextCompat.getColor(context, R.color.pure_white));
-
         }
 
 
@@ -273,10 +242,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 //            mIsLiked = comment.isLiked();
 
             //close when rebind
-            mSwipeLayout.close(false);
 
             //if owner of comment, don't allow them to like
-            mSwipeLayout.setLeftSwipeEnabled(comment.getCommentUserId() == null || !comment.getCommentUserId().equals(mViewerUserId));
 
             if (comment.isAnon()) {
                 setAnonImage(comment.getAnonImage());
@@ -288,7 +255,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
             vPrivacyChanged.setVisibility(comment.hasPrivacyChanged ? View.VISIBLE : View.GONE);
 
-            setUpPulloutButtons();
 
             vTimeStamp.setText(comment.getDateString());
 
@@ -320,34 +286,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             }
         }
 
-        private void setUpPulloutButtons() {
-            if (mComment.getCommentUserId() != null && mViewerUserId.equals(mComment.getCommentUserId())) {
-                mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.VISIBLE);
-                mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.GONE);
-                mSwipeLayout.findViewById(R.id.comment_reveal).setVisibility(
-                        mFeedDetail.isAnonCommentsDisabled() ? View.GONE : View.VISIBLE);
-                mSwipeLayout.findViewById(R.id.comment_report).setVisibility(View.GONE);
-            } else {
-                mSwipeLayout.findViewById(R.id.comment_reveal).setVisibility(View.GONE);
-                mSwipeLayout.findViewById(R.id.comment_report).setVisibility(View.VISIBLE);
-
-                if (mComment.isAnon()) { //comment is anonymous
-                    mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.GONE);
-
-                    //viewer is owner of post? then can delete anon comments
-                    if (mFeedDetail.getPostUserId() != null && mFeedDetail.getPostUserId().equals(mViewerUserId)) {
-                        mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.VISIBLE);
-                    } else {
-                        mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.GONE);
-                    }
-                } else {
-                    mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.VISIBLE);
-                    mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.GONE);
-                }
-            }
-
-        }
-
         @Override
         public void onClick(View v) {
             if (v == vCommentUserName || v == vCommentUserImage) { //take them to user profile
@@ -356,37 +294,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                     if (activity != null) {
                         activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mComment.getCommentUserName(), mComment.getCommentUserId()));
                     }
-                }
-            } else {
-                if (mDenySwipe || mCommentActions == null) return;
-
-                mSwipeLayout.close();
-
-                switch (v.getId()) {
-                    case R.id.comment_reply:
-                        if (!mComment.isAnon() && mComment.getCommentUserId() != null)
-                            mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mComment.getCommentUserName(), mComment.getCommentUserId(), ""), getAdapterPosition());
-                        break;
-                    case R.id.comment_delete:
-                        mCommentActions.deleteComment(getAdapterPosition(), mComment.getCommentPostId());
-                        break;
-                    case R.id.comment_report:
-                        mCommentActions.reportComment(mComment.getCommentPostId());
-                        break;
-                    case R.id.comment_reveal:
-                        mCommentActions.revealComment(getAdapterPosition(), mComment.getCommentPostId(), mComment.isAnon());
-                        break;
-                    case R.id.left_controls:
-                        boolean isLiked = mComment.toggleLiked();
-                        if (isLiked) {
-                            mComment.incrementLikes();
-                            setUpLikes(mComment);
-                        } else {
-                            mComment.decrementLikes();
-                            setUpLikes(mComment);
-                        }
-
-                        mCommentActions.likeComment(isLiked, mComment.getCommentPostId());
                 }
             }
         }
@@ -644,10 +551,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     public interface MentionedTextAdder {
         void addMentionedPerson(MentionedPerson person, int pos);
-    }
-
-    public void closeAllItems() {
-        mItemManger.closeAllItems();
     }
 
 

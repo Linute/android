@@ -485,7 +485,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             mAlertDialog = null;
         }
 
-        mFeedDetailAdapter.closeAllItems();
 
         VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
 
@@ -645,8 +644,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             return;
         }
 
-        mFeedDetailAdapter.setDenySwipe(true);
-        mFeedDetailAdapter.closeAllItems();
         //final int lastPos = mFeedDetailLLM.findFirstVisibleItemPosition();
 
         int skip = mSkip - 20;
@@ -666,7 +663,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         new LSDKEvents(getActivity()).getComments(eventComments, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-                        mFeedDetailAdapter.setDenySwipe(false);
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
@@ -681,7 +677,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
                             Log.d(TAG, "onResponse: " + response.body().string());
-                            mFeedDetailAdapter.setDenySwipe(false);
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
@@ -724,7 +719,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                             mFeedDetailAdapter.notifyItemRemoved(1);
                                             mFeedDetail.getComments().addAll(0, tempComments);
                                             mFeedDetailAdapter.notifyItemRangeInserted(1, tempComments.size());
-                                            mFeedDetailAdapter.setDenySwipe(false);
                                             mFeedDetailLLM.scrollToPosition(tempComments.size() + 1);
                                         }
                                     });
@@ -732,7 +726,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                             });
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            mFeedDetailAdapter.setDenySwipe(false);
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
@@ -1482,7 +1475,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     /* DELETING COMMENT */
     @Override
     public void deleteComment(final int pos, final String id) {
-        if (mFeedDetailAdapter.getDenySwipe()) return;
 
         if (getActivity() != null) {
             mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle("Delete comment")
@@ -1504,7 +1496,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     }
 
     private void confirmDeleteComment(final int in, final String id) {
-        if (mFeedDetailAdapter.getDenySwipe() || getActivity() == null) return;
 
         final int pos = in - 1;
         final Comment com = (Comment) mFeedDetail.getComments().get(pos);
@@ -1517,13 +1508,11 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             return;
 
 
-        mFeedDetailAdapter.setDenySwipe(true);
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, "Deleting comment...", true, false);
 
         new LSDKEvents(getActivity()).deleteComment(id, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                mFeedDetailAdapter.setDenySwipe(false);
                 progressDialog.dismiss();
 
                 final BaseTaptActivity act = (BaseTaptActivity) getActivity();
@@ -1577,7 +1566,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 }
 
                 progressDialog.dismiss();
-                mFeedDetailAdapter.setDenySwipe(false);
             }
         });
     }
@@ -1591,7 +1579,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     /* REVEALING COMMENT */
     @Override
     public void revealComment(final int pos, final String id, final boolean isAnon) {
-        if (getActivity() != null && !mFeedDetailAdapter.getDenySwipe())
             mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle(isAnon ? "Reveal" : "Wear a mask")
                     .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this comment?" : "Are you sure you want to become anonymous for this comment?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -1610,7 +1597,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     }
 
     private void confirmRevealComment(final int in, final String id, final boolean isAnon) {
-        if (mFeedDetailAdapter.getDenySwipe() || getActivity() == null) return;
+        if (getActivity() == null) return;
 
         final int pos = in - 1;
         final Comment comment = (Comment) mFeedDetail.getComments().get(pos);
@@ -1621,7 +1608,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             return;
 
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing comment..." : "Making comment anonymous...", true, false);
-        mFeedDetailAdapter.setDenySwipe(true);
 
         new LSDKEvents(getActivity()).revealComment(id, !isAnon, comment.hasPrivacyChanged, new Callback() {
 
@@ -1629,7 +1615,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             public void onFailure(Call call, IOException e) {
                 final BaseTaptActivity act = (BaseTaptActivity) getActivity();
                 progressDialog.dismiss();
-                mFeedDetailAdapter.setDenySwipe(false);
 
                 if (act != null) {
                     act.runOnUiThread(new Runnable() {
@@ -1692,7 +1677,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     }
                 }
                 progressDialog.dismiss();
-                mFeedDetailAdapter.setDenySwipe(false);
             }
         });
     }
@@ -1702,7 +1686,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     @Override
     public void reportComment(final String id) {
-        if (getActivity() != null && !mFeedDetailAdapter.getDenySwipe())
+        if (getActivity() != null )
             mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle("Report comment")
                     .setMessage("Are you sure you want to report this comment?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -1737,7 +1721,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     }
 
     private void confirmReportComment(String id) {
-        if (getActivity() == null || mFeedDetailAdapter.getDenySwipe()) return;
+        if (getActivity() == null) return;
 
         new LSDKEvents(getActivity()).reportComment(id, mViewId, new Callback() {
 
