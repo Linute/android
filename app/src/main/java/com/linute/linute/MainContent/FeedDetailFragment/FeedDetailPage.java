@@ -127,6 +127,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     protected TaptSocket mTaptSocket = TaptSocket.getInstance();
 
+    private boolean mSendCommentEnabled = false;
+
     public FeedDetailPage() {
     }
 
@@ -311,7 +313,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             }
         });
 
-        updateAnonCheckboxState(false);
+        updateAnonCheckboxState(mSendCommentEnabled);
 
         ImpressionHelper.sendImpressionsAsync(pref.getString("collegeId", ""), mViewId, mFeedDetail.getPostId());
 
@@ -569,7 +571,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         jsonObject = jsonObject.getJSONObject("post");
 
 
-                    final boolean commentsDisabled = jsonObject.getBoolean("isCommentsDisabled");
+                    mSendCommentEnabled = !jsonObject.getBoolean("isCommentsDisabled");
                     mSkip = mFeedDetail.getNumOfComments() - 20;
 
                     final ArrayList<Object> tempComments = new ArrayList<>();
@@ -603,7 +605,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                     mCommentsRetrieved = true;
                                     mFeedDetailAdapter.notifyDataSetChanged();
 
-                                    updateAnonCheckboxState(!commentsDisabled);
+                                    updateAnonCheckboxState(mSendCommentEnabled);
 
                                     recList.post(new Runnable() {
                                         @Override

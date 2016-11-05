@@ -247,31 +247,32 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
             vAnonComments.setTextOn("Yes");
         }
 
+
+        final ImageView profileImageView = (ImageView) findViewById(R.id.image_profile);
+        final String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
+
         ModesDisabled disabled = ModesDisabled.getInstance();
         if (disabled.anonPosts() || disabled.realPosts()){
             vAnonPost.setClickable(false);
             vAnonPost.setChecked(disabled.realPosts());
-        }
-
-        final ImageView profileImageView = (ImageView) findViewById(R.id.image_profile);
-
-        vAnonPost.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b) {
-                    Glide.with(CreateStatusActivity.this)
-                            .load(R.drawable.anon_switch_on)
-                            .into(profileImageView);
-                } else {
-                    String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
-                    Glide.with(CreateStatusActivity.this)
-                            .load(profileImageUrl)
-                            .into(profileImageView);
+            Glide.with(this).load(disabled.realPosts() ? R.drawable.anon_switch_on : profileImageUrl).into(profileImageView);
+        }else {
+            Glide.with(this).load(profileImageUrl).into(profileImageView);
+            vAnonPost.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if (b) {
+                        Glide.with(CreateStatusActivity.this)
+                                .load(R.drawable.anon_switch_on)
+                                .into(profileImageView);
+                    } else {
+                        Glide.with(CreateStatusActivity.this)
+                                .load(profileImageUrl)
+                                .into(profileImageView);
+                    }
                 }
-            }
-        });
-        String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
-        Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
+            });
+        }
 
         mTextFrame = findViewById(R.id.post_create_frame);
 

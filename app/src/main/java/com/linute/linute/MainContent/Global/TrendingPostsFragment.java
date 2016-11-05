@@ -419,7 +419,7 @@ public class TrendingPostsFragment extends BaseFeedFragment {
                     //get polls
                     try {
                         jsonArray = jsonObject.getJSONArray("polls");
-                        for (int i = jsonArray.length() - 1; i >= 0; i++) {
+                        for (int i = jsonArray.length() - 1; i >= 0; i--) {
                             refreshedPosts.add(PollsSingleton.getInstance().updateOrAddPoll(new Poll(jsonArray.getJSONObject(i))));
                         }
                     } catch (JSONException e) {
