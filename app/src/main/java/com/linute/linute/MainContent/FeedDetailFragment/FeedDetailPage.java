@@ -126,6 +126,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     private Snackbar mNewCommentSnackbar;
 
     protected TaptSocket mTaptSocket = TaptSocket.getInstance();
+    private FeedDetailAdapter.MentionedTextAdder mMentionedTextAdder;
 
     public FeedDetailPage() {
     }
@@ -197,6 +198,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         mSendButton.setImageViews(R.drawable.ic_upload_picture, R.drawable.ic_send);
 
         recList = (RecyclerView) rootView.findViewById(R.id.feed_detail_recyc);
+        registerForContextMenu(recList);
+
         mFeedDetailLLM = new CustomLinearLayoutManager(getActivity());
         mFeedDetailLLM.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(mFeedDetailLLM);
@@ -284,7 +287,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         mCommentEditText.setQueryTokenReceiver(this);
         mCommentEditText.setSuggestionsVisibilityManager(this);
 
-        mFeedDetailAdapter.setMentionedTextAdder(new FeedDetailAdapter.MentionedTextAdder() {
+        mMentionedTextAdder = new FeedDetailAdapter.MentionedTextAdder() {
             @Override
             public void addMentionedPerson(MentionedPerson person, final int pos) {
                 mCommentEditText.append(" @");
@@ -292,7 +295,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 mCommentEditText.requestFocus();
                 showKeyboard(mCommentEditText, true);
             }
-        });
+        };
+        mFeedDetailAdapter.setMentionedTextAdder(mMentionedTextAdder);
 
         View mAnonCheckBoxContainer = rootView.findViewById(R.id.comment_checkbox_container);
 
@@ -318,6 +322,77 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         return rootView;
     }
 
+
+    /*
+    * if (mComment.getCommentUserId() != null && mViewerUserId.equals(mComment.getCommentUserId())) {
+                        menu.add(Menu.NONE, 10, 0, "Delete");
+                        if(mComment.isAnon()){
+                            menu.add(Menu.NONE, 11, 0, "Reveal Yourself");
+                        }else{
+                            menu.add(Menu.NONE, 12, 0, "Make Anon");
+                        }
+                    }else
+                    if(mComment.isAnon()){
+                        menu.add(Menu.NONE, 20, 0, "Like");
+                        menu.add(Menu.NONE, 21, 0, "Report");
+                    }else{
+                        menu.add(Menu.NONE, 30, 0, "Like");
+                        menu.add(Menu.NONE, 31, 0, "Report");
+                        menu.add(Menu.NONE, 32, 0, "Reply");
+                    }
+                }
+            });
+    * */
+
+    public static final int MENU_DELETE = 10;
+    public static final int MENU_REVEAL = 11;
+    public static final int MENU_GO_ANON = 12;
+    public static final int MENU_LIKE = 20;
+    public static final int MENU_REPORT = 21;
+    public static final int MENU_REPLY = 32;
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        int position = mFeedDetailAdapter.getContextMenuPosition();
+        String commentId = mFeedDetailAdapter.getContextMenuCommentId();
+        Comment comment = (Comment)mFeedDetail.getComments().get(position-1);
+
+        switch (item.getItemId()){
+            case MENU_DELETE:
+                deleteComment(position, commentId);
+                return true;
+            case MENU_REVEAL:
+                revealComment(position, commentId,true);
+                mFeedDetailAdapter.notifyItemChanged(position);
+                return true;
+            case MENU_GO_ANON:
+                revealComment(position, commentId, false);
+                mFeedDetailAdapter.notifyItemChanged(position);
+                return true;
+            case MENU_LIKE:
+                toggleLike(commentId, comment);
+                mFeedDetailAdapter.notifyItemChanged(position);
+                return true;
+            case MENU_REPORT:
+                reportComment(commentId);
+                return true;
+            case MENU_REPLY:
+                mMentionedTextAdder.addMentionedPerson(new MentionedPerson(comment.getCommentUserName(), comment.getCommentUserId(), ""), position);
+
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    private void toggleLike(String commentId, Comment comment) {
+        boolean like = comment.toggleLiked();
+        if(like) {
+            comment.incrementLikes();
+        }else{
+            comment.decrementLikes();
+        }
+        likeComment(like, commentId);
+    }
 
     private void updateAnonCheckboxState(boolean sendEnabled) {
         ModesDisabled disabled = ModesDisabled.getInstance();

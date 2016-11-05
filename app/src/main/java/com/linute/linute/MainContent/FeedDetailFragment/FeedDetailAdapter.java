@@ -11,7 +11,9 @@ import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.TypedValue;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +30,7 @@ import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.DoubleTouchListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.makeramen.roundedimageview.RoundedImageView;
@@ -62,6 +65,9 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     private RequestManager mRequestManager;
 
+    private int contextMenuPosition = -1;
+    private String contextMenuId = null;
+
     public FeedDetailAdapter(BaseFeedDetail feedDetail, RequestManager manager, Context context) {
         this.context = context;
         mFeedDetail = feedDetail;
@@ -85,6 +91,14 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     public boolean getDenySwipe() {
         return mDenySwipe;
+    }
+
+    public int getContextMenuPosition() {
+        return contextMenuPosition;
+    }
+
+    public String getContextMenuCommentId() {
+        return contextMenuId;
     }
 
     @Override
@@ -228,6 +242,51 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
         public BaseFeedDetailViewHolder(View itemView) {
             super(itemView);
+
+            itemView.findViewById(R.id.feed_detail_touch).setOnTouchListener(new DoubleTouchListener(750) {
+                @Override
+                public void onDoubleTouch() {
+                    boolean isLiked = mComment.toggleLiked();
+                    if (isLiked) {
+                        mComment.incrementLikes();
+                        setUpLikes(mComment);
+                    } else {
+                        mComment.decrementLikes();
+                        setUpLikes(mComment);
+                    }
+
+                    mCommentActions.likeComment(isLiked, mComment.getCommentPostId());
+                }
+            });
+
+            itemView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+                @Override
+                public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                    contextMenuPosition = getAdapterPosition();
+                    contextMenuId = mComment.getCommentPostId();
+
+                    if (mComment.getCommentUserId() != null && mViewerUserId.equals(mComment.getCommentUserId())) {
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_DELETE, 0, "Delete");
+                        if(mComment.isAnon()){
+                            menu.add(Menu.NONE, FeedDetailPage.MENU_REVEAL, 0, "Reveal Yourself");
+                        }else{
+                            menu.add(Menu.NONE, FeedDetailPage.MENU_GO_ANON, 0, "Make Anon");
+                        }
+                    }else
+                    if(mComment.isAnon()){
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_LIKE, 0, (mComment.isLiked() ? "Unlike" : "Like"));
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_REPORT, 0, "Report");
+                    }else{
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_LIKE, 0, (mComment.isLiked() ? "Unlike" : "Like"));
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_REPORT, 0, "Report");
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_REPLY, 0, "Reply");
+                    }
+                }
+            });
+
+
+
+
             mSwipeLayout = (SwipeLayout) itemView.findViewById(R.id.comment_swipe_layout);
 
             View leftControls = mSwipeLayout.findViewById(R.id.left_controls);

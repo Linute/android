@@ -6,7 +6,8 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 app:leftEdgeSwipeOffset="0dp"
-                                app:rightEdgeSwipeOffset="0dp">
+                                app:rightEdgeSwipeOffset="0dp"
+    >
 
 
     <!--left_controls right now is only like button so i won't give it a parent
@@ -90,12 +91,14 @@
 
     </LinearLayout>
 
-
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <LinearLayout
         android:id="@+id/feed_detail_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/pure_white"
+        android:background="?android:attr/selectableItemBackground"
         android:orientation="horizontal">
 
 
@@ -179,4 +182,9 @@
 
         </LinearLayout>
     </LinearLayout>
+    <FrameLayout
+        android:id="@+id/feed_detail_touch"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</FrameLayout>
 </com.daimajia.swipe.SwipeLayout>
