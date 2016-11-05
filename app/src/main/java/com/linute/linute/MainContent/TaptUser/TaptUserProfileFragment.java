@@ -1214,7 +1214,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
         p.setPostHidden(!p.isPostHidden());
         Toast.makeText(activity,
-                p.isPostHidden() ?  "Post hidden on feed" : "Post unhidden on feed",
+                p.isPostHidden() ?  "Post hidden from feed" : "Post unhidden from feed",
                 Toast.LENGTH_SHORT).show();
 
         activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);

@@ -169,8 +169,9 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public int getItemCount() {
         //2 for headers and 1 for footer
-        int size = mPosts.size() + 2;
-        return size == 2 ? 2 : size + 1;
+        //int size = mPosts.size() + 2;
+//        return size == 2 ? 2 : size + 1;
+        return mPosts.size() + 3; //2 for header and 1 for loadmore
     }
 
     @Override
