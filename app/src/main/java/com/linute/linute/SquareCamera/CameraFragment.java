@@ -791,13 +791,23 @@ public class CameraFragment extends Fragment {
         //Log.d(TAG, "saveBitmap: "+mPreviewView.getBitmap().getWidth());
         //Log.i(TAG, "saveBitmap: "+(int)(mPreviewView.getBitmap().getWidth() * 6f / 5f));
         int width = mPreviewView.getWidth();
-        Bitmap previewBitmap = mPreviewView.getBitmap(width,
-                ScreenSizeSingleton.getSingleton().mHasRatioRequirement ?
-                        (int) (width * 6f / 5f) :
-                        width);
-        Uri uri = ImageUtility.savePicture(getContext(),
-                previewBitmap
-        );
+//        Bitmap previewBitmap = mPreviewView.getBitmap(width,
+//                ScreenSizeSingleton.getSingleton().mHasRatioRequirement ?
+//                        (int) (width * 6f / 5f) :
+//                        width);
+
+        Bitmap original = mPreviewView.getBitmap();
+        Bitmap previewBitmap =
+                Bitmap.createBitmap(original, 0, 0, width,
+                        ScreenSizeSingleton.getSingleton().mHasRatioRequirement ?
+                                (int) (width * 6f / 5f) :
+                                width
+                );
+
+        if (previewBitmap != original)
+            original.recycle();
+
+        Uri uri = ImageUtility.savePicture(getContext(), previewBitmap);
         previewBitmap.recycle();
         return uri;
     }
