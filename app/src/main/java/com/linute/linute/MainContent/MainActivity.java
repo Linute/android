@@ -1312,8 +1312,9 @@ public class MainActivity extends BaseTaptActivity {
                 JSONObject object = new JSONObject(args[0].toString()).getJSONObject("modesDisabled");
                 //Log.d(TAG, "call: "+object.toString(4));
                 JSONObject temp;
-                temp = object.getJSONObject("real");
                 ModesDisabled modesDisabled = ModesDisabled.getInstance();
+
+                temp = object.getJSONObject("real");
                 modesDisabled.setRealComments(temp.getBoolean("comments"));
                 modesDisabled.setRealPosts(temp.getBoolean("posts"));
 

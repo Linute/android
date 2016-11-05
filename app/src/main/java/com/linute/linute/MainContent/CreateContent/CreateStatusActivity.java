@@ -161,6 +161,8 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
             public void backPressed() {
                 if (!mPostEditText.getText().toString().isEmpty()) {
                     showTextView();
+                }else {
+                    mPostEditText.clearFocus();
                 }
             }
         });
