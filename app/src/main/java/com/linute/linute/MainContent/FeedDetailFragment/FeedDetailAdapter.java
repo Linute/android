@@ -259,7 +259,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                         mComment.decrementLikes();
                         setUpLikes(mComment);
                     }
-
+                    vTopLayer.setBackgroundColor(vTopLayer.getResources().getColor(isLiked ? R.color.red_like : R.color.red_unlike));
                     if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         AnimationUtils.animateLollipop(vTopLayer,
                                 (int) x,
