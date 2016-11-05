@@ -236,6 +236,9 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             itemView.findViewById(R.id.feed_detail_touch).setOnTouchListener(new DoubleTouchListener(750) {
                 @Override
                 public void onDoubleTouch(int x, int y) {
+                    if(mViewerUserId.equals(mComment.getCommentUserId())){
+                        return;
+                    }
                     boolean isLiked = mComment.toggleLiked();
                     if (isLiked) {
                         mComment.incrementLikes();
