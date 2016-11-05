@@ -109,13 +109,18 @@ public class ImageFeedHolder extends BasePostFeedHolder {
 
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void animateLollipop(final View v, int x, int y, float radius) {
+    private static void animateLollipop(final View v, int x, int y, float radius) {
         Animator animator = ViewAnimationUtils.createCircularReveal(v, x, y, 0, radius);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                v.setVisibility(View.INVISIBLE);
+                v.animate().alpha(0).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        v.setVisibility(View.INVISIBLE);
+                    }
+                });
             }
 
             @Override
@@ -129,7 +134,7 @@ public class ImageFeedHolder extends BasePostFeedHolder {
         animator.start();
     }
 
-    private void animatePreLollipop(final View layer) {
+    private static void animatePreLollipop(final View layer) {
         AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
         a.setDuration(400);
 
