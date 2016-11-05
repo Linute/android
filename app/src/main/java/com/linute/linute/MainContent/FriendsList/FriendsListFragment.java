@@ -10,12 +10,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.ModesDisabled;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
@@ -111,7 +113,7 @@ public class FriendsListFragment extends BaseFragment {
                             new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    Log.i(TAG, "Empty List Text Clicked (Not Following)");
+                                    //Log.i(TAG, "Empty List Text Clicked (Not Following)");
                                     BaseTaptActivity acc = (BaseTaptActivity) getActivity();
                                     acc.addFragmentToContainer(new FindFriendsChoiceFragment());
                                 }
@@ -121,14 +123,20 @@ public class FriendsListFragment extends BaseFragment {
                             new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    Log.i(TAG, "Empty List Text Clicked (No Followers)");
-                                    BaseTaptActivity acc = (BaseTaptActivity) getActivity();
-                                    Intent i = new Intent(getActivity(), CameraActivity.class);
-                                    PostOptions options = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, null);
-                                    i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
-                                    i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, options);
-                                    i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.SEND_POST);
-                                    acc.startActivityForResult(i, MainActivity.PHOTO_STATUS_POSTED);
+                                    //Log.i(TAG, "Empty List Text Clicked (No Followers)");
+                                    ModesDisabled disabled = ModesDisabled.getInstance();
+                                    if (disabled.realPosts() && disabled.anonPosts()) {
+                                        if (getActivity() != null)
+                                            Toast.makeText(getActivity(), "You have been banned from posting content", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        BaseTaptActivity acc = (BaseTaptActivity) getActivity();
+                                        Intent i = new Intent(getActivity(), CameraActivity.class);
+                                        PostOptions options = new PostOptions(PostOptions.ContentType.None, PostOptions.ContentSubType.Post, null);
+                                        i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
+                                        i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, options);
+                                        i.putExtra(CameraActivity.EXTRA_RETURN_TYPE, CameraActivity.SEND_POST);
+                                        acc.startActivityForResult(i, MainActivity.PHOTO_STATUS_POSTED);
+                                    }
                                 }
                             }
                     )
