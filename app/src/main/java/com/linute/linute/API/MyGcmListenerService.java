@@ -38,6 +38,7 @@ import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.gcm.GcmListenerService;
+import com.linute.linute.LaunchActivity;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatRoom;
 import com.linute.linute.MainContent.Chat.User;
@@ -51,9 +52,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 
 public class MyGcmListenerService extends GcmListenerService {
@@ -79,6 +85,21 @@ public class MyGcmListenerService extends GcmListenerService {
         }
 
         String action = data.getString("action");
+        Log.d("AAA", data.toString());
+        if("notification global".equals(action)){
+            String notifId = data.getString("nid");
+            new LSDKAnalytics(this).postRecievedNotification(notifId, new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    Log.e(TAG, "failed to post global notification received");
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+
+                }
+            });
+        }
 //        Log.d(TAG, "From: " + from);
 //        Log.d(TAG, "Message: " + message);
 //        for (String key : data.keySet()) {
@@ -118,7 +139,6 @@ public class MyGcmListenerService extends GcmListenerService {
         Intent intent = buildIntent(data, action);
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_ONE_SHOT);
-
 
         //Log.d(TAG, data.toString());
 
@@ -257,6 +277,14 @@ public class MyGcmListenerService extends GcmListenerService {
             return intent;
         }
 
+        if(type == LinuteConstants.GLOBAL){
+            intent = new Intent(this, LaunchActivity.class);
+            intent.putExtra(LaunchActivity.EXTRA_REPORT_NOTIF_OPENED, true);
+            intent.putExtra(LaunchActivity.EXTRA_NOTIF_ID, data.getString("nid"));
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            return intent;
+        }
+
         intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra("NOTIFICATION", type);
@@ -313,6 +341,8 @@ public class MyGcmListenerService extends GcmListenerService {
             intent.putExtra("user", data.getString("user"));
         }
 
+
+
         return intent;
     }
 
@@ -355,6 +385,8 @@ public class MyGcmListenerService extends GcmListenerService {
                 return LinuteConstants.PROFILE;
             case "messager":
                 return LinuteConstants.MESSAGE;
+            case "notification global":
+                return LinuteConstants.GLOBAL;
             default:
                 return LinuteConstants.MISC;
         }

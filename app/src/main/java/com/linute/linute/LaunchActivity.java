@@ -8,11 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -22,7 +18,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
-import com.linute.linute.API.LSDKUser;
+import com.linute.linute.API.LSDKAnalytics;
 import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.API.RegistrationIntentService;
 import com.linute.linute.LoginAndSignup.CollegePickerActivity;
@@ -31,13 +27,7 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 import io.fabric.sdk.android.Fabric;
@@ -62,6 +52,9 @@ public class LaunchActivity extends Activity {
     private BroadcastReceiver mRegistrationBroadcastReceiver;
 
 
+    public static final String EXTRA_REPORT_NOTIF_OPENED = "report opened";
+    public static final String EXTRA_NOTIF_ID = "notifid";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +63,24 @@ public class LaunchActivity extends Activity {
             Fabric.with(this, new Crashlytics());
         }
 
+        Intent intent = getIntent();
+        if(intent != null){
+            boolean reportOpened = intent.getBooleanExtra(EXTRA_REPORT_NOTIF_OPENED, false);
+            if(reportOpened){
+                String notifId = intent.getStringExtra(EXTRA_NOTIF_ID);
+                new LSDKAnalytics(this).postOpenedNotification(notifId, new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+
+                    }
+                });
+            }
+        }
 
         //Initialize sending crash reports to backend. This comes up in the #android-crash channel
         final Thread.UncaughtExceptionHandler oldHandler = Thread.getDefaultUncaughtExceptionHandler();
