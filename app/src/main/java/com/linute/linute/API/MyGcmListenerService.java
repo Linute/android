@@ -272,7 +272,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
         int type = gettNotificationType(data.getString("action"));
         if (type == LinuteConstants.MISC) {
-            intent = new Intent(this, PreLoginActivity.class);
+            intent = new Intent(this, LaunchActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             return intent;
         }
