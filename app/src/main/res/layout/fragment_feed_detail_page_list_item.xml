@@ -21,7 +21,6 @@
             android:id="@+id/feed_detail_main"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
             android:orientation="horizontal">
 
 
@@ -60,17 +59,22 @@
 
                     <TextView
                         android:id="@+id/comment_user_name"
-                        android:layout_width="0px"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
+                        android:layout_weight="0"
                         android:ellipsize="end"
                         android:lines="1"
                         android:textColor="@color/user_name_blue"
                         android:textSize="@dimen/body_font_size"
                         android:textStyle="bold"
-                        tools:text="Name NameName Nddsa adasd asdaddame" />
+                        tools:text="Name Nam" />
 
+                    <android.support.v4.widget.Space
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        />
                     <TextView
                         android:id="@+id/comment_time_ago"
                         android:layout_width="wrap_content"
@@ -111,5 +115,7 @@
     <FrameLayout
         android:id="@+id/feed_detail_touch"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:background="?android:attr/selectableItemBackground"
+        />
 </FrameLayout>
