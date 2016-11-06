@@ -21,10 +21,10 @@ public class ModesDisabled {
     }
 
     private ModesDisabled(){
-        mRealPosts = true;
-        mRealComments = true;
-        mAnonComments = true;
-        mAnonPosts = true;
+        mRealPosts = false;
+        mRealComments = false;
+        mAnonComments = false;
+        mAnonPosts = false;
     }
 
     public boolean realPosts() {

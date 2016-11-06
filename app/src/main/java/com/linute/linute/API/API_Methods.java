@@ -31,7 +31,7 @@ public class API_Methods {
 
 
     //CHANGE ONLY THIS TO SWITCH TO PROD
-    public static final boolean IS_DEV_BUILD = true;
+    public static final boolean IS_DEV_BUILD = false;
 
     // API ENDPOINT URL
     public static final String SCHEME = "https";
@@ -41,7 +41,7 @@ public class API_Methods {
     public static final String HOST_LIVE = "api.tapt.io";
 
     public static final String VERSION_DEV = "v1.4.7";
-    public static final String VERSION_LIVE = "v1.4.6";
+    public static final String VERSION_LIVE = "v1.4.7";
 
     //set default to live, just in case
     public static String HOST = HOST_LIVE;
