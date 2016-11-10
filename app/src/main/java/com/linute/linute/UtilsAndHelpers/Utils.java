@@ -322,11 +322,18 @@ public class Utils {
             return in;
         }
 
-        String out = in.replaceAll("[(\\uD83C\\udffb)" +
-                "(\\uD83C\\uDFFc)" +
-                "(\\uD83C\\uDFFd)" +
-                "(\\uD83C\\uDFFe)" +
-                "(\\uD83C\\uDFFF)]", "");
+        String out = in.replaceAll(
+                "(\\uD83C\\udffB|" +
+                "\\uD83C\\uDFFC|" +
+                "\\uD83C\\uDFFD|" +
+                "\\uD83C\\uDFFE|" +
+                "\\uD83C\\uDFFF)", "");
+
+
+
+        Log.i("AAA", "in "+in);
+        Log.i("AAA", "out "+out);
+
 
         return out;
     }
