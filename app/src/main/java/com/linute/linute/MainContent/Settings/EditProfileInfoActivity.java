@@ -96,6 +96,7 @@ public class EditProfileInfoActivity extends BaseSocketActivity {
     }
 
     public void setMainActivityNeedsToUpdate(boolean needsToUpdate){
+        //Log.i(TAG, "setMainActivityNeedsToUpdate: changed");
         mMainActivityNeedsToUpdate = needsToUpdate;
     }
 

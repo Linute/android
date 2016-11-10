@@ -70,12 +70,16 @@ public class SettingActivity extends BaseSocketActivity {
         toolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setResult(mUpdateNeeded ? RESULT_OK : RESULT_CANCELED);
                 onBackPressed();
             }
         });
     }
 
+    @Override
+    public void onBackPressed() {
+        setResult(mUpdateNeeded ? RESULT_OK : RESULT_CANCELED);
+        super.onBackPressed();
+    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {

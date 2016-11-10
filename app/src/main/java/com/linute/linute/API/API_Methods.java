@@ -31,7 +31,7 @@ public class API_Methods {
 
 
     //CHANGE ONLY THIS TO SWITCH TO PROD
-    public static final boolean IS_DEV_BUILD = true;
+    public static final boolean IS_DEV_BUILD = false;
 
     // API ENDPOINT URL
     public static final String SCHEME = "https";
