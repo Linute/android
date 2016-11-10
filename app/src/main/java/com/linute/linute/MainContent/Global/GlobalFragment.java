@@ -262,7 +262,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if(isViewLoaded()) vSwipe.setRefreshing(false);
+                            if (isViewLoaded()) vSwipe.setRefreshing(false);
                             Utils.showBadConnectionToast(getActivity());
                         }
                     });
@@ -281,19 +281,16 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                         JSONObject trend;
 
                         addHotAndFriends(tempList);
+                        addTestArticle(tempList);
                         GlobalChoiceItem item;
 
-                        tempList.add(new Article("Test Article", null));
 
                         for (int i = 0; i < trends.length(); i++) {
                             try {
                                 trend = trends.getJSONObject(i);
                                 if (trend.has("type") && trend.getString("type").equals("article")) {
                                     item = new Article(
-                                            trend.getString("name"),
-                                            trend.getString("description"),
-                                            trend.getString("image"),
-                                            trend.getString("id")
+                                            trend
                                     );
                                 } else {
                                     item = new GlobalChoiceItem(
@@ -418,6 +415,14 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
         items.add(new GlobalChoiceItem("Friends", null, GlobalChoiceItem.TYPE_HEADER_FRIEND));
     }
 
+    private void addTestArticle(ArrayList<GlobalChoiceItem> items) {
+        try {
+            items.add(new Article(ARTICLE_JSON));
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -426,4 +431,35 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
 
         mGlobalChoicesAdapter.setRequestManager(null);
     }
+
+
+    public static JSONObject ARTICLE_JSON;
+
+            static {
+                try {
+                    ARTICLE_JSON = new JSONObject(
+                            "{"
+                                    + "	\"id\" : \"0\","
+                                    + "	\"date\" : \"04/05/2016\","
+                                    + "	\"publisher\" : \"Mikhail Foenko\","
+                                    + "	\"authors\" : [\"Mikhail Foenko\"],"
+                                    + "	\"color\" : \"FFFFFF\","
+                                    + "	\"title\" : \"Somethign about CCNY\","
+                                    + "	\"image\" : \"http://ccnycampus.org/wp-content/blogs.dir/5/files/2016/09/Screen-Shot-2016-09-15-at-3.48.40-PM.png\","
+                                    + "	\"content\" : ["
+                                    + "		{"
+                                    + "			\"type\":\"paragraph\","
+                                    + "			\"data\":\"lisa stole money or some shit\""
+                                    + "		},"
+                                    + "		{"
+                                    + "			\"type\":\"image\","
+                                    + "			\"data\":\"http://ccnycampus.org/wp-content/blogs.dir/5/files/2016/09/Screen-Shot-2016-09-15-at-3.48.40-PM.png\""
+                                    + "		}"
+                                    + "	]"
+                                    + "}");
+                }catch(JSONException e){
+                    e.printStackTrace();
+                    ARTICLE_JSON = new JSONObject();
+                }
+            }
 }

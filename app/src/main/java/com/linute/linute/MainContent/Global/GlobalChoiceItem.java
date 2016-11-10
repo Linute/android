@@ -12,11 +12,11 @@ import java.util.List;
  */
 public class GlobalChoiceItem implements Parcelable {
 
-    public final String title;
+    public String title;
     public final String imageUrl;
     public final String key;
     private int unread;
-    public final String description;
+    public String description;
 
     public final int type;
 

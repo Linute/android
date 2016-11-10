@@ -1,14 +1,17 @@
 package com.linute.linute.MainContent.Global.Articles;
 
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import java.util.ArrayList;
 
@@ -28,8 +31,22 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<ArticleElementAd
     public ElementVH onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         switch (viewType){
-            case ArticleElement.ElementTypes.TEXT:
+            case ArticleElement.ElementTypes.TITLE:
                 return new TextElementVH(inflater.inflate(R.layout.article_element_text, parent, false));
+            case ArticleElement.ElementTypes.IMAGE:
+                return new ImageElementVH(inflater.inflate(R.layout.article_element_image, parent, false));
+            case ArticleElement.ElementTypes.PARAGRAPH:
+                return new TextElementVH(inflater.inflate(R.layout.article_element_paragraph, parent, false));
+            case ArticleElement.ElementTypes.GIF:
+                return new GifElementVH(inflater.inflate(R.layout.article_element_gif, parent, false));
+            case ArticleElement.ElementTypes.CAPTION:
+                return new TextElementVH(inflater.inflate(R.layout.article_element_caption, parent, false));
+            case ArticleElement.ElementTypes.VIDEO:
+                return new VideoElementVH(inflater.inflate(R.layout.article_element_video, parent, false));
+            case ArticleElement.ElementTypes.ATTRIBUTION:
+                return new TextElementVH(inflater.inflate(R.layout.article_element_attribution, parent, false));
+            case ArticleElement.ElementTypes.HEADER:
+                return new TextElementVH(inflater.inflate(R.layout.article_element_header, parent, false));
             default:
                 return new InvalidElementVH(inflater.inflate(R.layout.article_element_invalid, parent, false));
         }
@@ -75,10 +92,38 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<ArticleElementAd
         }
     }
 
+    private static class VideoElementVH extends ElementVH implements View.OnClickListener{
+
+        private final ImageView vPreview;
+        private final TextureVideoView vVideo;
+        private final ImageView vPause;
+
+        VideoElementVH(View itemView) {
+            super(itemView);
+            vPreview = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
+            vVideo = (TextureVideoView) itemView.findViewById(R.id.video);
+            vPause = (ImageView) itemView.findViewById(R.id.cinema_icon);
+            vPause.setOnClickListener(this);
+        }
+
+        @Override
+        public void bind(ArticleElement element) {
+            vVideo.setVideoURI(Uri.parse(element.content));
+        }
+
+        @Override
+        public void onClick(View v) {
+            if(vVideo.isPlaying()){
+                vVideo.pause();
+            }else {
+                vVideo.start();
+            }
+        }
+    }
 
     private static class ImageElementVH extends ElementVH{
 
-        ImageView vImage;
+        private final ImageView vImage;
         ImageElementVH(View itemView) {
             super(itemView);
             vImage = (ImageView)itemView.findViewById(R.id.image);
@@ -92,9 +137,24 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<ArticleElementAd
         }
     }
 
+    private static class GifElementVH extends ElementVH{
+        private final WebView vWeb;
+        public GifElementVH(View itemView) {
+            super(itemView);
+            vWeb = (WebView)itemView.findViewById(R.id.gif);
+
+        }
+
+        @Override
+        public void bind(ArticleElement element) {
+            String data = "<html><body><img src=\""+element.content+"\"></body></html>";
+            vWeb.loadData(data, "text/html", null);
+        }
+    }
+
     private static class InvalidElementVH extends ElementVH{
 
-        TextView vText;
+        private final TextView vText;
         InvalidElementVH(View itemView) {
             super(itemView);
             vText = (TextView)itemView.findViewById(R.id.text);
@@ -102,7 +162,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<ArticleElementAd
 
         @Override
         public void bind(ArticleElement element) {
-            vText.setText(element.content);
+            vText.setText("ERROR [" + element.type + "] is not a valid element \n content: " + element.content);
         }
     }
 

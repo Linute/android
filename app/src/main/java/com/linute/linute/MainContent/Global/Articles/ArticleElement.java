@@ -19,15 +19,28 @@ public class ArticleElement implements Parcelable{
     public static final class ElementTypes {
         private ElementTypes() {}
 
-        public static final int TEXT = 0;
-        public static final int IMAGE = 1;
+        public static final int TITLE = 1;
+        public static final int PARAGRAPH = 2;
+        public static final int HEADER = 3;
+        public static final int CAPTION = 4;
+        public static final int IMAGE = 5;
+        public static final int VIDEO = 6;
+        public static final int GIF = 7;
+        public static final int ATTRIBUTION = 8;
+
     }
 
     public static final Map<String, Integer> ELEMENT_TYPES = new HashMap<>();
 
     static {
-        ELEMENT_TYPES.put("text", ElementTypes.TEXT);
+        ELEMENT_TYPES.put("title", ElementTypes.TITLE);
+        ELEMENT_TYPES.put("paragraph", ElementTypes.PARAGRAPH);
+        ELEMENT_TYPES.put("header", ElementTypes.HEADER);
+        ELEMENT_TYPES.put("caption", ElementTypes.CAPTION);
         ELEMENT_TYPES.put("image", ElementTypes.IMAGE);
+        ELEMENT_TYPES.put("video", ElementTypes.VIDEO);
+        ELEMENT_TYPES.put("gif", ElementTypes.GIF);
+        ELEMENT_TYPES.put("attribution", ElementTypes.ATTRIBUTION);
     }
 
 
@@ -36,7 +49,7 @@ public class ArticleElement implements Parcelable{
 
     protected ArticleElement(JSONObject object) throws JSONException{
         this.type = ELEMENT_TYPES.get(object.getString("type"));
-        this.content = object.getString("content");
+        this.content = object.getString("data");
     }
 
     protected ArticleElement(int type, String content) {

@@ -41,7 +41,6 @@ public class ArticleFragment extends Fragment {
         if(args != null){
             mArticle = args.getParcelable(ARG_ARTICLE);
         }
-        mArticle.elements.add(new ArticleElement(0,"Loren ipsum sit dolorem"));
     }
 
     @Nullable
