@@ -170,6 +170,8 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
         vSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                mGlobalChoiceItems.clear();
+                getArticles();
                 getChoices();
             }
         });
@@ -196,6 +198,8 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                     vSwipe.setRefreshing(true);
                 }
             });
+            mGlobalChoiceItems.clear();
+            getArticles();
             getChoices();
         } else if (mGlobalChoiceItems.isEmpty()) {
             vEmpty.setVisibility(View.VISIBLE);
@@ -246,7 +250,111 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        mGlobalChoiceItems.clear();
+        getArticles();
         getChoices();
+    }
+
+    public void getArticles() {
+        setFragmentState(FragmentState.LOADING_DATA);
+
+        new LSDKGlobal(getContext()).getArticles(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (isViewLoaded()) vSwipe.setRefreshing(false);
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+
+                    try {
+                        JSONArray trends = new JSONObject(response.body().string()).getJSONArray("trends");
+
+                        // Log.d(TAG, "onResponse: " + trends.toString(4));
+                        final ArrayList<GlobalChoiceItem> tempList = new ArrayList<>();
+                        JSONObject trend;
+
+                        addTestArticle(tempList);
+                        GlobalChoiceItem item;
+
+
+                        for (int i = 0; i < trends.length(); i++) {
+                            try {
+
+                                trend = trends.getJSONObject(i);
+                                   item = new Article(
+                                            trend
+                                    );
+                                tempList.add(item);
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+//                        GlobalChoiceItem.sort(tempList);
+
+
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (isViewLoaded()) {
+                                        vSwipe.setRefreshing(false);
+                                    }
+                                    mHandler.removeCallbacksAndMessages(null);
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+//                                            mGlobalChoiceItems.clear();
+                                            mGlobalChoiceItems.addAll(tempList);
+                                            if (isViewLoaded()) {
+                                                mGlobalChoicesAdapter.notifyDataSetChanged();
+                                                vEmpty.setVisibility(mGlobalChoiceItems.isEmpty() ? View.VISIBLE : View.GONE);
+                                            }
+                                        }
+                                    });
+
+                                    setFragmentState(FragmentState.NEEDS_UPDATING);
+                                }
+                            });
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                    if (vSwipe != null)
+                                        vSwipe.setRefreshing(false);
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                                if (vSwipe != null)
+                                    vSwipe.setRefreshing(false);
+                            }
+                        });
+                    }
+                }
+            }
+        });
     }
 
     public void getChoices() {
@@ -281,7 +389,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                         JSONObject trend;
 
                         addHotAndFriends(tempList);
-                        addTestArticle(tempList);
+//                        addTestArticle(tempList);
                         GlobalChoiceItem item;
 
 
@@ -322,7 +430,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            mGlobalChoiceItems.clear();
+//                                            mGlobalChoiceItems.clear();
                                             mGlobalChoiceItems.addAll(tempList);
                                             if (isViewLoaded()) {
                                                 mGlobalChoicesAdapter.notifyDataSetChanged();

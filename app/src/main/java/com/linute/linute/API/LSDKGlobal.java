@@ -30,4 +30,11 @@ public class LSDKGlobal {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
         return API_Methods.get(new String[]{"events", "trend"}, header, param, callback);
     }
+
+    public Call getArticles(Callback callback){
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+        Map<String, Object> params = new HashMap<>(0);
+        return API_Methods.get(new String[]{"articles", "trend"}, header, params, callback);
+
+    }
 }
