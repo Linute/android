@@ -99,14 +99,14 @@ public class Update {
         if (hasEventInformation())
             setUpEvent(json);
 
-        String text = getStringFromJson(json, "text");
+        mDescription = getStringFromJson(json, "text");
 
-        if(isAnon()){
-            mDescription = text.replaceFirst("Anon ", "");
-        }else {
-            mDescription = text.replaceFirst(mUserFullName + " ", "");
-        }
-        mDescription = Utils.stripUnsupportedCharacters(mDescription);
+//        if(isAnon()){
+//            mDescription = text.replaceFirst("Anon ", "");
+//        }else {
+//            mDescription = text.replaceFirst(mUserFullName + " ", "");
+//        }
+        //mDescription = Utils.stripUnsupportedCharacters(mDescription);
 
         mIsViewed = getBooleanFromJson(json, "isViewed");
     }

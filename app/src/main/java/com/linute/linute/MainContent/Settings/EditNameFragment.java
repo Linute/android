@@ -143,14 +143,14 @@ public class EditNameFragment extends Fragment {
                             final EditProfileInfoActivity activity = (EditProfileInfoActivity) getActivity();
                             if (activity == null) return;
 
+                            //we changed name, we will need to update things in MainActivity
+                            activity.setMainActivityNeedsToUpdate(true);
+
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     Utils.showSavedToast(getActivity());
                                     showProgress(false);
-
-                                    //we changed name, we will need to update things in MainActivity
-                                    activity.setMainActivityNeedsToUpdate(true);
 
                                     getFragmentManager().popBackStack(); //pop this fragment
                                 }

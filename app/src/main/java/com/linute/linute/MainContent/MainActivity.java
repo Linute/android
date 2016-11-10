@@ -392,7 +392,6 @@ public class MainActivity extends BaseTaptActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) { //came back from settings
             setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
@@ -848,8 +847,8 @@ public class MainActivity extends BaseTaptActivity {
                                         .setNotification(new NotificationEvent(NotificationEvent.ACTIVITY, true));
 
                                 if (update.hasEventInformation()) {
-                                    String text = (update.isAnon() ? "Anon " : update.getUserFullName() + " ") + update.getDescription();
-                                    newEventSnackbar(text, update.getPost());
+                                    //String text = (update.isAnon() ? "Anon " : update.getUserFullName() + " ") + update.getDescription();
+                                    newEventSnackbar(update.getDescription(), update.getPost());
                                 } else {
                                     newProfileSnackBar(update);
                                 }
