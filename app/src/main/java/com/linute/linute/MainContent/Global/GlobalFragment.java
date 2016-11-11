@@ -277,22 +277,22 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                 if (response.isSuccessful()) {
 
                     try {
-                        JSONArray trends = new JSONObject(response.body().string()).getJSONArray("trends");
+                        JSONArray articles = new JSONObject(response.body().string()).getJSONArray("articles");
 
-                        // Log.d(TAG, "onResponse: " + trends.toString(4));
+                        // Log.d(TAG, "onResponse: " + articles.toString(4));
                         final ArrayList<GlobalChoiceItem> tempList = new ArrayList<>();
-                        JSONObject trend;
+                        JSONObject article;
 
-                        addTestArticle(tempList);
+//                        addTestArticle(tempList);
                         GlobalChoiceItem item;
 
 
-                        for (int i = 0; i < trends.length(); i++) {
+                        for (int i = 0; i < articles.length(); i++) {
                             try {
 
-                                trend = trends.getJSONObject(i);
+                                article = articles.getJSONObject(i);
                                    item = new Article(
-                                            trend
+                                            article
                                     );
                                 tempList.add(item);
 

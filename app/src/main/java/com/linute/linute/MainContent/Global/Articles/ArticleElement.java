@@ -6,9 +6,6 @@ import android.os.Parcelable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Created by mikhail on 10/25/16.
  */
@@ -19,20 +16,23 @@ public class ArticleElement implements Parcelable{
     public static final class ElementTypes {
         private ElementTypes() {}
 
-        public static final int TITLE = 1;
-        public static final int PARAGRAPH = 2;
+        public static final int TITLE = 0;
+        public static final int DATE = 1;
+        public static final int AUTHOR = 2;
         public static final int HEADER = 3;
-        public static final int CAPTION = 4;
-        public static final int IMAGE = 5;
-        public static final int VIDEO = 6;
-        public static final int GIF = 7;
-        public static final int ATTRIBUTION = 8;
+        public static final int PARAGRAPH = 4;
+        public static final int CAPTION = 5;
+        public static final int ATTRIBUTION = 6;
+        public static final int IMAGE = 7;
+        public static final int VIDEO = 8;
+        public static final int GIF = 9;
+        public static final int QUOTE = 10;
 
     }
 
-    public static final Map<String, Integer> ELEMENT_TYPES = new HashMap<>();
+//    public static final Map<String, Integer> ELEMENT_TYPES = new HashMap<>();
 
-    static {
+    /*static {
         ELEMENT_TYPES.put("title", ElementTypes.TITLE);
         ELEMENT_TYPES.put("paragraph", ElementTypes.PARAGRAPH);
         ELEMENT_TYPES.put("header", ElementTypes.HEADER);
@@ -41,15 +41,15 @@ public class ArticleElement implements Parcelable{
         ELEMENT_TYPES.put("video", ElementTypes.VIDEO);
         ELEMENT_TYPES.put("gif", ElementTypes.GIF);
         ELEMENT_TYPES.put("attribution", ElementTypes.ATTRIBUTION);
-    }
+    }*/
 
 
     public final int type;
     public final String content;
 
     protected ArticleElement(JSONObject object) throws JSONException{
-        this.type = ELEMENT_TYPES.get(object.getString("type"));
-        this.content = object.getString("data");
+        this.type = object.getInt("type"); //ELEMENT_TYPES.get(object.getString("type"));
+        this.content = object.getString("value");
     }
 
     protected ArticleElement(int type, String content) {

@@ -32,7 +32,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<ArticleElementAd
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         switch (viewType){
             case ArticleElement.ElementTypes.TITLE:
-                return new TextElementVH(inflater.inflate(R.layout.article_element_text, parent, false));
+                return new TextElementVH(inflater.inflate(R.layout.article_element_title, parent, false));
             case ArticleElement.ElementTypes.IMAGE:
                 return new ImageElementVH(inflater.inflate(R.layout.article_element_image, parent, false));
             case ArticleElement.ElementTypes.PARAGRAPH:
@@ -47,6 +47,12 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<ArticleElementAd
                 return new TextElementVH(inflater.inflate(R.layout.article_element_attribution, parent, false));
             case ArticleElement.ElementTypes.HEADER:
                 return new TextElementVH(inflater.inflate(R.layout.article_element_header, parent, false));
+            case ArticleElement.ElementTypes.QUOTE:
+                return new TextElementVH(inflater.inflate(R.layout.article_element_quote, parent, false));
+            case ArticleElement.ElementTypes.DATE:
+                return new TextElementVH(inflater.inflate(R.layout.article_element_date, parent, false));
+            case ArticleElement.ElementTypes.AUTHOR:
+                return new TextElementVH(inflater.inflate(R.layout.article_element_author, parent, false));
             default:
                 return new InvalidElementVH(inflater.inflate(R.layout.article_element_invalid, parent, false));
         }
