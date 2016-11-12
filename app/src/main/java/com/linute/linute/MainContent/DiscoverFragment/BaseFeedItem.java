@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LabeledIntent;
 import android.content.pm.PackageManager;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -83,26 +84,40 @@ public class BaseFeedItem implements Parcelable{
         bfi.getShareUri(context, new BaseFeedItem.OnUriReadyListener() {
             @Override
             public void onUriReady(Uri uri) {
-                Intent sendIntent = new Intent(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
-//            sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
-                sendIntent.setType("image/png");
-                Intent shareIntent = Intent.createChooser(sendIntent, "Share");
-
+                final Intent sendIntent = new Intent(Intent.ACTION_SEND);
                 //adds "Share over Messenger" option to choose
-                Intent taptShareIntent = new Intent(context, SendToActivity.class);
+                final Intent taptShareIntent = new Intent(context, SendToActivity.class);
                 taptShareIntent.putExtra(SendToActivity.EXTRA_POST_ID, bfi.getId());
-                shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{new LabeledIntent(taptShareIntent, "com.linute.linute", "Messenger", R.mipmap.ic_launcher)});
 
-                context.startActivity(shareIntent);
+
+                if(bfi instanceof Post && ((Post)bfi).getType() == Post.POST_TYPE_VIDEO){
+                    //videos need to be scanned
+                MediaScannerConnection.scanFile(context, new String[]{uri.toString()}, new String[]{"video/mp4"}, new MediaScannerConnection.OnScanCompletedListener() {
+                    @Override
+                    public void onScanCompleted(String path, Uri uri) {
+                        sendIntent.setType("video/mp4");
+                        sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                        Intent shareIntent = Intent.createChooser(sendIntent, "Share");
+                        shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{new LabeledIntent(taptShareIntent, "com.linute.linute", "Messenger", R.mipmap.ic_launcher)});
+                        context.startActivity(shareIntent);
+                    }
+                });
+                }else{
+                    sendIntent.setType("image/jpeg");
+                    sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                    Intent shareIntent = Intent.createChooser(sendIntent, "Share");
+                    shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{new LabeledIntent(taptShareIntent, "com.linute.linute", "Messenger", R.mipmap.ic_launcher)});
+                    context.startActivity(shareIntent);
+                }
             }
-
             @Override
             public void onUriFail(Exception e) {
                 Log.e(TAG, "getShareUri fail:",e);
             }
         });
     }
+
+
 
     /**
      * Attempts to save a file representing this BaseFeedItem (i.e. an image)

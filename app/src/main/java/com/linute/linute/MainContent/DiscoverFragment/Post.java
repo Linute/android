@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -18,6 +19,13 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
+import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.FFmpegLoadBinaryResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.linute.linute.API.API_Methods;
+import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.JsonHelpers;
@@ -26,8 +34,10 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by Arman on 12/27/15.
@@ -529,7 +539,6 @@ public class Post extends BaseFeedItem implements Parcelable {
                 Glide.with(mContext).load(getUserImage()).asBitmap().into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(Bitmap profileImage, GlideAnimation<? super Bitmap> glideAnimation) {
-                        //todo don't make an entire holder, inflate the header and draw that alone, then the bitmap
                         View header = LayoutInflater.from(mContext).inflate(R.layout.trending_name_header, null, false);
                         ((ImageView)header.findViewById(R.id.feedDetail_profile_image)).setImageBitmap(profileImage);
                         ((TextView)header.findViewById(R.id.feedDetail_user_name)).setText(getUserName());
@@ -560,10 +569,11 @@ public class Post extends BaseFeedItem implements Parcelable {
 //                        canvas.restoreToCount(savecount);
 
                         Uri uri = ImageUtility.savePicture(mContext, returnedBitmap);
-                        Log.i(TAG, uri.getPath());
+//                        Log.i(TAG, uri.getPath());
                         returnedBitmap.recycle();
-                        resource.recycle();
-                        profileImage.recycle();
+                        //for some reason Glide seems to reuse these bitmap references
+//                        resource.recycle();
+//                        profileImage.recycle();
                         listener.onUriReady(uri);
                     }
                 });
@@ -573,5 +583,137 @@ public class Post extends BaseFeedItem implements Parcelable {
 
     private void shareVideoPost(final Context mContext, final OnUriReadyListener listener) {
         //todo get an ffmpeg instance and overlay a post header
+
+
+        final Uri videoUri = Uri.parse(getVideoUrl());
+
+
+        final String videoInput = getVideoUrl();
+        final String outputFile = ImageUtility.getVideoUri();
+
+        Glide.with(mContext).load(getUserImage()).asBitmap().into(new SimpleTarget<Bitmap>() {
+            @Override
+            public void onResourceReady(Bitmap profileImage, GlideAnimation<? super Bitmap> glideAnimation) {
+                //todo don't make an entire holder, inflate the header and draw that alone, then the bitmap
+
+                View header = LayoutInflater.from(mContext).inflate(R.layout.trending_name_header, null, false);
+                ((ImageView) header.findViewById(R.id.feedDetail_profile_image)).setImageBitmap(profileImage);
+                ((TextView) header.findViewById(R.id.feedDetail_user_name)).setText(getUserName());
+                ((TextView) header.findViewById(R.id.feedDetail_time_stamp)).setVisibility(View.GONE);
+                ((TextView) header.findViewById(R.id.college_name)).setText(getCollegeName());
+
+
+
+                int width = mContext.getResources().getDisplayMetrics().widthPixels;
+                header.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                header.layout(0, 0, width, header.getMeasuredHeight());
+
+                Bitmap returnedBitmap = Bitmap.createBitmap(header.getWidth(), header.getHeight(), Bitmap.Config.ARGB_8888);
+
+                Canvas canvas = new Canvas(returnedBitmap);
+                canvas.drawColor(Color.WHITE);
+                header.draw(canvas);
+
+
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(getVideoUrl(), API_Methods.getMainHeader(new LSDKUser(mContext).getToken()));
+                int vidWidth = retriever.getFrameAtTime(0).getWidth();
+                int vidHeight = retriever.getFrameAtTime(0).getHeight();
+
+                int headWidth = vidWidth;
+                int headHeight = (int)((float)vidWidth/returnedBitmap.getWidth() * returnedBitmap.getHeight());
+
+//                Log.i("ffmpeg", Arrays.toString(new int[]{vidWidth, vidHeight, headWidth, headHeight}));
+
+                final String headerInput = ImageUtility.savePicture(mContext, returnedBitmap).getPath();
+
+                final String[] cmds = new String[]{
+//                        "-s",String.format(Locale.US, "%dx%d",  vidWidth, vidHeight),
+                        "-i", videoInput,
+                        "-i", headerInput,
+                        "-filter_complex",
+                        String.format(Locale.US, "[1:v]scale=%d:%d[header];",headWidth, headHeight)+
+                                String.format(Locale.US, "[0:v]pad=iw:ih+%d:0:%d[vid];",headHeight,headHeight)+
+                        "[vid][header]overlay[out]",
+//                        String.format(Locale.US, "[out]scale=%d:%d[out1]", vidWidth, headHeight+vidHeight), //newWidth, newHeight));
+
+                        "-map", "[out]",
+//                        "-s",String.format(Locale.US, "%dx%d",  vidWidth, headHeight+vidHeight),
+                        "-r","24",
+                        "-preset",
+                        "superfast", //ultrafast
+                        "-c:a",
+                        "copy",
+                        outputFile
+
+
+                };
+               /* String[] cmds = new String[]{
+//                        "-i", videoInput,
+                        "-i", headerInput,
+//                        "-filter_complex", "'[0:v][1:v]overlay[out]'",
+                        "-r","24",outputFile
+                };*/
+                final FFmpeg ffmpeg = FFmpeg.getInstance(mContext);
+                try {
+                    ffmpeg.loadBinary(new FFmpegLoadBinaryResponseHandler() {
+                        @Override
+                        public void onFailure() {
+
+                        }
+
+                        @Override
+                        public void onSuccess() {
+                            try {
+                                ffmpeg.execute(cmds, new FFmpegExecuteResponseHandler() {
+                                    @Override
+                                    public void onSuccess(String message) {
+                                        Log.i("ffmpeg", message);
+                                        listener.onUriReady(Uri.parse(outputFile));
+                                    }
+
+                                    @Override
+                                    public void onProgress(String message) {
+                                        Log.i("ffmpeg", message);
+                                    }
+
+                                    @Override
+                                    public void onFailure(String message) {
+                                        Log.i("ffmpeg", message);
+                                    }
+
+                                    @Override
+                                    public void onStart() {
+                                        Log.i("ffmpeg", "start");
+                                    }
+
+                                    @Override
+                                    public void onFinish() {
+                                        Log.i("ffmpeg", "fin");
+                                        new File(headerInput).delete();
+                                    }
+                                });
+                            } catch (FFmpegCommandAlreadyRunningException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onStart() {
+
+                        }
+
+                        @Override
+                        public void onFinish() {
+
+                        }
+                    });
+                }catch(FFmpegNotSupportedException e){
+                    e.printStackTrace();
+                }
+
+
+            }
+        });
     }
 }
