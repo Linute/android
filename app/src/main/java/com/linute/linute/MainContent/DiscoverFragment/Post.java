@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
@@ -11,6 +12,8 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
@@ -509,51 +512,61 @@ public class Post extends BaseFeedItem implements Parcelable {
 
         switch (mType) {
             case POST_TYPE_IMAGE:
+            case POST_TYPE_STATUS:
                 shareImagePost(mContext, listener);
                 break;
             case POST_TYPE_VIDEO:
-
+                shareVideoPost(mContext, listener);
+                break;
         }
-
-
-
     }
 
     private void shareImagePost(final Context mContext, final OnUriReadyListener listener) {
         Glide.with(mContext).load(getImage()).asBitmap().into(new SimpleTarget<Bitmap>(){
             @Override
-            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+            public void onResourceReady(final Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
 
-                //todo don't make an entire holder, inflate the header and draw that alone, then the bitmap
-                ImageFeedHolder.ShareViewHolder holder = new ImageFeedHolder.ShareViewHolder(LayoutInflater.from(mContext).inflate(R.layout.trending_item, null, false),
-                        mContext, Glide.with(mContext), null);
-                holder.bindModel(Post.this);
+                Glide.with(mContext).load(getUserImage()).asBitmap().into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap profileImage, GlideAnimation<? super Bitmap> glideAnimation) {
+                        //todo don't make an entire holder, inflate the header and draw that alone, then the bitmap
+                        View header = LayoutInflater.from(mContext).inflate(R.layout.trending_name_header, null, false);
+                        ((ImageView)header.findViewById(R.id.feedDetail_profile_image)).setImageBitmap(profileImage);
+                        ((TextView)header.findViewById(R.id.feedDetail_user_name)).setText(getUserName());
+                        ((TextView)header.findViewById(R.id.feedDetail_time_stamp)).setVisibility(View.GONE);
+                        ((TextView)header.findViewById(R.id.college_name)).setText(getCollegeName());
 
-                holder.vPostImage.setImageBitmap(resource);
-                holder.itemView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-                holder.itemView.layout(0,0,holder.itemView.getWidth(), holder.itemView.getHeight());
 
+                        int width = mContext.getResources().getDisplayMetrics().widthPixels;
+                        header.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                        header.layout(0,0,width, header.getMeasuredHeight());
 
+                        int bitmapHeight = (int)((float)header.getWidth() / resource.getWidth() * resource.getHeight());
+                        Bitmap returnedBitmap = Bitmap.createBitmap(header.getWidth(), header.getHeight()+bitmapHeight, Bitmap.Config.ARGB_8888);
+                        Canvas canvas = new Canvas(returnedBitmap);
+                        Drawable bgDrawable = header.getBackground();
+                        if (bgDrawable != null)
+                            bgDrawable.draw(canvas);
+                        else
+                            canvas.drawColor(Color.WHITE);
+                        header.draw(canvas);
 
-                View headerFeedDetail = holder.itemView.findViewById(R.id.header_feed_detail);
-                Bitmap returnedBitmap = Bitmap.createBitmap(headerFeedDetail.getWidth(), headerFeedDetail.getHeight()+holder.vPostImage.getHeight(), Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(returnedBitmap);
-                Drawable bgDrawable = headerFeedDetail.getBackground();
-                if (bgDrawable != null)
-                    bgDrawable.draw(canvas);
-                else
-                    canvas.drawColor(Color.WHITE);
-                headerFeedDetail.draw(canvas);
+//                        int savecount = canvas.save();
+//                        canvas.translate(0, header.getHeight());
+                        Rect src = new Rect(0,0,resource.getWidth(), resource.getHeight());
 
-                int savecount = canvas.save();
-                canvas.translate(0, headerFeedDetail.getHeight());
-                holder.vPostImage.draw(canvas);
-                canvas.restoreToCount(savecount);
+                        Rect dest = new Rect(0, header.getHeight(), canvas.getWidth(), canvas.getHeight());
+                        canvas.drawBitmap(resource,src,dest,null);
+//                        canvas.restoreToCount(savecount);
 
-                Uri uri = ImageUtility.savePicture(mContext, returnedBitmap);
-                Log.i(TAG, uri.getPath());
-                returnedBitmap.recycle();
-                listener.onUriReady(uri);
+                        Uri uri = ImageUtility.savePicture(mContext, returnedBitmap);
+                        Log.i(TAG, uri.getPath());
+                        returnedBitmap.recycle();
+                        resource.recycle();
+                        profileImage.recycle();
+                        listener.onUriReady(uri);
+                    }
+                });
             }
         });
     }
