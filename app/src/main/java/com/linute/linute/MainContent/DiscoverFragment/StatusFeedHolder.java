@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.view.View;
 import android.widget.TextView;
 
@@ -34,11 +33,6 @@ public class StatusFeedHolder extends BasePostFeedHolder {
                 vLikesHeart.toggle();
             }
         });
-    }
-
-    @Override
-    protected Uri getShareUri() {
-        return null;
     }
 
     @Override

@@ -1,8 +1,22 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.linute.linute.R;
+import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.JsonHelpers;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -20,6 +34,7 @@ public class Post extends BaseFeedItem implements Parcelable {
     public final static int POST_TYPE_STATUS = 0;
     public final static int POST_TYPE_IMAGE = 1;
     public final static int POST_TYPE_VIDEO = 2;
+    private static final String TAG = "Post";
 
     private String mUserId;         // id of post owner
     private String mUserName;       // post owner's full name
@@ -478,5 +493,72 @@ public class Post extends BaseFeedItem implements Parcelable {
 
     public void setPrivacyChanged(boolean privacyChanged) {
         isPrivacyChanged = privacyChanged;
+    }
+
+
+    /**
+     * Attempts to save a file representing this BaseFeedItem (and image or a video)
+     * then calls the callback with a Uri pointing to the file
+     * @param mContext
+     * @param listener callback to which Uri is passed
+     */
+    @Override
+    public void getShareUri(final Context mContext, final OnUriReadyListener listener) {
+
+        if(listener == null){throw new IllegalArgumentException("listener can not be null");}
+
+        switch (mType) {
+            case POST_TYPE_IMAGE:
+                shareImagePost(mContext, listener);
+                break;
+            case POST_TYPE_VIDEO:
+
+        }
+
+
+
+    }
+
+    private void shareImagePost(final Context mContext, final OnUriReadyListener listener) {
+        Glide.with(mContext).load(getImage()).asBitmap().into(new SimpleTarget<Bitmap>(){
+            @Override
+            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+
+                //todo don't make an entire holder, inflate the header and draw that alone, then the bitmap
+                ImageFeedHolder.ShareViewHolder holder = new ImageFeedHolder.ShareViewHolder(LayoutInflater.from(mContext).inflate(R.layout.trending_item, null, false),
+                        mContext, Glide.with(mContext), null);
+                holder.bindModel(Post.this);
+
+                holder.vPostImage.setImageBitmap(resource);
+                holder.itemView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                holder.itemView.layout(0,0,holder.itemView.getWidth(), holder.itemView.getHeight());
+
+
+
+                View headerFeedDetail = holder.itemView.findViewById(R.id.header_feed_detail);
+                Bitmap returnedBitmap = Bitmap.createBitmap(headerFeedDetail.getWidth(), headerFeedDetail.getHeight()+holder.vPostImage.getHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(returnedBitmap);
+                Drawable bgDrawable = headerFeedDetail.getBackground();
+                if (bgDrawable != null)
+                    bgDrawable.draw(canvas);
+                else
+                    canvas.drawColor(Color.WHITE);
+                headerFeedDetail.draw(canvas);
+
+                int savecount = canvas.save();
+                canvas.translate(0, headerFeedDetail.getHeight());
+                holder.vPostImage.draw(canvas);
+                canvas.restoreToCount(savecount);
+
+                Uri uri = ImageUtility.savePicture(mContext, returnedBitmap);
+                Log.i(TAG, uri.getPath());
+                returnedBitmap.recycle();
+                listener.onUriReady(uri);
+            }
+        });
+    }
+
+    private void shareVideoPost(final Context mContext, final OnUriReadyListener listener) {
+        //todo get an ffmpeg instance and overlay a post header
     }
 }

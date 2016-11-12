@@ -1,11 +1,8 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.LabeledIntent;
 import android.graphics.PorterDuff;
-import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -19,7 +16,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
-import com.linute.linute.MainContent.SendTo.SendToActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
@@ -191,8 +187,6 @@ public abstract class BasePostFeedHolder extends RecyclerView.ViewHolder impleme
         return mUserId;
     }
 
-    protected abstract Uri getShareUri();
-
     @Override
     public void onClick(View v) {
 
@@ -225,16 +219,7 @@ public abstract class BasePostFeedHolder extends RecyclerView.ViewHolder impleme
                     FeedDetailPage.newInstance(mPost)
             );
         }else if(v == vShareButton){
-
-            Intent sendIntent = new Intent(Intent.ACTION_SEND);
-            sendIntent.putExtra(Intent.EXTRA_STREAM, getShareUri());
-//            sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
-            sendIntent.setType("image/png");
-            Intent shareIntent = Intent.createChooser(sendIntent, "Share");
-            Intent taptShareIntent = new Intent(mContext, SendToActivity.class);
-            taptShareIntent.putExtra(SendToActivity.EXTRA_POST_ID, mPost.getId());
-            shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { new LabeledIntent(taptShareIntent, "com.linute.linute", "Share over messenger", R.mipmap.ic_launcher)});
-            mContext.startActivity(shareIntent);
+            mPostAction.startShare(mPost,getAdapterPosition());
         }
     }
 }

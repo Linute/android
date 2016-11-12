@@ -1,12 +1,17 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
@@ -59,6 +64,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
+import static com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedFragment.PERM_REQ_WRITE_FOR_SHARE;
+
 public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction {
     public static final String TAG = Profile.class.getSimpleName();
 
@@ -105,6 +112,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
     private boolean mCanLoadMore = false;
 
     private String mUserid;
+    private BaseFeedItem shareItem;
     //private boolean mTitleIsVisible = false;
 
     private boolean isLinearFeed = false;
@@ -623,6 +631,16 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
                 }).show();
     }
 
+    @Override
+    public void startShare(final BaseFeedItem bfi, int position) {
+        if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)  == PackageManager.PERMISSION_DENIED){
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERM_REQ_WRITE_FOR_SHARE);
+            shareItem = bfi;
+        }else{
+            BaseFeedItem.share(bfi, getContext());
+        }
+    }
+
     private void confirmDeletePost(final Post p, final int position) {
         if (getContext() == null) return;
         mAlertDialog = new AlertDialog.Builder(getActivity())
@@ -929,5 +947,18 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null)
             activity.addFragmentOnTop(SendToFragment.newInstance(p.getId()), "send_to");
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case PERM_REQ_WRITE_FOR_SHARE:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    BaseFeedItem.share(shareItem, getContext());
+                }else{
+                    Toast.makeText(getContext(), "Tapt need to make a file to share", Toast.LENGTH_SHORT).show();
+                }
+        }
     }
 }

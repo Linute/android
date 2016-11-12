@@ -1,7 +1,18 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.LabeledIntent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
+
+import com.linute.linute.MainContent.SendTo.SendToActivity;
+import com.linute.linute.R;
 
 /**
  * Created by QiFeng on 10/22/16.
@@ -9,6 +20,7 @@ import android.os.Parcelable;
 
 public class BaseFeedItem implements Parcelable{
 
+    private static final String TAG = BaseFeedItem.class.getSimpleName();
     private String mId;         // id of post
 
     public BaseFeedItem(){
@@ -50,5 +62,58 @@ public class BaseFeedItem implements Parcelable{
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(mId);
+    }
+
+
+    /**
+     * static function to share a BaseFeedItem
+     * used to keep share code in one place
+     *
+     * @param bfi BaseFeedItem to be shared
+     * @param context
+     */
+    public static void share(final BaseFeedItem bfi, final Context context){
+        if(ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)  == PackageManager.PERMISSION_DENIED){
+//            throw new IllegalArgumentException("This method needs WRITE_EXTERNAL_STORAGE permission to work");
+            Log.e(TAG, BaseFeedItem.class.getSimpleName() + ".share() called without WRITE_EXTERNAL_STORAGE permission!!!");
+            Log.e(TAG, "aborting share");
+            return;
+        }
+
+        bfi.getShareUri(context, new BaseFeedItem.OnUriReadyListener() {
+            @Override
+            public void onUriReady(Uri uri) {
+                Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
+//            sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
+                sendIntent.setType("image/png");
+                Intent shareIntent = Intent.createChooser(sendIntent, "Share");
+
+                //adds "Share over Messenger" option to choose
+                Intent taptShareIntent = new Intent(context, SendToActivity.class);
+                taptShareIntent.putExtra(SendToActivity.EXTRA_POST_ID, bfi.getId());
+                shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{new LabeledIntent(taptShareIntent, "com.linute.linute", "Share over messenger", R.mipmap.ic_launcher)});
+
+                context.startActivity(shareIntent);
+            }
+
+            @Override
+            public void onUriFail(Exception e) {
+                Log.e(TAG, "getShareUri fail:",e);
+            }
+        });
+    }
+
+    /**
+     * Attempts to save a file representing this BaseFeedItem (i.e. an image)
+     * then calls the callback with a Uri pointing to the file
+     * @param context
+     * @param callback
+     */
+    public void getShareUri(Context context, OnUriReadyListener callback){}
+
+    public interface OnUriReadyListener{
+        public void onUriReady(Uri uri);
+        public void onUriFail(Exception e);
     }
 }

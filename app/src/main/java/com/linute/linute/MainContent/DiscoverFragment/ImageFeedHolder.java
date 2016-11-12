@@ -4,20 +4,13 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
-import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.FrameLayout;
@@ -33,7 +26,6 @@ import com.bumptech.glide.request.target.Target;
 import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.CustomOnTouchListener;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -245,38 +237,7 @@ public class ImageFeedHolder extends BasePostFeedHolder {
                 .into(vPostImage);
     }
 
-    @Override
-    protected Uri getShareUri() {
-
-        ShareViewHolder holder = new ShareViewHolder(LayoutInflater.from(mContext).inflate(R.layout.trending_item, (ViewGroup)itemView.getParent(), false),
-                mContext, mRequestManager, mPostAction);
-        holder.bindModel(mPost);
-
-        holder.itemView.measure(View.MeasureSpec.makeMeasureSpec(itemView.getWidth(), View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(itemView.getHeight(), View.MeasureSpec.EXACTLY));
-        holder.itemView.layout(itemView.getLeft(), itemView.getTop(), itemView.getRight(), itemView.getBottom());
-
-        View headerFeedDetail = holder.itemView.findViewById(R.id.header_feed_detail);
-        Bitmap returnedBitmap = Bitmap.createBitmap(headerFeedDetail.getWidth(), headerFeedDetail.getHeight()+holder.vPostImage.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(returnedBitmap);
-        Drawable bgDrawable = headerFeedDetail.getBackground();
-        if (bgDrawable != null)
-            bgDrawable.draw(canvas);
-        else
-            canvas.drawColor(Color.WHITE);
-        headerFeedDetail.draw(canvas);
-
-        int savecount = canvas.save();
-        canvas.translate(0, headerFeedDetail.getHeight());
-        vPostImage.draw(canvas);
-        canvas.restoreToCount(savecount);
-
-        Uri uri = ImageUtility.savePicture(mContext, returnedBitmap);
-        Log.i(TAG, uri.getPath());
-        returnedBitmap.recycle();
-        return uri;
-    }
-
-    private static final class ShareViewHolder extends ImageFeedHolder {
+    public static final class ShareViewHolder extends ImageFeedHolder {
             TextView vCollegeText;
 
         ShareViewHolder(View itemView, Context context, RequestManager requestManager, BaseFeedAdapter.PostAction action) {
