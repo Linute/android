@@ -92,7 +92,7 @@ public class BaseFeedItem implements Parcelable{
                 //adds "Share over Messenger" option to choose
                 Intent taptShareIntent = new Intent(context, SendToActivity.class);
                 taptShareIntent.putExtra(SendToActivity.EXTRA_POST_ID, bfi.getId());
-                shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{new LabeledIntent(taptShareIntent, "com.linute.linute", "Share over messenger", R.mipmap.ic_launcher)});
+                shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{new LabeledIntent(taptShareIntent, "com.linute.linute", "Messenger", R.mipmap.ic_launcher)});
 
                 context.startActivity(shareIntent);
             }
