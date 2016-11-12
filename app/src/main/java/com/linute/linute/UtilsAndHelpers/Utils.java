@@ -329,12 +329,6 @@ public class Utils {
                 "\\uD83C\\uDFFE|" +
                 "\\uD83C\\uDFFF)", "");
 
-
-
-        Log.i("AAA", "in "+in);
-        Log.i("AAA", "out "+out);
-
-
         return out;
     }
 }
