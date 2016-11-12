@@ -20,7 +20,6 @@ import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.SendTo.SendToActivity;
-import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
@@ -232,11 +231,9 @@ public abstract class BasePostFeedHolder extends RecyclerView.ViewHolder impleme
 //            sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
             sendIntent.setType("image/png");
             Intent shareIntent = Intent.createChooser(sendIntent, "Share");
-            Intent taptShareIntent = new Intent(mContext, SettingActivity.class);
-            //TODO messenged intent not added properly
-//            taptShareIntent.setComponent(new ComponentName(mContext, "Send over Messenger"));
+            Intent taptShareIntent = new Intent(mContext, SendToActivity.class);
+            taptShareIntent.putExtra(SendToActivity.EXTRA_POST_ID, mPost.getId());
             shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { new LabeledIntent(taptShareIntent, "com.linute.linute", "Share over messenger", R.mipmap.ic_launcher)});
-            shareIntent.putExtra(SendToActivity.EXTRA_POST_ID, mPost.getId());
             mContext.startActivity(shareIntent);
         }
     }
