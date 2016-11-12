@@ -9,7 +9,7 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -36,10 +36,10 @@ import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
-import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -107,6 +107,8 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
     private String mUserid;
     //private boolean mTitleIsVisible = false;
 
+    private boolean isLinearFeed = false;
+
     public Profile() {
         // Required empty public constructor
     }
@@ -129,7 +131,21 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         vRecList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         vRecList.setHasFixedSize(true);
 
-        final LinearLayoutManager llm = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        final RecyclerView recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
+//        recList.setHasFixedSize(true);
+
+//        final LinearLayoutManager llm = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+
+
+        final GridLayoutManager llm = new GridLayoutManager(getActivity(), isLinearFeed ? 1 : 3);
+        llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if(!isLinearFeed && (position == 0 || position == 1)) return 3;
+                else return 1;
+            }
+        });
+
         vRecList.setLayoutManager(llm);
 
         mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
@@ -146,6 +162,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
             });
         }
         mProfileAdapter.setPostAction(this);
+        mProfileAdapter.showThumbnails = !isLinearFeed;
 
         vRecList.setAdapter(mProfileAdapter);
 
@@ -195,6 +212,14 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
                 MainActivity activity = (MainActivity) getActivity();
                 if (activity == null) return false;
                 switch (item.getItemId()) {
+                    case R.id.menu_switch_layout:
+                        isLinearFeed = !isLinearFeed;
+                        Log.i("AAA", "isLinearFeed="+isLinearFeed);
+                        item.setIcon(isLinearFeed ? R.drawable.ic_view_module_white_24dp : R.drawable.ic_view_stream_white_24dp);
+                        llm.setSpanCount(isLinearFeed ? 1 : 3 );
+                        mProfileAdapter.showThumbnails = !isLinearFeed;
+                        mProfileAdapter.notifyDataSetChanged();
+                        return true;
                     case R.id.settings:
                         activity.startEditProfileActivity(SettingActivity.class);
                         return true;

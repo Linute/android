@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -86,6 +86,8 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
     private boolean mOwnerIsViewer; //viewer viewing own profile
     private Handler mHandler = new Handler();
 
+    private boolean isLinearFeed = false;
+
     //private boolean mUserNameVisible = false;
 
     public TaptUserProfileFragment() {
@@ -126,9 +128,19 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         final RecyclerView recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
-        recList.setHasFixedSize(true);
+//        recList.setHasFixedSize(true);
 
-        final LinearLayoutManager llm = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+//        final LinearLayoutManager llm = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+
+
+        final GridLayoutManager llm = new GridLayoutManager(getActivity(), isLinearFeed ? 1 : 3);
+        llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if(!isLinearFeed && (position == 0 || position == 1)) return 3;
+                else return 1;
+            }
+        });
 
         recList.setLayoutManager(llm);
 
@@ -180,7 +192,13 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
                 MainActivity activity = (MainActivity) getActivity();
                 switch (item.getItemId()) {
-
+                    case R.id.menu_switch_layout:
+                        isLinearFeed = !isLinearFeed;
+                        item.setIcon(isLinearFeed ? R.drawable.ic_view_module_white_24dp : R.drawable.ic_view_stream_white_24dp);
+                        llm.setSpanCount(isLinearFeed ? 1 : 3 );
+                        recList.removeAllViews();
+                        mProfileAdapter.notifyDataSetChanged();
+                        return true;
                     case R.id.more_options:
                         if (mProfileInfoHasLoaded && activity != null) {
 

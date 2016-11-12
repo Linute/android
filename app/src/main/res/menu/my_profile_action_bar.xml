@@ -16,4 +16,10 @@
         android:icon="@drawable/ic_action_update"
         app:showAsAction="always"/>
 
+    <item android:id="@+id/menu_switch_layout"
+        android:title="Switch Layout"
+        android:icon="@drawable/ic_view_module_white_24dp"
+        app:showAsAction="ifRoom"
+        />
+
 </menu>
