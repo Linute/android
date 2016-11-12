@@ -1,8 +1,11 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.LabeledIntent;
 import android.graphics.PorterDuff;
+import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -16,6 +19,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
+import com.linute.linute.MainContent.SendTo.SendToActivity;
+import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
@@ -30,14 +35,16 @@ import org.json.JSONObject;
 /**
  * Created by QiFeng on 3/8/16.
  */
-public class BasePostFeedHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
+public abstract class BasePostFeedHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
 
     protected View vLikeButton;
     protected View vCommentButton;
+    protected View vShareButton;
 
     protected TextView vPostUserName;
     protected TextView vLikesText; //how many likes we have
     protected TextView vCommentText; //how many comments we have
+    protected TextView vShareText; //how many shares we have
     protected TextView vPostTime;
     protected CheckBox vLikesHeart; //toggle heart
     protected View vPrivacyChanged;
@@ -69,10 +76,12 @@ public class BasePostFeedHolder extends RecyclerView.ViewHolder implements Check
 
         vLikeButton = itemView.findViewById(R.id.feed_control_bar_like_button);
         vCommentButton = itemView.findViewById(R.id.feed_control_bar_comments_button);
+        vShareButton = itemView.findViewById(R.id.feed_control_bar_share_button);
 
         vPostUserName = (TextView) itemView.findViewById(R.id.feedDetail_user_name);
         vLikesText = (TextView) itemView.findViewById(R.id.postNumHearts);
         vCommentText = (TextView) itemView.findViewById(R.id.postNumComments);
+        vShareText = (TextView) itemView.findViewById(R.id.postNumShares);
         vPostTime = (TextView) itemView.findViewById(R.id.feedDetail_time_stamp);
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeart);
         vUserImage = (ProfileImageView) itemView.findViewById(R.id.feedDetail_profile_image);
@@ -83,6 +92,7 @@ public class BasePostFeedHolder extends RecyclerView.ViewHolder implements Check
 
         vLikeButton.setOnClickListener(this);
         vCommentButton.setOnClickListener(this);
+        vShareButton.setOnClickListener(this);
         vPostUserName.setOnClickListener(this);
         vUserImage.setOnClickListener(this);
         itemView.findViewById(R.id.more).setOnClickListener(new View.OnClickListener() {
@@ -127,7 +137,7 @@ public class BasePostFeedHolder extends RecyclerView.ViewHolder implements Check
         mEnableProfileView = enableProfileView;
     }
 
-
+    //Like Post
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         BaseTaptActivity activity = (BaseTaptActivity) mContext;
@@ -182,6 +192,8 @@ public class BasePostFeedHolder extends RecyclerView.ViewHolder implements Check
         return mUserId;
     }
 
+    protected abstract Uri getShareUri();
+
     @Override
     public void onClick(View v) {
 
@@ -213,6 +225,19 @@ public class BasePostFeedHolder extends RecyclerView.ViewHolder implements Check
             activity.addFragmentToContainer(
                     FeedDetailPage.newInstance(mPost)
             );
+        }else if(v == vShareButton){
+
+            Intent sendIntent = new Intent(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_STREAM, getShareUri());
+//            sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
+            sendIntent.setType("image/png");
+            Intent shareIntent = Intent.createChooser(sendIntent, "Share");
+            Intent taptShareIntent = new Intent(mContext, SettingActivity.class);
+            //TODO messenged intent not added properly
+//            taptShareIntent.setComponent(new ComponentName(mContext, "Send over Messenger"));
+            shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { new LabeledIntent(taptShareIntent, "com.linute.linute", "Share over messenger", R.mipmap.ic_launcher)});
+            shareIntent.putExtra(SendToActivity.EXTRA_POST_ID, mPost.getId());
+            mContext.startActivity(shareIntent);
         }
     }
 }
