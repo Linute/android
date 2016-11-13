@@ -2,7 +2,6 @@ package com.linute.linute.API;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
@@ -21,6 +20,8 @@ public class LSDKUser {
     private SharedPreferences mSharedPreferences;
 
     private String mToken;
+
+    public String getToken(){return mToken;}
 
     public LSDKUser(Context context) {
         mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);

@@ -1,12 +1,17 @@
 package com.linute.linute.UtilsAndHelpers.BaseFeedClasses;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,6 +27,7 @@ import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.ShareUtil;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.R;
@@ -49,6 +55,7 @@ import okhttp3.Response;
 public abstract class BaseFeedFragment extends BaseFragment {
 
     public final static String TAG = BaseFeedFragment.class.getSimpleName();
+    public static final int PERM_REQ_WRITE_FOR_SHARE = 543;
 
     protected RecyclerView vRecyclerView;
     protected View vEmptyView;
@@ -69,6 +76,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
     protected Handler mHandler = new Handler(); //handler for recview
     protected boolean hasTopItem = false;
 
+    private BaseFeedItem shareItem;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -86,6 +94,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
         initAdapter();
         mFeedAdapter.setRequestManager(Glide.with(this));
         mFeedAdapter.setPostAction(new BaseFeedAdapter.PostAction() {
+
             @Override
             public void clickedOptions(final BaseFeedItem bfi, final int position) {
                 if (getContext() == null || mUserId == null || disableOptions()) return;
@@ -130,6 +139,16 @@ public abstract class BaseFeedFragment extends BaseFragment {
                                     }
                                 }
                             }).show();
+                }
+            }
+
+            @Override
+            public void startShare(final BaseFeedItem bfi, BaseFeedAdapter.ShareProgressListener listener) {
+                if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)  == PackageManager.PERMISSION_DENIED){
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERM_REQ_WRITE_FOR_SHARE);
+                    shareItem = bfi;
+                }else{
+                    ShareUtil.share(bfi, getContext(), listener);
                 }
             }
         });
@@ -559,6 +578,19 @@ public abstract class BaseFeedFragment extends BaseFragment {
 
 
     public abstract ArrayList<BaseFeedItem> getFeedArray();
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case PERM_REQ_WRITE_FOR_SHARE:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    ShareUtil.share(shareItem, getContext(), null );
+                }else{
+                    Toast.makeText(getContext(), "Tapt need to make a file to share", Toast.LENGTH_SHORT).show();
+                }
+        }
+    }
 
     @Override
     public void onDestroyView() {

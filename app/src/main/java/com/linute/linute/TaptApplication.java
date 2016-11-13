@@ -42,8 +42,8 @@ public class TaptApplication extends MultiDexApplication {
             API_Methods.VERSION = API_Methods.VERSION_LIVE;
         }
 
-
-        RealmConfiguration configuration = new RealmConfiguration.Builder(this).name(FILE_NAME)
+        Realm.init(this);
+        RealmConfiguration configuration = new RealmConfiguration.Builder().name(FILE_NAME)
                 .schemaVersion(SCHEMA_VERSION)
                 .migration(new TaptMigration())
                 .build();

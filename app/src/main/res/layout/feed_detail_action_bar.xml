@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/feed_item_bar_height"
                 android:orientation="vertical"
@@ -72,6 +73,57 @@
 
         <TextView
             android:id="@+id/postNumComments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|right"
+            android:lines="1"
+            android:textColor="@color/twentyfive_black"
+            android:textSize="12sp"
+            tools:text="237"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/feed_control_bar_share_button"
+        android:layout_width="wrap_content"
+        android:minWidth="48dp"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_toRightOf="@id/feed_control_bar_comments_button"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        >
+        <ImageView
+            android:id="@+id/postShare"
+            android:layout_width="@dimen/feed_detail_action_size"
+            android:layout_height="@dimen/feed_detail_action_size"
+            android:layout_gravity="center_vertical"
+            android:gravity="center"
+            android:layout_marginRight="4dp"
+            android:src="@drawable/ic_share_gray"
+            />
+
+        <com.github.lzyzsd.circleprogress.DonutProgress
+            android:id="@+id/shareProgress"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+
+            android:layout_gravity="center_vertical"
+            android:gravity="center"
+            android:layout_marginRight="4dp"
+            app:donut_progress="0"
+            app:donut_unfinished_stroke_width="4dp"
+            app:donut_finished_stroke_width="4dp"
+            app:donut_unfinished_color="#969696"
+            app:donut_finished_color="@color/blue_color"
+            app:donut_text_color="@color/blue_color"
+            app:donut_max="100"
+            android:visibility="gone"
+            app:donut_text_size="6sp"
+            />
+
+        <TextView
+            android:id="@+id/postNumShares"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|right"

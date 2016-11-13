@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/header_feed_detail"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <com.linute.linute.UtilsAndHelpers.ProfileImageView
+        android:id="@+id/feedDetail_profile_image"
+        android:layout_width="@dimen/profile_image_radius"
+        android:layout_height="@dimen/profile_image_radius"
+        android:layout_gravity="center_vertical"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="8dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/image_loading_background" />
+
+
+    <LinearLayout
+        android:layout_width="0px"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/feedDetail_user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:lines="1"
+            android:textColor="@color/secondaryColor"
+            android:textSize="@dimen/header_font_size"
+            android:textStyle="bold"
+            tools:text="John Snow" />
+
+
+        <TextView
+            android:id="@+id/college_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lines="1"
+            android:textColor="@color/twentyfive_black"
+            android:textSize="@dimen/sub_font_size"
+            tools:text="City college of new" />
+    </LinearLayout>
+
+    <android.support.v4.widget.Space
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+    <ImageView
+        android:id="@+id/image_watermark"
+        android:layout_width="120dp"
+        android:layout_height="match_parent"
+        android:layout_margin="8dp"
+        android:src="@drawable/tapt_watermark"
+        android:scaleType="fitCenter"
+        />
+
+</LinearLayout>

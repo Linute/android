@@ -1,8 +1,8 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -215,5 +215,10 @@ public class Poll extends BaseFeedItem implements Parcelable{
 
         mHidden = in.readByte() == 1;
         mMuted = in.readByte() == 1;
+    }
+
+    @Override
+    public void getShareUri(Context context, OnUriReadyListener callback) {
+        callback.onUriFail(new IllegalArgumentException("Polls cannot be shared"));
     }
 }

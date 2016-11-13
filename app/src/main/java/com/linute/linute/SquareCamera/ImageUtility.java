@@ -43,6 +43,13 @@ public class ImageUtility {
         File mediaFile = new File(
                 mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg"
         );
+        if(!mediaFile.exists()){
+            try {
+                mediaFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         // Saving the bitmap
         try {
