@@ -29,7 +29,7 @@
                 android:layout_gravity="center"
                 android:background="@drawable/profile_oval"
                 android:padding="16dp"
-                android:src="@drawable/ic_action_messanger"
+                android:src="@drawable/ic_chat"
                 android:visibility="invisible"/>
 
         </FrameLayout>
