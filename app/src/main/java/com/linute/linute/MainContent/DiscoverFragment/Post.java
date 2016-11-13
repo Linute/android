@@ -10,6 +10,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -543,16 +544,7 @@ public class Post extends BaseFeedItem implements Parcelable {
                     public void onResourceReady(Bitmap profileImage, GlideAnimation<? super Bitmap> glideAnimation) {
                         listener.onUriProgress(50);
 
-                        View header = LayoutInflater.from(mContext).inflate(R.layout.trending_name_header, null, false);
-                        ((ImageView) header.findViewById(R.id.feedDetail_profile_image)).setImageBitmap(profileImage);
-                        ((TextView) header.findViewById(R.id.feedDetail_user_name)).setText(getUserName());
-                        ((TextView) header.findViewById(R.id.feedDetail_time_stamp)).setVisibility(View.GONE);
-                        ((TextView) header.findViewById(R.id.college_name)).setText(getCollegeName());
-
-
-                        int width = mContext.getResources().getDisplayMetrics().widthPixels;
-                        header.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-                        header.layout(0, 0, width, header.getMeasuredHeight());
+                        View header = setupShareHeader(profileImage, mContext);
 
                         int bitmapHeight = (int) ((float) header.getWidth() / resource.getWidth() * resource.getHeight());
                         Bitmap returnedBitmap = Bitmap.createBitmap(header.getWidth(), header.getHeight() + bitmapHeight, Bitmap.Config.ARGB_8888);
@@ -601,6 +593,22 @@ public class Post extends BaseFeedItem implements Parcelable {
         });
     }
 
+    @NonNull
+    private View setupShareHeader(Bitmap profileImage, Context mContext) {
+        View header = LayoutInflater.from(mContext).inflate(R.layout.share_name_header, null, false);
+        ((ImageView) header.findViewById(R.id.feedDetail_profile_image)).setImageBitmap(profileImage);
+        ((TextView) header.findViewById(R.id.feedDetail_user_name)).setText(getUserName());
+        ((TextView) header.findViewById(R.id.college_name)).setText(getCollegeName());
+//        View watermark = header.findViewById(R.id.image_watermark);
+
+        int width = mContext.getResources().getDisplayMetrics().widthPixels;
+        header.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+
+        header.layout(0, 0, width, header.getMeasuredHeight());
+
+        return header;
+    }
+
     private void shareVideoPost(final Context mContext, final OnUriReadyListener listener) {
         //todo get an ffmpeg instance and overlay a post header
 
@@ -616,17 +624,11 @@ public class Post extends BaseFeedItem implements Parcelable {
             public void onResourceReady(Bitmap profileImage, GlideAnimation<? super Bitmap> glideAnimation) {
                 //todo don't make an entire holder, inflate the header and draw that alone, then the bitmap
 
-                View header = LayoutInflater.from(mContext).inflate(R.layout.trending_name_header, null, false);
-                ((ImageView) header.findViewById(R.id.feedDetail_profile_image)).setImageBitmap(profileImage);
-                ((TextView) header.findViewById(R.id.feedDetail_user_name)).setText(getUserName());
-                ((TextView) header.findViewById(R.id.feedDetail_time_stamp)).setVisibility(View.GONE);
-                ((TextView) header.findViewById(R.id.college_name)).setText(getCollegeName());
+                View header = setupShareHeader(profileImage, mContext);
 
 
 
-                int width = mContext.getResources().getDisplayMetrics().widthPixels;
-                header.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-                header.layout(0, 0, width, header.getMeasuredHeight());
+
 
                 Bitmap returnedBitmap = Bitmap.createBitmap(header.getWidth(), header.getHeight(), Bitmap.Config.ARGB_8888);
 
