@@ -21,6 +21,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     protected ImageView vEventImage;
+    protected View vCinemaIcon;
 
     private Context mContext;
     private SharedPreferences mSharedPreferences;
@@ -35,6 +36,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         vEventImage = (ImageView) itemView.findViewById(R.id.profile_grid_item_image);
+        vCinemaIcon = itemView.findViewById(R.id.icon);
 
         itemView.setOnClickListener(this);
     }
@@ -49,7 +51,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(vEventImage);
 
-
+        vCinemaIcon.setVisibility(userActivityItem.isVideoPost() ? View.VISIBLE : View.GONE);
         mUserActivityItem = userActivityItem;
 
     }

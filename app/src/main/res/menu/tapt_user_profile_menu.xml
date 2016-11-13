@@ -1,18 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <item android:id="@+id/more_options"
-          android:orderInCategory="2"
-          app:showAsAction="always"
-          android:title="Options"
-          android:icon="@drawable/ic_action_navigation_more_vert"
-    />
-
-    <item android:id="@+id/menu_switch_layout"
-        android:title="Switch Layout"
-        android:icon="@drawable/ic_view_module_white_24dp"
-        app:showAsAction="ifRoom"
-        />
-
 </menu>

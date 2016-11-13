@@ -131,7 +131,6 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         vRecList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         vRecList.setHasFixedSize(true);
 
-        final RecyclerView recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
 //        recList.setHasFixedSize(true);
 
 //        final LinearLayoutManager llm = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
@@ -141,7 +140,10 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                if(!isLinearFeed && (position == 0 || position == 1)) return 3;
+                                    //profile info     view switch         load more footer
+                if(!isLinearFeed && (position == 0 || position == 1 || position == mPosts.size() + 2))
+                    return 3;
+
                 else return 1;
             }
         });
@@ -154,14 +156,19 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
             //get data from sharedpref
             user = LinuteUser.getDefaultUser(getContext());
             mProfileAdapter = new ProfileAdapter(mPosts, user, getContext());
-            mProfileAdapter.setTitleTextListener(new ProfileAdapter.TitleTextListener() {
-                @Override
-                protected void showTitle(boolean show) {
-                    mToolbar.setTitle(show ? user.getFirstName() + " " + user.getLastName() : "");
-                }
-            });
         }
+
         mProfileAdapter.setPostAction(this);
+        mProfileAdapter.setOnSwitchLayoutClicked(new ProfileAdapter.OnSwitchLayoutClicked() {
+            @Override
+            public void switchClicked(int position) {
+                isLinearFeed = position == 1;
+                llm.setSpanCount(isLinearFeed ? 1 : 3 );
+                mProfileAdapter.showThumbnails = !isLinearFeed;
+                mProfileAdapter.notifyDataSetChanged();
+            }
+        });
+
         mProfileAdapter.showThumbnails = !isLinearFeed;
 
         vRecList.setAdapter(mProfileAdapter);
@@ -187,14 +194,13 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
 
         mProfileAdapter.setRequestManager(Glide.with(this));
 
+        mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 vRecList.scrollToPosition(0);
             }
         });
-        if (mProfileAdapter.titleShown())
-            mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
 
         mToolbar.setNavigationIcon(NotificationsCounterSingleton.getInstance().hasNewPosts() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -212,14 +218,6 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
                 MainActivity activity = (MainActivity) getActivity();
                 if (activity == null) return false;
                 switch (item.getItemId()) {
-                    case R.id.menu_switch_layout:
-                        isLinearFeed = !isLinearFeed;
-                        Log.i("AAA", "isLinearFeed="+isLinearFeed);
-                        item.setIcon(isLinearFeed ? R.drawable.ic_view_module_white_24dp : R.drawable.ic_view_stream_white_24dp);
-                        llm.setSpanCount(isLinearFeed ? 1 : 3 );
-                        mProfileAdapter.showThumbnails = !isLinearFeed;
-                        mProfileAdapter.notifyDataSetChanged();
-                        return true;
                     case R.id.settings:
                         activity.startEditProfileActivity(SettingActivity.class);
                         return true;
@@ -243,34 +241,6 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         vUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
         vUpdatesCounter.setText(count < 100 ? count + "" : "+");
 
-        //lower the swipe refresh
-        mSwipeRefreshLayout.setProgressViewOffset(false, -200, 200);
-
-        //when user scrolls down, change alpha of actionbar
-        vRecList.addOnScrollListener(
-                new RecyclerView.OnScrollListener() {
-                    @Override
-                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                        super.onScrolled(recyclerView, dx, dy);
-                        if (llm.findFirstVisibleItemPosition() == 0) {
-                            View view = recyclerView.getChildAt(0);
-                            if (view != null) {
-                                int alpha = (int) (((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight())))) * 255);
-                                //255 is max
-                                //unpredictable actions if it's over 255
-                                if (alpha >= 255) {
-                                    alpha = 255;
-                                } else {
-                                    //unpredicatable if less than 0
-                                    if (alpha < 0) alpha = 0;
-                                }
-
-                                mToolbar.getBackground().mutate().setAlpha(alpha);
-                            }
-                        }
-                    }
-                }
-        );
         return rootView;
     }
 
@@ -403,7 +373,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
 
         HashMap<String, Object> params = new HashMap<>();
         params.put("owner", mUserid);
-        params.put("limit", "20");
+        params.put("limit", "21");
 
         new LSDKEvents(getContext()).getEvents("profile", params, new Callback() {
             @Override
@@ -496,7 +466,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         if (owner == null) return;
 
         mLoadingMore = true;
-        int limit = 20;
+        int limit = 21;
         int skip = mSkip;
 
         if (skip < 0) {

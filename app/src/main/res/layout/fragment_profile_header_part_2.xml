@@ -1,174 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="-30dp"
-    android:orientation="vertical">
+    android:layout_height="48dp"
+    android:background="@color/pure_white"
+    android:orientation="horizontal">
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="68dp"
-        android:orientation="vertical">
+        android:id="@+id/grid"
+        android:layout_width="0px"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="39dp"
-            android:layout_gravity="bottom"
-            android:background="@color/colorPrimary"/>
 
-        <TextView
-            android:id="@+id/username"
-            android:layout_width="match_parent"
-            android:layout_height="31dp"
-            android:layout_gravity="bottom"
-            android:layout_marginEnd="76dp"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:background="@color/colorPrimary"
-            android:ellipsize="end"
-            android:gravity="bottom"
-            android:lines="1"
-            android:textAllCaps="true"
-            android:textColor="@color/secondaryColor"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            tools:text="QI FENG HUANG"
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_grid"
         />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/chat_button"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_gravity="end|center_vertical"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:src="@drawable/ic_action_messanger"
-            app:backgroundTint="@color/messanger_blue"/>
     </FrameLayout>
 
-    <TextView
-        android:id="@+id/college_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:ellipsize="end"
-        android:lines="1"
-        android:paddingBottom="@dimen/activity_horizontal_margin"
-        android:paddingEnd="@dimen/activity_horizontal_margin"
-        android:paddingStart="@dimen/activity_horizontal_margin"
-        android:textAllCaps="true"
-        android:textColor="@color/secondaryColor"
-        android:textSize="@dimen/sub_font_size"
-        tools:text="City College of New York"
-    />
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="#AAAAAA"/>
 
-    <TextView
-        android:id="@+id/profilefrag_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:ellipsize="end"
-        android:maxLines="5"
-        android:paddingBottom="@dimen/activity_horizontal_margin"
-        android:paddingEnd="@dimen/activity_horizontal_margin"
-        android:paddingStart="@dimen/activity_horizontal_margin"
-        android:textColor="#FFFFFF"
-        android:textSize="@dimen/body_font_size"
-        tools:text="TEST TEST TEST TESTTEST TEST TEST TESTTEST TEST TEST TESTTEST TEST TEST TESTTEST TEST TEST TESTTEST TEST TEST TEST "
-    />
+    <FrameLayout
+        android:id="@+id/linear"
+        android:layout_width="0px"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:baselineAligned="false"
-        android:orientation="horizontal"
-        android:paddingBottom="@dimen/activity_horizontal_margin">
 
-        <LinearLayout
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_linear"
+        />
 
-            <TextView
-                android:id="@+id/profilefrag_num_posts"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="2dp"
-                android:gravity="center_horizontal"
-                android:lines="1"
-                android:textColor="#FFFFFF"
-                android:textSize="@dimen/header_font_size"
-                tools:text="123"
-            />
+    </FrameLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:lines="1"
-                android:text="Posts"
-                android:textColor="@color/fifty_white"
-                android:textSize="@dimen/body_font_size"
-            />
-        </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/follow_button"
-            android:layout_width="0px"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:background="@drawable/rounded_corner_button"
-            android:foreground="?android:selectableItemBackground">
-
-            <TextView
-                android:id="@+id/follow_button_text"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:textAllCaps="true"
-                android:textColor="@color/white"
-                android:textSize="@dimen/header_font_size"
-                tools:text="Follow"
-            />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/prof_header_followers_container"
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/profilefrag_num_followers"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="2dp"
-                android:gravity="center_horizontal"
-                android:lines="1"
-                android:textColor="#FFFFFF"
-                android:textSize="@dimen/header_font_size"
-                tools:text="123"
-            />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:lines="1"
-                android:text="Followers"
-                android:textColor="@color/fifty_white"
-                android:textSize="@dimen/body_font_size"
-            />
-        </LinearLayout>
-    </LinearLayout>
 </LinearLayout>

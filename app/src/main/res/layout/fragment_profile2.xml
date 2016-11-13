@@ -1,15 +1,34 @@
-<FrameLayout
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ECF0F2">
 
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="4dp">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways|snap"
+            app:navigationIcon="@drawable/ic_action_navigation_arrow_back_inverted"
+            app:titleTextColor="@color/pure_white"
+        />
+
+    </android.support.design.widget.AppBarLayout>
+
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/profilefrag2_swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
     >
 
         <android.support.v7.widget.RecyclerView
@@ -20,16 +39,4 @@
     </android.support.v4.widget.SwipeRefreshLayout>
 
 
-    <View android:layout_width="match_parent"
-          android:layout_height="?android:attr/actionBarSize"
-          android:background="@drawable/toolbar_gradient_background"
-    />
-
-    <android.support.v7.widget.Toolbar android:id="@+id/toolbar"
-                                       android:layout_width="match_parent"
-                                       android:layout_height="?android:attr/actionBarSize"
-                                       android:background="@color/colorPrimary"
-                                       app:titleTextColor="@color/pure_white"
-                                       android:elevation="4dp"/>
-
-</FrameLayout>
+</android.support.design.widget.CoordinatorLayout>

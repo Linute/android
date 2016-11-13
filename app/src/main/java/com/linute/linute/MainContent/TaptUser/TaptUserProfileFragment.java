@@ -137,7 +137,8 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                if(!isLinearFeed && (position == 0 || position == 1)) return 3;
+                if(!isLinearFeed && (position == 0 || position == 1 || position == mPosts.size() + 2))
+                    return 3;
                 else return 1;
             }
         });
@@ -150,15 +151,65 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
         if (mProfileAdapter == null) {
             mProfileAdapter = new ProfileAdapter(mPosts, mLinuteUser, getActivity());
-            mProfileAdapter.setTitleTextListener(new ProfileAdapter.TitleTextListener() {
-                @Override
-                protected void showTitle(boolean show) {
-                    mToolbar.setTitle(show ? mUserName : "");
-                }
-            });
         }
 
         mProfileAdapter.setRequestManager(Glide.with(this));
+        mProfileAdapter.setOnSwitchLayoutClicked(new ProfileAdapter.OnSwitchLayoutClicked() {
+            @Override
+            public void switchClicked(int position) {
+                isLinearFeed = position == 1;
+                llm.setSpanCount(isLinearFeed ? 1 : 3 );
+                mProfileAdapter.showThumbnails = !isLinearFeed;
+                mProfileAdapter.notifyDataSetChanged();
+            }
+        });
+
+        mProfileAdapter.showThumbnails = !isLinearFeed;
+
+        mProfileAdapter.setOnClickFollow(this);
+        mProfileAdapter.setPostAction(this);
+        mProfileAdapter.setOnClickMore(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mProfileInfoHasLoaded && getActivity() != null) {
+                    String[] options = new String[]{
+                            mLinuteUser.isBlocked() ? "Unblock user" : "Block user",
+                            "Report",
+                            mLinuteUser.isSubscribed() ? "Stop post notifications" : "Get post notifications"
+                    };
+
+                    mAlertDialog = new AlertDialog
+                            .Builder(getActivity())
+                            .setItems(options, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which) {
+                                        case 0:
+                                            blockConfirmation();
+                                            return;
+                                        case 1:
+                                            reportUserConfirmation();
+                                            return;
+                                        default:
+                                            subscribeConfirmation();
+                                    }
+                                }
+                            })
+                            .show();
+                }
+            }
+        });
+
+        mProfileAdapter.setLoadMorePosts(
+                new LoadMoreViewHolder.OnLoadMore() {
+                    @Override
+                    public void loadMore() {
+                        if (mCanLoadMore && !mSwipeRefreshLayout.isRefreshing() && !mLoadingMore) {
+                            getMoreActivities();
+                        }
+                    }
+                }
+        );
 
         recList.setAdapter(mProfileAdapter);
 
@@ -171,8 +222,8 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                 setActivities(); //get activities
             }
         });
-        mSwipeRefreshLayout.setProgressViewOffset(false, -200, 200);
 
+        mToolbar.setTitle(mUserName);
         mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,46 +240,8 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-
                 MainActivity activity = (MainActivity) getActivity();
                 switch (item.getItemId()) {
-                    case R.id.menu_switch_layout:
-                        isLinearFeed = !isLinearFeed;
-                        item.setIcon(isLinearFeed ? R.drawable.ic_view_module_white_24dp : R.drawable.ic_view_stream_white_24dp);
-                        llm.setSpanCount(isLinearFeed ? 1 : 3 );
-                        recList.removeAllViews();
-                        mProfileAdapter.notifyDataSetChanged();
-                        return true;
-                    case R.id.more_options:
-                        if (mProfileInfoHasLoaded && activity != null) {
-
-                            String[] options = new String[]{
-                                    mLinuteUser.isBlocked() ? "Unblock user" : "Block user",
-                                    "Report",
-                                    mLinuteUser.isSubscribed() ? "Stop post notifications" : "Get post notifications"
-                            };
-
-                            mAlertDialog = new AlertDialog
-                                    .Builder(getActivity())
-                                    .setItems(options, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            switch (which) {
-                                                case 0:
-                                                    blockConfirmation();
-                                                    return;
-                                                case 1:
-                                                    reportUserConfirmation();
-                                                    return;
-                                                default:
-                                                    subscribeConfirmation();
-                                            }
-                                        }
-                                    })
-                                    .show();
-
-                        }
-                        return true;
                     case R.id.settings:
                         if (activity != null)
                             activity.startEditProfileActivity(SettingActivity.class);
@@ -251,43 +264,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                 recList.scrollToPosition(0);
             }
         });
-        if (mProfileAdapter.titleShown()) mToolbar.setTitle(mUserName);
 
-        mProfileAdapter.setOnClickFollow(this);
-        mProfileAdapter.setPostAction(this);
-
-        recList.addOnScrollListener(
-                new RecyclerView.OnScrollListener() {
-                    @Override
-                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                        super.onScrolled(recyclerView, dx, dy);
-                        if (llm.findFirstVisibleItemPosition() == 0) {
-                            View view = recyclerView.getChildAt(0);
-                            if (view != null) {
-                                //doing the maths
-                                int alpha = (int) ((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight()))) * 255);
-                                if (alpha >= 255) {
-                                    alpha = 255;
-                                } else {
-                                    if (alpha <= 0) alpha = 0;
-                                }
-                                mToolbar.getBackground().mutate().setAlpha(alpha);
-                            }
-                        }
-                    }
-                }
-        );
-
-        mProfileAdapter.setLoadMorePosts(
-                new LoadMoreViewHolder.OnLoadMore() {
-                    @Override
-                    public void loadMore() {
-                        if (mCanLoadMore && !mSwipeRefreshLayout.isRefreshing() && !mLoadingMore) {
-                            getMoreActivities();
-                        }
-                    }
-                }
-        );
 
 
         return rootView;
@@ -397,7 +374,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
         HashMap<String, Object> params = new HashMap<>();
         params.put("owner", mTaptUserId);
-        params.put("limit", "20");
+        params.put("limit", "21");
 
         new LSDKEvents(getContext()).getEvents("profile", params, new Callback() {
             @Override
@@ -672,7 +649,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         if (getActivity() == null) return;
 
         mLoadingMore = true;
-        int limit = 20;
+        int limit = 21;
         int skip = mSkip;
 
         if (skip < 0) {
