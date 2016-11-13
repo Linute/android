@@ -14,6 +14,9 @@ import com.linute.linute.MainContent.SendTo.SendToActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by mikhail on 11/12/16.
  */
@@ -30,6 +33,13 @@ public class ShareUtil {
      * @param context
      */
     public static void share(final BaseFeedItem bfi, final Context context, final BaseFeedAdapter.ShareProgressListener listener){
+        if(cachedUris.containsKey(bfi.getId())){
+            listener.updateShareProgress(100);
+            launchChooser(cachedUris.get(bfi.getId()),bfi, context);
+            return;
+        }
+
+
         if(ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)  == PackageManager.PERMISSION_DENIED){
 //            throw new IllegalArgumentException("This method needs WRITE_EXTERNAL_STORAGE permission to work");
             Log.e(TAG, BaseFeedItem.class.getSimpleName() + ".share() called without WRITE_EXTERNAL_STORAGE permission!!!");
@@ -41,30 +51,20 @@ public class ShareUtil {
             @Override
             public void onUriReady(Uri uri) {
                 onUriProgress(100);
-                final Intent sendIntent = new Intent(Intent.ACTION_SEND);
                 //adds "Share over Messenger" option to choose
-                final Intent taptShareIntent = new Intent(context, SendToActivity.class);
-                taptShareIntent.putExtra(SendToActivity.EXTRA_POST_ID, bfi.getId());
-
 
                 if(bfi instanceof Post && ((Post)bfi).getType() == Post.POST_TYPE_VIDEO){
                     //videos need to be scanned
                     MediaScannerConnection.scanFile(context, new String[]{uri.toString()}, new String[]{"video/mp4"}, new MediaScannerConnection.OnScanCompletedListener() {
                         @Override
                         public void onScanCompleted(String path, Uri uri) {
-                            sendIntent.setType("video/mp4");
-                            sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
-                            Intent shareIntent = Intent.createChooser(sendIntent, "Share");
-                            shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{new LabeledIntent(taptShareIntent, "com.linute.linute", "Messenger", R.mipmap.ic_launcher)});
-                            context.startActivity(shareIntent);
+                            cachedUris.put(bfi.getId(), uri);
+                            launchChooser(uri, bfi, context);
                         }
                     });
                 }else{
-                    sendIntent.setType("image/jpeg");
-                    sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
-                    Intent shareIntent = Intent.createChooser(sendIntent, "Share");
-                    shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{new LabeledIntent(taptShareIntent, "com.linute.linute", "Messenger", R.mipmap.ic_launcher)});
-                    context.startActivity(shareIntent);
+                    cachedUris.put(bfi.getId(), uri);
+                    launchChooser(uri, bfi, context);
                 }
             }
 
@@ -83,6 +83,32 @@ public class ShareUtil {
             }
         });
     }
+
+    private static void launchChooser(Uri uri, BaseFeedItem bfi, Context context) {
+
+
+        final Intent sendIntent = new Intent(Intent.ACTION_SEND);
+        if(bfi instanceof Post && ((Post) bfi).getType()==Post.POST_TYPE_VIDEO) {
+            sendIntent.setType("video/mp4");
+        }else{
+            sendIntent.setType("image/jpg");
+        }
+
+        sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        Intent shareIntent = Intent.createChooser(sendIntent, "Share");
+
+        final Intent taptShareIntent = new Intent(context, SendToActivity.class);
+        taptShareIntent.putExtra(SendToActivity.EXTRA_POST_ID, bfi.getId());
+        shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{new LabeledIntent(taptShareIntent, "com.linute.linute", "Messenger", R.mipmap.ic_launcher)});
+
+
+        context.startActivity(shareIntent);
+
+
+    }
+
+
+    private static Map<String, Uri> cachedUris = new HashMap<>();
 
 
 
