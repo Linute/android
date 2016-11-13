@@ -295,11 +295,11 @@ public class Post extends BaseFeedItem implements Parcelable {
     }
 
     public String getUserName() {
-        return mUserName;
+        return mPrivacy == 1 ? "Anonymous" : mUserName;
     }
 
     public String getUserImage() {
-        return mUserImage;
+        return mPrivacy == 1 ? mAnonImage : mUserImage;
     }
 
     public String getTitle() {
@@ -532,6 +532,8 @@ public class Post extends BaseFeedItem implements Parcelable {
     }
 
     private void shareImagePost(final Context mContext, final OnUriReadyListener listener) {
+        listener.onUriProgress(10);
+
         Glide.with(mContext).load(getImage()).asBitmap().into(new SimpleTarget<Bitmap>(){
             @Override
             public void onResourceReady(final Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
@@ -539,19 +541,22 @@ public class Post extends BaseFeedItem implements Parcelable {
                 Glide.with(mContext).load(getUserImage()).asBitmap().into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(Bitmap profileImage, GlideAnimation<? super Bitmap> glideAnimation) {
+                        listener.onUriProgress(50);
+
                         View header = LayoutInflater.from(mContext).inflate(R.layout.trending_name_header, null, false);
-                        ((ImageView)header.findViewById(R.id.feedDetail_profile_image)).setImageBitmap(profileImage);
-                        ((TextView)header.findViewById(R.id.feedDetail_user_name)).setText(getUserName());
-                        ((TextView)header.findViewById(R.id.feedDetail_time_stamp)).setVisibility(View.GONE);
-                        ((TextView)header.findViewById(R.id.college_name)).setText(getCollegeName());
+                        ((ImageView) header.findViewById(R.id.feedDetail_profile_image)).setImageBitmap(profileImage);
+                        ((TextView) header.findViewById(R.id.feedDetail_user_name)).setText(getUserName());
+                        ((TextView) header.findViewById(R.id.feedDetail_time_stamp)).setVisibility(View.GONE);
+                        ((TextView) header.findViewById(R.id.college_name)).setText(getCollegeName());
 
 
                         int width = mContext.getResources().getDisplayMetrics().widthPixels;
                         header.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-                        header.layout(0,0,width, header.getMeasuredHeight());
+                        header.layout(0, 0, width, header.getMeasuredHeight());
 
-                        int bitmapHeight = (int)((float)header.getWidth() / resource.getWidth() * resource.getHeight());
-                        Bitmap returnedBitmap = Bitmap.createBitmap(header.getWidth(), header.getHeight()+bitmapHeight, Bitmap.Config.ARGB_8888);
+                        int bitmapHeight = (int) ((float) header.getWidth() / resource.getWidth() * resource.getHeight());
+                        Bitmap returnedBitmap = Bitmap.createBitmap(header.getWidth(), header.getHeight() + bitmapHeight, Bitmap.Config.ARGB_8888);
+
                         Canvas canvas = new Canvas(returnedBitmap);
                         Drawable bgDrawable = header.getBackground();
                         if (bgDrawable != null)
@@ -560,12 +565,15 @@ public class Post extends BaseFeedItem implements Parcelable {
                             canvas.drawColor(Color.WHITE);
                         header.draw(canvas);
 
+                        listener.onUriProgress(75);
+
+
 //                        int savecount = canvas.save();
 //                        canvas.translate(0, header.getHeight());
-                        Rect src = new Rect(0,0,resource.getWidth(), resource.getHeight());
+                        Rect src = new Rect(0, 0, resource.getWidth(), resource.getHeight());
 
                         Rect dest = new Rect(0, header.getHeight(), canvas.getWidth(), canvas.getHeight());
-                        canvas.drawBitmap(resource,src,dest,null);
+                        canvas.drawBitmap(resource, src, dest, null);
 //                        canvas.restoreToCount(savecount);
 
                         Uri uri = ImageUtility.savePicture(mContext, returnedBitmap);
@@ -576,7 +584,19 @@ public class Post extends BaseFeedItem implements Parcelable {
 //                        profileImage.recycle();
                         listener.onUriReady(uri);
                     }
+
+                    @Override
+                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                        super.onLoadFailed(e, errorDrawable);
+                        listener.onUriFail(e);
+                    }
                 });
+            }
+
+            @Override
+            public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                super.onLoadFailed(e, errorDrawable);
+                listener.onUriFail(e);
             }
         });
     }
@@ -610,7 +630,7 @@ public class Post extends BaseFeedItem implements Parcelable {
 
                 Bitmap returnedBitmap = Bitmap.createBitmap(header.getWidth(), header.getHeight(), Bitmap.Config.ARGB_8888);
 
-                Canvas canvas = new Canvas(returnedBitmap);
+                final Canvas canvas = new Canvas(returnedBitmap);
                 canvas.drawColor(Color.WHITE);
                 header.draw(canvas);
 
@@ -619,6 +639,7 @@ public class Post extends BaseFeedItem implements Parcelable {
                 retriever.setDataSource(getVideoUrl(), API_Methods.getMainHeader(new LSDKUser(mContext).getToken()));
                 int vidWidth = retriever.getFrameAtTime(0).getWidth();
                 int vidHeight = retriever.getFrameAtTime(0).getHeight();
+                final int totalFrames = (int)(Long.parseLong(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION))/1000.0 * 24);
 
                 int headWidth = vidWidth;
                 int headHeight = (int)((float)vidWidth/returnedBitmap.getWidth() * returnedBitmap.getHeight());
@@ -668,18 +689,25 @@ public class Post extends BaseFeedItem implements Parcelable {
                                 ffmpeg.execute(cmds, new FFmpegExecuteResponseHandler() {
                                     @Override
                                     public void onSuccess(String message) {
-                                        Log.i("ffmpeg", message);
+//                                        Log.i("ffmpeg", message);
                                         listener.onUriReady(Uri.parse(outputFile));
+//                                        listener.onUriFail(new Exception("hi"));
                                     }
 
                                     @Override
                                     public void onProgress(String message) {
                                         Log.i("ffmpeg", message);
+                                        int frames = message.indexOf("frame=") + "frame=".length();
+                                        if(frames == "frame=".length()-1){return;}
+                                        String currentFrame = message.substring(frames,
+                                                message.indexOf("fps="));
+                                        int currentFrameIndex = Integer.parseInt(currentFrame.trim());
+                                        listener.onUriProgress((int)(100.0*currentFrameIndex/totalFrames));
                                     }
 
                                     @Override
                                     public void onFailure(String message) {
-                                        Log.i("ffmpeg", message);
+//                                        Log.i("ffmpeg", message);
                                     }
 
                                     @Override
@@ -689,7 +717,7 @@ public class Post extends BaseFeedItem implements Parcelable {
 
                                     @Override
                                     public void onFinish() {
-                                        Log.i("ffmpeg", "fin");
+//                                        Log.i("ffmpeg", "fin");
                                         new File(headerInput).delete();
                                     }
                                 });

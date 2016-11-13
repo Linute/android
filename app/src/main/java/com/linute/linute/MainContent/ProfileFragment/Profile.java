@@ -31,6 +31,7 @@ import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.ShareUtil;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
@@ -632,12 +633,12 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
     }
 
     @Override
-    public void startShare(final BaseFeedItem bfi, int position) {
+    public void startShare(final BaseFeedItem bfi, BaseFeedAdapter.ShareProgressListener listener) {
         if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)  == PackageManager.PERMISSION_DENIED){
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERM_REQ_WRITE_FOR_SHARE);
             shareItem = bfi;
         }else{
-            BaseFeedItem.share(bfi, getContext());
+            ShareUtil.share(bfi, getContext(), listener);
         }
     }
 
@@ -954,9 +955,9 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode){
             case PERM_REQ_WRITE_FOR_SHARE:
-                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    BaseFeedItem.share(shareItem, getContext());
-                }else{
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    ShareUtil.share(shareItem, getContext(), null);
+                else{
                     Toast.makeText(getContext(), "Tapt need to make a file to share", Toast.LENGTH_SHORT).show();
                 }
         }

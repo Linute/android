@@ -59,6 +59,10 @@ public abstract class BaseFeedAdapter extends RecyclerView.Adapter<RecyclerView.
 
     public interface PostAction{
         void clickedOptions(BaseFeedItem bfi, int position);
-        void startShare(BaseFeedItem bfi, int position);
+        void startShare(BaseFeedItem bfi, ShareProgressListener progressListener);
+    }
+
+    public interface ShareProgressListener{
+        public void updateShareProgress(int progress);
     }
 }

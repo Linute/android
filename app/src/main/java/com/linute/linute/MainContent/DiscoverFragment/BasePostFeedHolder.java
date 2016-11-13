@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.github.lzyzsd.circleprogress.DonutProgress;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
@@ -21,6 +22,7 @@ import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.ProfileImageView;
 
@@ -190,7 +192,7 @@ public abstract class BasePostFeedHolder extends RecyclerView.ViewHolder impleme
     @Override
     public void onClick(View v) {
 
-        BaseTaptActivity activity = (BaseTaptActivity) mContext;
+        final BaseTaptActivity activity = (BaseTaptActivity) mContext;
 
         if (activity == null || mPost == null) return;
 
@@ -219,7 +221,52 @@ public abstract class BasePostFeedHolder extends RecyclerView.ViewHolder impleme
                     FeedDetailPage.newInstance(mPost)
             );
         }else if(v == vShareButton){
-            mPostAction.startShare(mPost,getAdapterPosition());
+            vShareButton.findViewById(R.id.shareProgress).setVisibility(View.VISIBLE);
+            vShareButton.findViewById(R.id.postShare).setVisibility(View.GONE);
+            mPostAction.startShare(mPost, new BaseFeedAdapter.ShareProgressListener() {
+                        @Override
+                        public void updateShareProgress(final int progress) {
+                            vShareButton.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    final DonutProgress donutProgress = (DonutProgress) vShareButton.findViewById(R.id.shareProgress);
+                                    donutProgress.setProgress(progress);
+                                    if(progress == 100 || progress == -1){
+                                        if(progress == -1){
+                                            CustomSnackbar.make(activity.findViewById(android.R.id.content), "Share Failed", CustomSnackbar.LENGTH_SHORT).setBackgroundColor(R.color.white).show();
+//                                            Toast.makeText(mContext, "Share failed", Toast.LENGTH_SHORT).show();
+                                            donutProgress.setProgress(100);
+                                            donutProgress.setText("X");
+                                            int red = mContext.getResources().getColor(R.color.red);
+                                            donutProgress.setTextColor(red);
+                                            donutProgress.setFinishedStrokeColor(red);
+                                        }else{
+                                            donutProgress.setProgress(100);
+                                            donutProgress.setText("✓");
+                                            int green = mContext.getResources().getColor(R.color.green_color);
+                                            donutProgress.setTextColor(green);
+                                            donutProgress.setFinishedStrokeColor(green);
+
+                                        }
+                                        vShareButton.postDelayed(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                vShareButton.findViewById(R.id.shareProgress).setVisibility(View.GONE);
+                                                donutProgress.setProgress(0);
+                                                donutProgress.setText(null);
+                                                int blue = mContext.getResources().getColor(R.color.blue_color);
+                                                donutProgress.setTextColor(blue);
+                                                donutProgress.setFinishedStrokeColor(blue);
+                                                vShareButton.findViewById(R.id.postShare).setVisibility(View.VISIBLE);
+                                            }
+                                        },1500);
+                                    }
+                                }
+                            });
+                        }
+                    });
         }
     }
+
+
 }
