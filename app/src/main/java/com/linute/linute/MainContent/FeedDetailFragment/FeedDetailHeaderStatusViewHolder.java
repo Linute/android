@@ -20,8 +20,8 @@ public class FeedDetailHeaderStatusViewHolder extends StatusFeedHolder {
 
     public static final String TAG = FeedDetailHeaderStatusViewHolder.class.getSimpleName();
 
-    public FeedDetailHeaderStatusViewHolder(View view, Context context, RequestManager manager){
-        super(view, context, manager, null);
+    public FeedDetailHeaderStatusViewHolder(View view, Context context, RequestManager manager, BaseFeedAdapter.PostAction action){
+        super(view, context, manager, action);
         view.findViewById(R.id.more).setVisibility(View.INVISIBLE);
     }
 

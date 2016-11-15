@@ -18,8 +18,8 @@ import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
  */
 public class FeedDetailHeaderVideoViewHolder extends VideoFeedHolder {
 
-    public FeedDetailHeaderVideoViewHolder(View view, Context context, RequestManager manager){
-        super(view, context, manager, null);
+    public FeedDetailHeaderVideoViewHolder(View view, Context context, RequestManager manager, BaseFeedAdapter.PostAction action){
+        super(view, context, manager, action);
         view.findViewById(R.id.more).setVisibility(View.INVISIBLE);
     }
 

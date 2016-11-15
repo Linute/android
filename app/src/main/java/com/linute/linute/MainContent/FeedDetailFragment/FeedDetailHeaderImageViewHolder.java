@@ -20,8 +20,8 @@ public class FeedDetailHeaderImageViewHolder extends ImageFeedHolder {
     public static final String TAG = FeedDetailHeaderImageViewHolder.class.getSimpleName();
 
 
-    public FeedDetailHeaderImageViewHolder(final View itemView, Context context, RequestManager manager) {
-        super(itemView, context, manager, null);
+    public FeedDetailHeaderImageViewHolder(final View itemView, Context context, RequestManager manager, BaseFeedAdapter.PostAction action) {
+        super(itemView, context, manager, action);
         itemView.findViewById(R.id.more).setVisibility(View.INVISIBLE);
     }
 
