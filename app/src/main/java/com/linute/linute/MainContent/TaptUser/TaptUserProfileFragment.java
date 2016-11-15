@@ -137,7 +137,8 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                if(!isLinearFeed && (position == 0 || position == 1 || position == mPosts.size() + 2))
+                //headers, load more , or empty view
+                if(!isLinearFeed && (position == 0 || position == 1 || position == mPosts.size() + 2 || (position == 2 && mPosts.get(0) == null)))
                     return 3;
                 else return 1;
             }
