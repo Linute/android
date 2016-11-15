@@ -3,7 +3,7 @@ package com.linute.linute.MainContent.Global.Articles;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -24,6 +24,7 @@ public class ArticleFragment extends Fragment {
     private ArticleElementAdapter mAdapter;
 
     private static final String ARG_ARTICLE = "article";
+    private GridLayoutManager mLayoutManager;
 
     public static ArticleFragment newInstance(Article article){
         Bundle args = new Bundle();
@@ -47,7 +48,7 @@ public class ArticleFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_article, container, false);
+        final View view = inflater.inflate(R.layout.fragment_article, container, false);
 
         Toolbar toolbar = (Toolbar)view.findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
@@ -62,7 +63,20 @@ public class ArticleFragment extends Fragment {
         mRecyclerView = (RecyclerView)view.findViewById(R.id.recycler_view);
         mAdapter = new ArticleElementAdapter(mArticle.elements);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mLayoutManager = new GridLayoutManager(getContext(), 2);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        mLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                int viewType = mAdapter.getItemViewType(position);
+                if(viewType == ArticleElement.ElementTypes.AUTHOR || viewType == ArticleElement.ElementTypes.DATE){
+                    return 1;
+                }
+                return 2;
+            }
+        });
+
 
         return view;
     }

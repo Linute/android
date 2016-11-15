@@ -153,7 +153,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<ArticleElementAd
 
         @Override
         public void bind(ArticleElement element) {
-            String data = "<html><body><img src=\""+element.content+"\"></body></html>";
+            String data = "<html><body><img style='display:block; width:100%' src=\""+element.content+"\"></body></html>";
             vWeb.loadData(data, "text/html", null);
         }
     }

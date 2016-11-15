@@ -5,6 +5,11 @@
     <TextView
         android:id="@+id/text"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:gravity="right"
+        android:textSize="8sp"
+        android:textColor="#ffa5a5a5"
+        android:fontFamily="sans-serif-condensed"
+        />
 
 </FrameLayout>
