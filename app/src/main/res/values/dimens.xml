@@ -104,6 +104,11 @@
     <dimen name="profile_border_width">1dp</dimen>
     <dimen name="margin_empty_screen">48dp</dimen>
     <dimen name="margin_empty_image">0dp</dimen>
+    <dimen name="article_menu_item_width">120dp</dimen>
+    <dimen name="article_menu_text_size">12sp</dimen>
+    <dimen name="article_menu_icon_radius">36dp</dimen>
+    <dimen name="article_menu_height">52dp</dimen>
+    <dimen name="article_menu_total_height">80dp</dimen>
 
 
 </resources>

@@ -20,7 +20,7 @@ public class Article extends GlobalChoiceItem{
     public final ArrayList<ArticleElement> elements = new ArrayList<>();
 
     public Article(JSONObject json) throws JSONException{
-        super(json.getJSONObject("event").getString("title"), json.getJSONObject("event").getString("description"), json.getJSONObject("event").getJSONArray("images").getString(0), json.getJSONObject("event").getString("id"), TYPE_ARTICLE);
+        super(json.getString("title"), json.getString("description"), json.getJSONArray("images").getString(0), json.getString("id"), TYPE_ARTICLE);
 
         JSONArray elementsJson = json.getJSONArray("content");
         for(int i=0;i<elementsJson.length();i++){

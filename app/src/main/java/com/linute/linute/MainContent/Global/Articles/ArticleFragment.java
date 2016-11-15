@@ -16,7 +16,7 @@ import com.linute.linute.R;
  * Created by mikhail on 10/25/16.
  */
 
-public class ArticleFragment extends Fragment {
+public class ArticleFragment extends Fragment implements View.OnClickListener{
 
     private Article mArticle;
 
@@ -25,6 +25,9 @@ public class ArticleFragment extends Fragment {
 
     private static final String ARG_ARTICLE = "article";
     private GridLayoutManager mLayoutManager;
+    private View vLikeButton;
+    private View vCommentButton;
+    private View vShareButton;
 
     public static ArticleFragment newInstance(Article article){
         Bundle args = new Bundle();
@@ -78,6 +81,36 @@ public class ArticleFragment extends Fragment {
         });
 
 
+        //menu
+        vLikeButton = view.findViewById(R.id.menu_like);
+        vCommentButton = view.findViewById(R.id.menu_comment);
+        vShareButton = view.findViewById(R.id.menu_share);
+
+        vLikeButton.setOnClickListener(this);
+        vCommentButton.setOnClickListener(this);
+        vShareButton.setOnClickListener(this);
+
+
         return view;
     }
+
+
+    @Override
+    public void onClick(View v) {
+        if(v == vLikeButton){
+            like();
+        }else if()
+    }
+
+    private void like(){
+
+    }
+
+    private void openComments(){
+
+    }
+
+    private void
+
+
 }
