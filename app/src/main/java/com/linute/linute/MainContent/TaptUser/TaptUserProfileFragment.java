@@ -1,11 +1,16 @@
 package com.linute.linute.MainContent.TaptUser;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
@@ -27,6 +32,7 @@ import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.ShareUtil;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.ProfileFragment.ProfileAdapter;
@@ -55,6 +61,8 @@ import java.util.Map;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+
+import static com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedFragment.PERM_REQ_WRITE_FOR_SHARE;
 
 /**
  * Created by Arman on 1/9/16.
@@ -88,6 +96,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
     private boolean isLinearFeed = false;
 
+    BaseFeedItem shareItem;
     //private boolean mUserNameVisible = false;
 
     public TaptUserProfileFragment() {
@@ -921,6 +930,16 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                 }).show();
     }
 
+    @Override
+    public void startShare(final BaseFeedItem bfi, BaseFeedAdapter.ShareProgressListener listener) {
+        if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)  == PackageManager.PERMISSION_DENIED){
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERM_REQ_WRITE_FOR_SHARE);
+            shareItem = bfi;
+        }else{
+            ShareUtil.share(bfi, getContext(), listener);
+        }
+    }
+
     private void confirmDeletePost(final Post p, final int position) {
         if (getContext() == null) return;
         mAlertDialog = new AlertDialog.Builder(getActivity())
@@ -1230,5 +1249,18 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null)
             activity.addFragmentOnTop(SendToFragment.newInstance(p.getId()), "send_to");
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case PERM_REQ_WRITE_FOR_SHARE:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    ShareUtil.share(shareItem, getContext(), null);
+                }else{
+                    Toast.makeText(getContext(), "Tapt need to make a file to share", Toast.LENGTH_SHORT).show();
+                }
+        }
     }
 }

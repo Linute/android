@@ -194,6 +194,7 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize"
             />
+        <activity android:name=".MainContent.SendTo.SendToActivity" />
 
         <service
             android:name=".MainContent.Uploading.UploadIntentService"

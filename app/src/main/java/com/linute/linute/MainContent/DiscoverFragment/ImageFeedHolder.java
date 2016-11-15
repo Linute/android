@@ -16,6 +16,7 @@ import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -235,4 +236,21 @@ public class ImageFeedHolder extends BasePostFeedHolder {
                 })
                 .into(vPostImage);
     }
+
+    public static final class ShareViewHolder extends ImageFeedHolder {
+            TextView vCollegeText;
+
+        ShareViewHolder(View itemView, Context context, RequestManager requestManager, BaseFeedAdapter.PostAction action) {
+                super(itemView, context, requestManager, action);
+                vCollegeText = (TextView) itemView.findViewById(R.id.college_name);
+            vPostTime.setVisibility(View.GONE);
+        }
+
+            @Override
+            public void bindModel(Post post) {
+                super.bindModel(post);
+                vCollegeText.setText(post.getCollegeName());
+            }
+    }
+
 }
