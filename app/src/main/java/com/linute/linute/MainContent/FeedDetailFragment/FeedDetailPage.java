@@ -1,16 +1,19 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -49,6 +52,7 @@ import com.linute.linute.MainContent.CreateContent.Gallery.GalleryActivity;
 import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.ShareUtil;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.MainContent.MainActivity;
@@ -57,6 +61,7 @@ import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
@@ -84,13 +89,14 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedFragment.PERM_REQ_WRITE_FOR_SHARE;
 
 /**
  * Created by Arman on 1/11/16.
  */
 
 public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, SocketListener,
-        SuggestionsResultListener, SuggestionsVisibilityManager, FeedDetailAdapter.CommentActions {
+        SuggestionsResultListener, SuggestionsVisibilityManager, FeedDetailAdapter.CommentActions, BaseFeedAdapter.PostAction {
 
     private static final int CAMERA_GALLERY_REQUEST = 65;
     private static final String TAG = BaseFeedDetail.class.getSimpleName();
@@ -128,6 +134,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     protected TaptSocket mTaptSocket = TaptSocket.getInstance();
 
     private boolean mSendCommentEnabled = false;
+    private BaseFeedItem shareItem;
 
     public FeedDetailPage() {
     }
@@ -205,6 +212,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, Glide.with(this), getContext());
         mFeedDetailAdapter.setCommentActions(this);
+        mFeedDetailAdapter.setPostAction(this);
         recList.setAdapter(mFeedDetailAdapter);
         mFeedDetailAdapter.setLoadMoreCommentsRunnable(new Runnable() {
             @Override
@@ -1699,6 +1707,20 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         });
     }
 
+    @Override
+    public void clickedOptions(BaseFeedItem bfi, int position) {
+        //unused
+    }
+
+    @Override
+    public void startShare(final BaseFeedItem bfi, BaseFeedAdapter.ShareProgressListener listener) {
+        if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)  == PackageManager.PERMISSION_DENIED){
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERM_REQ_WRITE_FOR_SHARE);
+            shareItem = bfi;
+        }else{
+            ShareUtil.share(bfi, getContext(), listener);
+        }
+    }
 
     /* Report Comment */
 

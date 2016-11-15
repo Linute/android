@@ -27,6 +27,7 @@ import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -40,7 +41,7 @@ import static com.linute.linute.MainContent.DiscoverFragment.Post.POST_TYPE_IMAG
  * Created by Arman on 1/13/16.
  */
 
-public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHolder> {
+public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHolder>{
     private static final int TYPE_IMAGE_HEADER = 0;
     private static final int TYPE_STATUS_HEADER = 1;
     private static final int TYPE_COMMENT_TEXT = 2;
@@ -61,6 +62,12 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     private String mImageSignature;
 
     private RequestManager mRequestManager;
+
+    private BaseFeedAdapter.PostAction mPostAction;
+
+    public void setPostAction(BaseFeedAdapter.PostAction action){
+        mPostAction = action;
+    }
 
     public FeedDetailAdapter(BaseFeedDetail feedDetail, RequestManager manager, Context context) {
         this.context = context;
@@ -104,19 +111,22 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                         .from(parent.getContext())
                         .inflate(R.layout.feed_detail_header_image, parent, false),
                         context,
-                        mRequestManager);
+                        mRequestManager,
+                        mPostAction);
             case TYPE_STATUS_HEADER:
                 return new FeedDetailHeaderStatusViewHolder(
                         LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.feed_detail_header_status, parent, false),
                         context,
-                        mRequestManager);
+                        mRequestManager,
+                        mPostAction);
             case TYPE_VIDEO_HEADER:
                 return new FeedDetailHeaderVideoViewHolder(LayoutInflater
                         .from(parent.getContext())
                         .inflate(R.layout.feed_detail_header_video, parent, false),
                         context,
-                        mRequestManager);
+                        mRequestManager,
+                        mPostAction);
             case TYPE_LOAD_MORE:
                 return new LoadMoreViewHolder(LayoutInflater
                         .from(parent.getContext())
