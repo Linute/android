@@ -45,14 +45,23 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == GlobalChoiceItem.TYPE_TREND)
-            return new TrendingChoiceViewHolder(
-                    LayoutInflater.from(parent.getContext())
-                            .inflate(R.layout.global_item, parent, false));
+        switch(viewType){
+            case GlobalChoiceItem.TYPE_TREND:
+            case GlobalChoiceItem.TYPE_ARTICLE:
+                return new TrendingChoiceViewHolder(
+                        LayoutInflater.from(parent.getContext())
+                                .inflate(R.layout.global_item, parent, false));
+            case GlobalChoiceItem.TYPE_HEADER_FRIEND:
+            case GlobalChoiceItem.TYPE_HEADER_HOT:
+                return new HeaderViewHolder(
+                        LayoutInflater.from(parent.getContext())
+                                .inflate(R.layout.global_header_items, parent, false));
+            default:
+                return new TrendingChoiceViewHolder(
+                        LayoutInflater.from(parent.getContext())
+                                .inflate(R.layout.global_item, parent, false));
 
-        return new HeaderViewHolder(
-                LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.global_header_items, parent, false));
+        }
     }
 
     @Override

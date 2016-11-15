@@ -22,6 +22,8 @@ import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
+import com.linute.linute.MainContent.Global.Articles.Article;
+import com.linute.linute.MainContent.Global.Articles.ArticleFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -105,7 +107,16 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
             @Override
             public int getSpanSize(int position) {
                 //headers are 1 span
-                return mGlobalChoiceItems.get(position).type == GlobalChoiceItem.TYPE_TREND ? 2 : 1;
+                switch (mGlobalChoiceItems.get(position).type) {
+                    case GlobalChoiceItem.TYPE_TREND:
+                    case GlobalChoiceItem.TYPE_ARTICLE:
+                        return 2;
+                    case GlobalChoiceItem.TYPE_HEADER_FRIEND:
+                    case GlobalChoiceItem.TYPE_HEADER_HOT:
+                        return 1;
+                    default:
+                        return 2;
+                }
             }
         });
 
@@ -159,6 +170,8 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
         vSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                mGlobalChoiceItems.clear();
+                getArticles();
                 getChoices();
             }
         });
@@ -185,6 +198,8 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                     vSwipe.setRefreshing(true);
                 }
             });
+            mGlobalChoiceItems.clear();
+            getArticles();
             getChoices();
         } else if (mGlobalChoiceItems.isEmpty()) {
             vEmpty.setVisibility(View.VISIBLE);
@@ -235,7 +250,111 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        mGlobalChoiceItems.clear();
+        getArticles();
         getChoices();
+    }
+
+    public void getArticles() {
+        setFragmentState(FragmentState.LOADING_DATA);
+
+        new LSDKGlobal(getContext()).getArticles(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (isViewLoaded()) vSwipe.setRefreshing(false);
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+
+                    try {
+                        JSONArray articles = new JSONObject(response.body().string()).getJSONArray("articles");
+
+                        // Log.d(TAG, "onResponse: " + articles.toString(4));
+                        final ArrayList<GlobalChoiceItem> tempList = new ArrayList<>();
+                        JSONObject article;
+
+//                        addTestArticle(tempList);
+                        GlobalChoiceItem item;
+
+
+                        for (int i = 0; i < articles.length(); i++) {
+                            try {
+
+                                article = articles.getJSONObject(i);
+                                   item = new Article(
+                                            article
+                                    );
+                                tempList.add(item);
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+//                        GlobalChoiceItem.sort(tempList);
+
+
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (isViewLoaded()) {
+                                        vSwipe.setRefreshing(false);
+                                    }
+                                    mHandler.removeCallbacksAndMessages(null);
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+//                                            mGlobalChoiceItems.clear();
+                                            mGlobalChoiceItems.addAll(tempList);
+                                            if (isViewLoaded()) {
+                                                mGlobalChoicesAdapter.notifyDataSetChanged();
+                                                vEmpty.setVisibility(mGlobalChoiceItems.isEmpty() ? View.VISIBLE : View.GONE);
+                                            }
+                                        }
+                                    });
+
+                                    setFragmentState(FragmentState.NEEDS_UPDATING);
+                                }
+                            });
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                    if (vSwipe != null)
+                                        vSwipe.setRefreshing(false);
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                                if (vSwipe != null)
+                                    vSwipe.setRefreshing(false);
+                            }
+                        });
+                    }
+                }
+            }
+        });
     }
 
     public void getChoices() {
@@ -251,7 +370,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if(isViewLoaded()) vSwipe.setRefreshing(false);
+                            if (isViewLoaded()) vSwipe.setRefreshing(false);
                             Utils.showBadConnectionToast(getActivity());
                         }
                     });
@@ -270,18 +389,25 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                         JSONObject trend;
 
                         addHotAndFriends(tempList);
+//                        addTestArticle(tempList);
                         GlobalChoiceItem item;
+
 
                         for (int i = 0; i < trends.length(); i++) {
                             try {
-
                                 trend = trends.getJSONObject(i);
-                                item = new GlobalChoiceItem(
-                                        trend.getString("name"),
-                                        trend.getString("description"),
-                                        trend.getString("image"),
-                                        trend.getString("id")
-                                );
+                                if (trend.has("type") && trend.getString("type").equals("article")) {
+                                    item = new Article(
+                                            trend
+                                    );
+                                } else {
+                                    item = new GlobalChoiceItem(
+                                            trend.getString("name"),
+                                            trend.getString("description"),
+                                            trend.getString("image"),
+                                            trend.getString("id")
+                                    );
+                                }
                                 item.setUnread(trend.getInt("badge"));
                                 tempList.add(item);
 
@@ -297,16 +423,16 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if(isViewLoaded()){
+                                    if (isViewLoaded()) {
                                         vSwipe.setRefreshing(false);
                                     }
                                     mHandler.removeCallbacksAndMessages(null);
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            mGlobalChoiceItems.clear();
+//                                            mGlobalChoiceItems.clear();
                                             mGlobalChoiceItems.addAll(tempList);
-                                            if(isViewLoaded()){
+                                            if (isViewLoaded()) {
                                                 mGlobalChoicesAdapter.notifyDataSetChanged();
                                                 vEmpty.setVisibility(mGlobalChoiceItems.isEmpty() ? View.VISIBLE : View.GONE);
                                             }
@@ -385,13 +511,24 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     public void goToTrend(GlobalChoiceItem item) {
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
-            activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item), "TREND");
+            if (item.type == GlobalChoiceItem.TYPE_ARTICLE)
+                activity.addFragmentToContainer(ArticleFragment.newInstance((Article) item));
+            else
+                activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item), "TREND");
         }
     }
 
     private void addHotAndFriends(ArrayList<GlobalChoiceItem> items) {
         items.add(new GlobalChoiceItem("Hottest", null, GlobalChoiceItem.TYPE_HEADER_HOT));
         items.add(new GlobalChoiceItem("Friends", null, GlobalChoiceItem.TYPE_HEADER_FRIEND));
+    }
+
+    private void addTestArticle(ArrayList<GlobalChoiceItem> items) {
+        try {
+            items.add(new Article(ARTICLE_JSON));
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -402,4 +539,35 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
 
         mGlobalChoicesAdapter.setRequestManager(null);
     }
+
+
+    public static JSONObject ARTICLE_JSON;
+
+            static {
+                try {
+                    ARTICLE_JSON = new JSONObject(
+                            "{"
+                                    + "	\"id\" : \"0\","
+                                    + "	\"date\" : \"04/05/2016\","
+                                    + "	\"publisher\" : \"Mikhail Foenko\","
+                                    + "	\"authors\" : [\"Mikhail Foenko\"],"
+                                    + "	\"color\" : \"FFFFFF\","
+                                    + "	\"title\" : \"Somethign about CCNY\","
+                                    + "	\"image\" : \"http://ccnycampus.org/wp-content/blogs.dir/5/files/2016/09/Screen-Shot-2016-09-15-at-3.48.40-PM.png\","
+                                    + "	\"content\" : ["
+                                    + "		{"
+                                    + "			\"type\":\"paragraph\","
+                                    + "			\"data\":\"lisa stole money or some shit\""
+                                    + "		},"
+                                    + "		{"
+                                    + "			\"type\":\"image\","
+                                    + "			\"data\":\"http://ccnycampus.org/wp-content/blogs.dir/5/files/2016/09/Screen-Shot-2016-09-15-at-3.48.40-PM.png\""
+                                    + "		}"
+                                    + "	]"
+                                    + "}");
+                }catch(JSONException e){
+                    e.printStackTrace();
+                    ARTICLE_JSON = new JSONObject();
+                }
+            }
 }
