@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -127,19 +128,29 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<ArticleElementAd
         }
     }
 
-    private static class ImageElementVH extends ElementVH{
+    private class ImageElementVH extends ElementVH{
 
         private final ImageView vImage;
+        private final ProgressBar vProgressBar;
+
         ImageElementVH(View itemView) {
             super(itemView);
             vImage = (ImageView)itemView.findViewById(R.id.image);
+            vProgressBar = (ProgressBar)itemView.findViewById(R.id.progress_bar);
         }
 
         @Override
         public void bind(ArticleElement element) {
+            /*vImage.setVisibility(View.GONE);
+            vProgressBar.setVisibility(View.VISIBLE);*/
+
+
+
             Glide.with(itemView.getContext())
                     .load(element.content)
+                    .placeholder(R.drawable.image_loading_background)
                     .into(vImage);
+
         }
     }
 

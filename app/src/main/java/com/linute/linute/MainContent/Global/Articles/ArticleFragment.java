@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ import com.linute.linute.R;
  */
 
 public class ArticleFragment extends Fragment implements View.OnClickListener{
+
+    public static final String TAG = ArticleFragment.class.getSimpleName();
 
     private Article mArticle;
 
@@ -44,7 +47,18 @@ public class ArticleFragment extends Fragment implements View.OnClickListener{
         Bundle args = getArguments();
         if(args != null){
             mArticle = args.getParcelable(ARG_ARTICLE);
+            Log.d(TAG, mArticle.elements.toString());
         }
+
+        //Preload article images
+       /* if(mArticle != null){
+            RequestManager glide = Glide.with(this);
+            for(ArticleElement element : mArticle.elements){
+                if(element.type == ArticleElement.ElementTypes.IMAGE){
+                    glide.load(element.content);
+                }
+            }
+        }*/
     }
 
     @Nullable
@@ -98,11 +112,15 @@ public class ArticleFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onClick(View v) {
         if(v == vLikeButton){
-            like();
-        }//else if()
+            toggleLike();
+        }else if(v == vCommentButton){
+            openComments();
+        }else if(v == vShareButton){
+            startShare();
+        }
     }
 
-    private void like(){
+    private void toggleLike(){
 
     }
 
@@ -110,7 +128,9 @@ public class ArticleFragment extends Fragment implements View.OnClickListener{
 
     }
 
-    //private void
+    private void startShare(){
+
+    }
 
 
 }
