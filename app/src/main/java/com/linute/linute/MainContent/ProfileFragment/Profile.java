@@ -149,10 +149,9 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                                    //profile info     view switch         load more footer
-                if(!isLinearFeed && (position == 0 || position == 1 || position == mPosts.size() + 2))
+                                    //profile info     view switch         load more footer                 //empty view holder
+                if(!isLinearFeed && (position == 0 || position == 1 || position == mPosts.size() + 2 || (position == 2 && mPosts.get(0) == null)))
                     return 3;
-
                 else return 1;
             }
         });
