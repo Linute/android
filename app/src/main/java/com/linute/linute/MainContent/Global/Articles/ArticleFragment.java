@@ -11,13 +11,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.linute.linute.R;
 
 /**
  * Created by mikhail on 10/25/16.
  */
 
-public class ArticleFragment extends Fragment implements View.OnClickListener{
+public class ArticleFragment extends Fragment implements View.OnClickListener {
 
     public static final String TAG = ArticleFragment.class.getSimpleName();
 
@@ -28,11 +30,13 @@ public class ArticleFragment extends Fragment implements View.OnClickListener{
 
     private static final String ARG_ARTICLE = "article";
     private GridLayoutManager mLayoutManager;
+
+    private View vMenu;
     private View vLikeButton;
     private View vCommentButton;
     private View vShareButton;
 
-    public static ArticleFragment newInstance(Article article){
+    public static ArticleFragment newInstance(Article article) {
         Bundle args = new Bundle();
         args.putParcelable(ARG_ARTICLE, article);
 
@@ -45,20 +49,18 @@ public class ArticleFragment extends Fragment implements View.OnClickListener{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
-        if(args != null){
+        if (args != null) {
             mArticle = args.getParcelable(ARG_ARTICLE);
             Log.d(TAG, mArticle.elements.toString());
         }
 
         //Preload article images
-       /* if(mArticle != null){
+        if (mArticle != null) {
             RequestManager glide = Glide.with(this);
-            for(ArticleElement element : mArticle.elements){
-                if(element.type == ArticleElement.ElementTypes.IMAGE){
-                    glide.load(element.content);
-                }
+            for (ArticleElement element : mArticle.elements) {
+                Log.d(TAG, element.toString());
             }
-        }*/
+        }
     }
 
     @Nullable
@@ -67,7 +69,7 @@ public class ArticleFragment extends Fragment implements View.OnClickListener{
         super.onCreateView(inflater, container, savedInstanceState);
         final View view = inflater.inflate(R.layout.fragment_article, container, false);
 
-        Toolbar toolbar = (Toolbar)view.findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,8 +79,8 @@ public class ArticleFragment extends Fragment implements View.OnClickListener{
         });
 
 
-        mRecyclerView = (RecyclerView)view.findViewById(R.id.recycler_view);
-        mAdapter = new ArticleElementAdapter(mArticle.elements);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        mAdapter = new ArticleElementAdapter(mArticle);
         mRecyclerView.setAdapter(mAdapter);
         mLayoutManager = new GridLayoutManager(getContext(), 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -87,15 +89,30 @@ public class ArticleFragment extends Fragment implements View.OnClickListener{
             @Override
             public int getSpanSize(int position) {
                 int viewType = mAdapter.getItemViewType(position);
-                if(viewType == ArticleElement.ElementTypes.AUTHOR || viewType == ArticleElement.ElementTypes.DATE){
+                if (viewType == ArticleElement.ElementTypes.AUTHOR || viewType == ArticleElement.ElementTypes.DATE) {
                     return 1;
                 }
                 return 2;
             }
         });
 
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            int lastVisibleItem = 0;
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                lastVisibleItem = mLayoutManager.findFirstCompletelyVisibleItemPosition();
+                if(mLayoutManager.findFirstCompletelyVisibleItemPosition()>0 && lastVisibleItem == 0){
+                    showMenu();
+                }else if(mLayoutManager.findFirstVisibleItemPosition() == 0 && lastVisibleItem != 0){
+                    hideMenu();
+                }
+            }
+        });
 
         //menu
+        vMenu = view.findViewById(R.id.menu);
         vLikeButton = view.findViewById(R.id.menu_like);
         vCommentButton = view.findViewById(R.id.menu_comment);
         vShareButton = view.findViewById(R.id.menu_share);
@@ -104,31 +121,41 @@ public class ArticleFragment extends Fragment implements View.OnClickListener{
         vCommentButton.setOnClickListener(this);
         vShareButton.setOnClickListener(this);
 
-
         return view;
     }
 
+    private void showMenu(){
+        int screenHeight = getResources().getDisplayMetrics().heightPixels;
+        vMenu.clearAnimation();
+        vMenu.animate().y(screenHeight-vMenu.getMeasuredHeight()-20);
+    }
+
+    private void hideMenu(){
+        int screenHeight = getResources().getDisplayMetrics().heightPixels;
+        vMenu.clearAnimation();
+        vMenu.animate().y(screenHeight+vMenu.getMeasuredHeight()+20);
+    }
 
     @Override
     public void onClick(View v) {
-        if(v == vLikeButton){
+        if (v == vLikeButton) {
             toggleLike();
-        }else if(v == vCommentButton){
+        } else if (v == vCommentButton) {
             openComments();
-        }else if(v == vShareButton){
+        } else if (v == vShareButton) {
             startShare();
         }
     }
 
-    private void toggleLike(){
+    private void toggleLike() {
 
     }
 
-    private void openComments(){
+    private void openComments() {
 
     }
 
-    private void startShare(){
+    private void startShare() {
 
     }
 

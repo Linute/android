@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
+    <TextView
+        android:id="@+id/text_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        tools:text="Sasha Obama Has a Big Announcement"
+        android:paddingTop="8dp"
+        android:paddingRight="8dp"
+        android:paddingLeft="8dp"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:typeface="sans"
+        android:fontFamily="sans-serif-condensed"
+        android:textAllCaps="true"
+        android:textColor="@color/pure_black"
+
+        />
+    <TextView
+        android:id="@+id/text_author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/text_title"
+        android:text="Authorrrrrrrr"
+
+        android:paddingTop="0dp"
+        android:paddingBottom="4dp"
+        android:paddingLeft="8dp"
+        android:gravity="left"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/user_name_blue"
+        />
+    <TextView
+        android:id="@+id/text_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/text_title"
+        tools:text="Dateeeeeeeee"
+
+        android:paddingTop="0dp"
+        android:paddingBottom="4dp"
+        android:paddingRight="8dp"
+        android:gravity="right"
+        android:textSize="14sp"
+        android:textColor="#ffa5a5a5"
+        android:fontFamily="sans-serif-condensed"
+        />
+</RelativeLayout>

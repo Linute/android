@@ -20,6 +20,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/menu"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/article_menu_height"
         android:layout_gravity="center_horizontal|bottom"
@@ -35,7 +36,6 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:background="?android:attr/selectableItemBackground"
             android:clickable="true"
             >
 
@@ -61,7 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
             >
 
             <View
@@ -98,7 +98,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
             >
 
             <ImageView
