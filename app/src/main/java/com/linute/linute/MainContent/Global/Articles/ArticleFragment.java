@@ -3,9 +3,11 @@ package com.linute.linute.MainContent.Global.Articles;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +24,7 @@ import com.linute.linute.R;
 public class ArticleFragment extends Fragment implements View.OnClickListener {
 
     public static final String TAG = ArticleFragment.class.getSimpleName();
+    public static final int MENU_ELEVATION_DP = 4;
 
     private Article mArticle;
 
@@ -99,15 +102,36 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             int lastVisibleItem = 0;
 
+//            int totalScroll = 0;
+
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                lastVisibleItem = mLayoutManager.findFirstCompletelyVisibleItemPosition();
-                if(mLayoutManager.findFirstCompletelyVisibleItemPosition()>0 && lastVisibleItem == 0){
+                lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
+                DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+
+
+                int visibleBotSpace = 0;
+                if(lastVisibleItem == mLayoutManager.getItemCount()-1) {
+                    visibleBotSpace = displayMetrics.heightPixels-mLayoutManager.findViewByPosition(lastVisibleItem).getBottom();
+                }
+                if(visibleBotSpace < 0){visibleBotSpace = 0;}
+
+                int maxBotSpace = 2*recyclerView.getPaddingBottom();
+                int botSpace = maxBotSpace-visibleBotSpace;
+                float elevation = botSpace * MENU_ELEVATION_DP * displayMetrics.density / maxBotSpace;
+                ViewCompat.setElevation(vMenu, elevation);
+
+                /*if(mLayoutManager.findFirstCompletelyVisibleItemPosition()>0 && lastVisibleItem == 0){
                     showMenu();
                 }else if(mLayoutManager.findFirstVisibleItemPosition() == 0 && lastVisibleItem != 0){
                     hideMenu();
-                }
+                }*/
+//                totalScroll += dy;
+                Log.d(TAG, "Scrolled "+botSpace + " " + elevation);
+//                Log.d(TAG, "Scrolled "+totalScroll);
+//                ViewCompat.setElevation();
+
             }
         });
 
