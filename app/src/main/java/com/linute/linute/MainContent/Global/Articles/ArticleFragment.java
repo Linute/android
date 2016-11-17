@@ -99,7 +99,7 @@ public class ArticleFragment extends Fragment implements View.OnClickListener{
     public void onClick(View v) {
         if(v == vLikeButton){
             like();
-        }else if()
+        }//else if()
     }
 
     private void like(){
@@ -110,7 +110,7 @@ public class ArticleFragment extends Fragment implements View.OnClickListener{
 
     }
 
-    private void
+    //private void
 
 
 }

@@ -17,6 +17,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by QiFeng on 5/14/16.
@@ -27,11 +28,15 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
     Context mContext;
     GoToTrend mGoToTrend;
     RequestManager mRequestManager;
+    int hotColor;
+    int friendColor;
 
 
     public GlobalChoicesAdapter(Context context, List<GlobalChoiceItem> list) {
         mGlobalChoiceItems = list;
         mContext = context;
+        hotColor = ContextCompat.getColor(context, R.color.global_hot);
+        friendColor = ContextCompat.getColor(context, R.color.global_friend);
     }
 
     public void setRequestManager(RequestManager manager) {
@@ -45,7 +50,7 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        switch(viewType){
+        switch (viewType) {
             case GlobalChoiceItem.TYPE_TREND:
             case GlobalChoiceItem.TYPE_ARTICLE:
                 return new TrendingChoiceViewHolder(
@@ -56,11 +61,15 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 return new HeaderViewHolder(
                         LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.global_header_items, parent, false));
+            case GlobalChoiceItem.TYPE_SECTION_TEXT:
+                return  new HeaderItem(
+                        LayoutInflater.from(parent.getContext())
+                                .inflate(R.layout.global_item_section_header, parent, false)
+                );
             default:
                 return new TrendingChoiceViewHolder(
                         LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.global_item, parent, false));
-
         }
     }
 
@@ -68,8 +77,10 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof TrendingChoiceViewHolder) {
             ((TrendingChoiceViewHolder) holder).bindView(mGlobalChoiceItems.get(position));
-        } else {
+        } else if (holder instanceof HeaderViewHolder){
             ((HeaderViewHolder) holder).bindView(mGlobalChoiceItems.get(position));
+        }else {
+            ((HeaderItem) holder).bindView(mGlobalChoiceItems.get(position));
         }
     }
 
@@ -130,7 +141,7 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         private View vParent;
         private TextView vTitle;
-        private ImageView vImageView;
+        private TextView vNewPosts;
         private GlobalChoiceItem mGlobalChoiceItem;
 
         public HeaderViewHolder(View itemView) {
@@ -139,31 +150,21 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
             vParent = itemView.findViewById(R.id.parent);
             vTitle = (TextView) vParent.findViewById(R.id.text);
             vTitle.setTypeface(Typeface.createFromAsset(mContext.getAssets(), "AbadiMTCondensedExtraBold.ttf"));
-            vImageView = (ImageView) vParent.findViewById(R.id.image);
-            vImageView.setColorFilter(ContextCompat.getColor(mContext, R.color.pure_white), PorterDuff.Mode.SRC_ATOP);
-
+            vNewPosts = (TextView) vParent.findViewById(R.id.new_posts);
             itemView.setOnClickListener(this);
         }
 
         public void bindView(GlobalChoiceItem item) {
             mGlobalChoiceItem = item;
-            vParent.getBackground().setColorFilter(
-                    ContextCompat.getColor(
-                            mContext,
-                            item.type == GlobalChoiceItem.TYPE_HEADER_FRIEND ?
-                                    R.color.global_friend_orange :
-                                    R.color.global_hot_red
-                    )
-                    , PorterDuff.Mode.SRC_ATOP
-            );
 
-            vImageView.setImageResource(
-                    item.type == GlobalChoiceItem.TYPE_HEADER_FRIEND ?
-                            R.drawable.ic_friends :
-                            R.drawable.ic_fire_off
+            vParent.getBackground().setColorFilter(
+                    item.type == GlobalChoiceItem.TYPE_HEADER_FRIEND ? friendColor : hotColor,
+                    PorterDuff.Mode.SRC_ATOP
             );
 
             vTitle.setText(item.title);
+            String text = String.format(Locale.US, "%d %s", item.getUnread(), item.getUnread() == 1 ? "new post" : "new posts");
+            vNewPosts.setText(text);
         }
 
         @Override
@@ -172,6 +173,21 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
                 mGoToTrend.goToTrend(mGlobalChoiceItem);
             }
         }
+    }
+
+    public class HeaderItem extends RecyclerView.ViewHolder {
+
+        TextView vTitle;
+
+        public HeaderItem(View itemView) {
+            super(itemView);
+            vTitle = (TextView) itemView.findViewById(R.id.title_view);
+        }
+
+        public void bindView(GlobalChoiceItem item){
+            vTitle.setText(item.title);
+        }
+
     }
 
     public RequestManager getRequestManager() {
