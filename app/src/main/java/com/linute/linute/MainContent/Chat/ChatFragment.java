@@ -1484,7 +1484,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         mChatAdapter.notifyItemRangeInserted(position + 1, tempChat.size());
                     }
                     if (mLinearLayoutManager.findLastVisibleItemPosition() < mChatList.size() - 1 && !viewerIsOwnerOfMessage) {
-                        if (getContext() == null) return;
+                        if (getContext() == null || mInputMessageView == null) return;
                         mNewMessageSnackbar = Snackbar.make(mInputMessageView, (mNewMessageCount > 1 ? mNewMessageCount + " New Messages" : "New Message"), Snackbar.LENGTH_LONG);
                         TextView snackbarTV = (TextView) mNewMessageSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
                         snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
