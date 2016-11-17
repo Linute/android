@@ -151,7 +151,7 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
                 vProgressBar.setProgress(1000*totalScroll / (recyclerView.computeVerticalScrollRange()-recyclerView.computeVerticalScrollExtent()));
 
 
-                Log.d(TAG, "Scrolled "+totalScroll + " " +recyclerView.computeVerticalScrollRange() + " " + recyclerView.computeVerticalScrollOffset() + " " + recyclerView.computeVerticalScrollExtent());
+//                Log.d(TAG, "Scrolled "+totalScroll + " " +recyclerView.computeVerticalScrollRange() + " " + recyclerView.computeVerticalScrollOffset() + " " + recyclerView.computeVerticalScrollExtent());
 
             }
 
