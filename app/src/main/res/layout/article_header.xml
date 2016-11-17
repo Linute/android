@@ -1,56 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:layout_height="wrap_content">
+
     <TextView
         android:id="@+id/text_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
 
-        tools:text="Sasha Obama Has a Big Announcement"
-        android:paddingTop="8dp"
-        android:paddingRight="8dp"
+        android:fontFamily="sans-serif-condensed"
         android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp"
+        android:textAllCaps="true"
+        android:textColor="@color/pure_black"
         android:textSize="32sp"
         android:textStyle="bold"
         android:typeface="sans"
-        android:fontFamily="sans-serif-condensed"
-        android:textAllCaps="true"
-        android:textColor="@color/pure_black"
-
+        tools:text="Sasha Obama Has a Big Announcement"
         />
+
     <TextView
         android:id="@+id/text_author"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@id/text_title"
-        android:text="Authorrrrrrrr"
+        android:fontFamily="sans-serif-condensed"
 
-        android:paddingTop="0dp"
+        android:gravity="center_vertical|left"
         android:paddingBottom="4dp"
         android:paddingLeft="8dp"
-        android:gravity="left"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif-condensed"
+        android:paddingTop="0dp"
+        android:text="Authorrrrrrrr"
         android:textColor="@color/user_name_blue"
-        />
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/text_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/text_title"
-        tools:text="Dateeeeeeeee"
+        android:layout_toRightOf="@id/text_author"
+        android:layout_marginLeft="8dp"
+        android:layout_alignBottom="@id/text_author"
 
-        android:paddingTop="0dp"
+        android:layout_below="@id/text_title"
+        android:fontFamily="sans-serif-condensed"
+
+        android:gravity="center_vertical|right"
         android:paddingBottom="4dp"
         android:paddingRight="8dp"
-        android:gravity="right"
-        android:textSize="14sp"
+        android:paddingTop="0dp"
         android:textColor="#ffa5a5a5"
-        android:fontFamily="sans-serif-condensed"
-        />
+        android:textSize="14sp"
+        tools:text="Dateeeeeeeee" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@id/text_author"
+        android:padding="4dp">
+        <com.linute.linute.UtilsAndHelpers.ToggleImageView
+            android:id="@+id/icon_like"
+            android:layout_width="@dimen/article_header_icon_radius"
+            android:layout_height="@dimen/article_header_icon_radius"
+            android:layout_gravity="center"
+            android:layout_marginLeft="8dp"
+            android:src="@drawable/ic_fire"
+            />
+        <TextView
+            android:id="@+id/text_like_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            tools:text="10"
+            android:padding="8dp"
+            />
+        <ImageView
+            android:id="@+id/icon_comment"
+            android:layout_width="@dimen/article_header_icon_radius"
+            android:layout_height="@dimen/article_header_icon_radius"
+            android:layout_gravity="center"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="8dp"
+            android:src="@drawable/ic_comment" />
+        <TextView
+            android:id="@+id/text_comment_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            tools:text="28"
+            android:padding="8dp"
+            />
+    </LinearLayout>
+
 </RelativeLayout>

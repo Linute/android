@@ -1,5 +1,7 @@
 package com.linute.linute.MainContent.Global.Articles;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,10 +14,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.ToggleImageView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by mikhail on 10/25/16.
@@ -38,6 +47,10 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
     private View vLikeButton;
     private View vCommentButton;
     private View vShareButton;
+    private ProgressBar vProgressBar;
+    private String mUserId;
+
+    private ToggleImageView vLikeIcon;
 
     public static ArticleFragment newInstance(Article article) {
         Bundle args = new Bundle();
@@ -51,6 +64,11 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mUserId = mSharedPreferences.getString("userID", "");
+
+
         Bundle args = getArguments();
         if (args != null) {
             mArticle = args.getParcelable(ARG_ARTICLE);
@@ -59,7 +77,7 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
 
         //Preload article images
         if (mArticle != null) {
-            RequestManager glide = Glide.with(this);
+//            RequestManager glide = Glide.with(this);
             for (ArticleElement element : mArticle.elements) {
                 Log.d(TAG, element.toString());
             }
@@ -102,7 +120,7 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             int lastVisibleItem = 0;
 
-//            int totalScroll = 0;
+            int totalScroll = 0;
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -119,7 +137,7 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
 
                 int maxBotSpace = 2*recyclerView.getPaddingBottom();
                 int botSpace = maxBotSpace-visibleBotSpace;
-                float elevation = botSpace * MENU_ELEVATION_DP * displayMetrics.density / maxBotSpace;
+                float elevation = getElevation(displayMetrics, maxBotSpace, botSpace);
                 ViewCompat.setElevation(vMenu, elevation);
 
                 /*if(mLayoutManager.findFirstCompletelyVisibleItemPosition()>0 && lastVisibleItem == 0){
@@ -127,19 +145,29 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
                 }else if(mLayoutManager.findFirstVisibleItemPosition() == 0 && lastVisibleItem != 0){
                     hideMenu();
                 }*/
-//                totalScroll += dy;
-                Log.d(TAG, "Scrolled "+botSpace + " " + elevation);
-//                Log.d(TAG, "Scrolled "+totalScroll);
-//                ViewCompat.setElevation();
+
+                totalScroll = recyclerView.computeVerticalScrollOffset();// + recyclerView.computeVerticalScrollExtent();
+                vProgressBar.setProgress(1000*totalScroll / (recyclerView.computeVerticalScrollRange()-recyclerView.computeVerticalScrollExtent()));
+
+
+                Log.d(TAG, "Scrolled "+totalScroll + " " +recyclerView.computeVerticalScrollRange() + " " + recyclerView.computeVerticalScrollOffset() + " " + recyclerView.computeVerticalScrollExtent());
 
             }
+
+            private float getElevation(DisplayMetrics displayMetrics, int maxBotSpace, int botSpace) {
+//                return botSpace * MENU_ELEVATION_DP * displayMetrics.density / maxBotSpace;
+                return (float)Math.pow(botSpace/maxBotSpace,2) * MENU_ELEVATION_DP * displayMetrics.density;
+            }
         });
+
+        vProgressBar = (ProgressBar)view.findViewById(R.id.progress_bar);
 
         //menu
         vMenu = view.findViewById(R.id.menu);
         vLikeButton = view.findViewById(R.id.menu_like);
         vCommentButton = view.findViewById(R.id.menu_comment);
         vShareButton = view.findViewById(R.id.menu_share);
+        vLikeIcon = (ToggleImageView)view.findViewById(R.id.icon_like);
 
         vLikeButton.setOnClickListener(this);
         vCommentButton.setOnClickListener(this);
@@ -148,7 +176,7 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
-    private void showMenu(){
+    /*private void showMenu(){
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
         vMenu.clearAnimation();
         vMenu.animate().y(screenHeight-vMenu.getMeasuredHeight()-20);
@@ -158,11 +186,11 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
         vMenu.clearAnimation();
         vMenu.animate().y(screenHeight+vMenu.getMeasuredHeight()+20);
-    }
+    }*/
 
     @Override
     public void onClick(View v) {
-        if (v == vLikeButton) {
+        if (v == vLikeButton || v == vLikeIcon) {
             toggleLike();
         } else if (v == vCommentButton) {
             openComments();
@@ -172,9 +200,37 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
     }
 
     private void toggleLike() {
+        ToggleImageView checkbox = vLikeIcon;
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null) {
+            try {
+                boolean emit = false;
 
+                if (mArticle.isPostLiked()) {
+//                    checkbox.setActive(false);
+                    mArticle.setPostLiked(false);
+                    mArticle.decrementLikes();
+                    emit = true;
+                } else {
+//                    checkbox.setActive(true);
+                    mArticle.setPostLiked(true);
+                    mArticle.incrementLikes();
+                    emit = true;
+                }
+
+                if (emit) {
+                    JSONObject body = new JSONObject();
+                    body.put("user", mUserId);
+                    body.put("room", mArticle.getPostId());
+                    TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:like", body);
+                }
+
+                mAdapter.notifyItemChanged(0);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
-
     private void openComments() {
 
     }
@@ -182,6 +238,5 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
     private void startShare() {
 
     }
-
 
 }

@@ -16,8 +16,16 @@
             android:layout_height="match_parent"
             android:paddingBottom="@dimen/article_menu_total_height"
             android:clipToPadding="false" />
-
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:max="1000"
+        android:visibility="gone"
+        android:layout_height="4dp" />
 
     <LinearLayout
         android:id="@+id/menu"

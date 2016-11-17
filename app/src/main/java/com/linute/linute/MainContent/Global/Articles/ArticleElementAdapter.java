@@ -1,7 +1,10 @@
 package com.linute.linute.MainContent.Global.Articles;
 
+import android.graphics.PorterDuff;
 import android.net.Uri;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +15,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 /**
@@ -104,18 +108,45 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         final TextView vTitle;
         final TextView vAuthor;
         final TextView vDate;
+        final ToggleImageView vLikeIcon;
+        final TextView vLikeCount;
+        final ImageView vCommentIcon;
+        final TextView vCommentCount;
+
+        final int mFilterColor;
+
+
 
         ArticleHeaderVH(View itemView){
             super(itemView);
+            mFilterColor = ContextCompat.getColor(itemView.getContext(), R.color.inactive_grey);
+
             vTitle = (TextView)itemView.findViewById(R.id.text_title);
             vAuthor = (TextView)itemView.findViewById(R.id.text_author);
             vDate = (TextView)itemView.findViewById(R.id.text_date);
+            vLikeIcon = (ToggleImageView)itemView.findViewById(R.id.icon_like);
+            vLikeIcon.setImageViews(R.drawable.ic_fire_off, R.drawable.ic_fire);
+            vLikeCount = (TextView)itemView.findViewById(R.id.text_like_count);
+            vCommentIcon = (ImageView)itemView.findViewById(R.id.icon_comment);
+            vCommentCount = (TextView)itemView.findViewById(R.id.text_comment_count);
+
         }
 
         public void bind(Article article){
             vTitle.setText(article.title);
             vAuthor.setText(article.author);
             vDate.setText(article.date);
+            vLikeCount.setText(String.valueOf(article.getNumberOfLikes()));
+            vCommentCount.setText(String.valueOf(article.getNumberOfComments()));
+            Log.d("AAA", article.isPostLiked()+"");
+            vLikeIcon.setActive(article.isPostLiked());
+            if (article.hasComments()) {
+                vCommentIcon.clearColorFilter();
+            } else {
+                vCommentIcon.setColorFilter(mFilterColor, PorterDuff.Mode.SRC_ATOP);
+            }
+
+//            vCommentIcon.setImageResource(article.hasComments() ? R.drawable.ic_comment, );
         }
     }
 
