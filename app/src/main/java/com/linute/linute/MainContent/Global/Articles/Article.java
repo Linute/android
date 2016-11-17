@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.Global.Articles;
 import android.os.Parcel;
 import android.util.Log;
 
+import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.Global.GlobalChoiceItem;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -26,15 +27,12 @@ public class Article extends GlobalChoiceItem{
     public final String date;
     public final ArrayList<ArticleElement> elements = new ArrayList<>();
 
-    private final String mPostId;
+    private Post mPost;
 
     public boolean mIsPostLiked = false;
 
-    private int mNumberOfComments;
-    private int mNumberOfLikes;
     private int mNumberOfViews;
     private int mNumberOfShares;
-    private JSONObject event;
 
     public Article(JSONObject json) throws JSONException{
         super(json.getString("title"), json.getString("description"), json.getJSONArray("images").getString(0), json.getString("id"), TYPE_ARTICLE);
@@ -46,10 +44,14 @@ public class Article extends GlobalChoiceItem{
             elements.add(new ArticleElement(elementsJson.getJSONObject(i)));
         }
 
-        event = json.getJSONObject("event");
-        mPostId = event.getString("id");
-        setNumberOfComments(event.getInt("numberOfComments"));
-        setNumberOfLikes(event.getInt("numberOfLikes"));
+        JSONObject event = json.getJSONObject("event");
+
+        mPost = new Post();
+        mPost.setId(event.getString("id"));
+        mPost.setNumLike(event.getInt("numberOfLikes"));
+        mPost.setNumOfComments(event.getInt("numberOfComments"));
+
+//        mPostId = event.getString("id");
         setNumberOfViews(event.getInt("numberOfViews"));
         setNumberOfShares(event.getInt("numberOfShares"));
 
@@ -64,25 +66,29 @@ public class Article extends GlobalChoiceItem{
         date = tDate;
     }
 
+    public Post getPost(){
+        return mPost;
+    }
+
     public boolean isPostLiked(){
-        return mIsPostLiked;
+        return mPost.isPostLiked();
     }
 
     public void setPostLiked(boolean isLiked){
-        mIsPostLiked = isLiked;
+        mPost.setPostLiked(isLiked);
     }
 
     public boolean hasComments(){
-        return mNumberOfComments > 0;
+        return mPost.getNumOfComments() > 0;
     }
 
     public String getPostId(){
-        return mPostId;
+        return mPost.getId();
     }
 
     public Article(Parcel in) {
         super(in);
-        mPostId = in.readString();
+        mPost = in.readParcelable(Post.class.getClassLoader());
         in.readList(elements, ArticleElement.class.getClassLoader());
         author = in.readString();
         date = in.readString();
@@ -91,34 +97,30 @@ public class Article extends GlobalChoiceItem{
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeString(mPostId);
+        dest.writeParcelable(mPost, 0);
         dest.writeList(elements);
         dest.writeString(author);
         dest.writeString(date);
     }
 
     public int getNumberOfComments() {
-        return mNumberOfComments;
+        return mPost.getNumOfComments();
     }
 
     public void setNumberOfComments(int mNumberOfComments) {
-        this.mNumberOfComments = mNumberOfComments;
+       mPost.setNumOfComments(mNumberOfComments);
     }
 
     public void incrementLikes(){
-        mNumberOfLikes++;
+        mPost.incrementLikes();
     }
 
     public void decrementLikes(){
-        mNumberOfLikes--;
+        mPost.decrementLikes();
     }
 
-    public int getNumberOfLikes() {
-        return mNumberOfLikes;
-    }
-
-    public void setNumberOfLikes(int mNumberOfLikes) {
-        this.mNumberOfLikes = mNumberOfLikes;
+    public String getNumberOfLikes() {
+        return mPost.getNumLike();
     }
 
     public int getNumberOfViews() {

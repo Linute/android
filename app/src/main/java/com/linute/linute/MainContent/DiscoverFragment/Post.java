@@ -295,6 +295,14 @@ public class Post extends BaseFeedItem implements Parcelable {
         mNumLikes = numLike;
     }
 
+    public void incrementLikes(){
+        mNumLikes++;
+    }
+
+    public void decrementLikes(){
+        mNumLikes--;
+    }
+
     public String getUserName() {
         return mPrivacy == 1 ? "Anonymous" : mUserName;
     }

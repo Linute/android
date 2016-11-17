@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -232,7 +233,8 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
         }
     }
     private void openComments() {
-
+        BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+        activity.addFragmentToContainer(FeedDetailPage.newInstance(mArticle.getPost()));
     }
 
     private void startShare() {
