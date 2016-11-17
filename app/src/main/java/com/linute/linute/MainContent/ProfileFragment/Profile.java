@@ -581,7 +581,8 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
 
     @Override
     public void resetFragment() {
-        vRecList.scrollToPosition(0);
+        if (vRecList != null)
+            vRecList.scrollToPosition(0);
     }
 
     private Subscription mNotificationSubscription;
