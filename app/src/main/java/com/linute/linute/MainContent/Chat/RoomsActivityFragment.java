@@ -231,7 +231,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
     public void onDestroy() {
         super.onDestroy();
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity != null) {
+        if (activity != null && mTaptSocket != null) {
             mTaptSocket.emit(API_Methods.VERSION + ":messages:unread", new JSONObject());
         }
     }
