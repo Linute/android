@@ -40,12 +40,32 @@
         tools:text="BACK TO SCHOOL"
     />
 
-    <TextView
-        android:id="@+id/new_posts"
-        android:drawableStart="@drawable/ic_book"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="8dp"
+        android:orientation="horizontal"
+    >
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_book"
+        />
+
+        <TextView
+            android:id="@+id/new_posts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="214"
+            android:textColor="@color/pure_white"
+            android:textSize="14sp"/>
+
+    </LinearLayout>
 
 
 </FrameLayout>
