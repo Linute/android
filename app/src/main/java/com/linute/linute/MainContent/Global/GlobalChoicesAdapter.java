@@ -98,8 +98,9 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         private TextView vTitle;
         private ImageView vImage;
-        private TextView vText;
-        private View vIndicator;
+        private TextView vViews;
+        private TextView vLength;
+        private TextView vSource;
 
         private GlobalChoiceItem mGlobalChoiceItem;
 
@@ -108,8 +109,9 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
             vTitle = (TextView) itemView.findViewById(R.id.text);
             vTitle.setTypeface(Typeface.createFromAsset(mContext.getAssets(), "AbadiMTCondensedExtraBold.ttf"));
             vImage = (ImageView) itemView.findViewById(R.id.background);
-            vText = (TextView) itemView.findViewById(R.id.text1);
-            vIndicator = itemView.findViewById(R.id.indicator);
+            vViews = (TextView) itemView.findViewById(R.id.views);
+            vSource = (TextView) itemView.findViewById(R.id.source);
+            vLength = (TextView) itemView.findViewById(R.id.length);
             itemView.setOnClickListener(this);
         }
 
@@ -117,7 +119,7 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
         public void bindView(GlobalChoiceItem item) {
             vTitle.setText(item.title);
             mGlobalChoiceItem = item;
-            vIndicator.setVisibility(item.hasUnread() ? View.VISIBLE : View.GONE);
+
             mRequestManager
                     .load(Utils.getTrendsImageURL(item.imageUrl))
                     .dontAnimate()
@@ -126,7 +128,6 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     .placeholder(R.color.seperator_color)
                     .into(vImage);
 
-            vText.setText(item.description);
         }
 
         @Override

@@ -36,6 +36,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import okhttp3.Call;
@@ -286,6 +287,15 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                             try {
 
                                 article = articles.getJSONObject(i);
+
+                                // TODO: 11/18/16 remove logs
+                                Iterator<String> keys = article.keys();
+                                while (keys.hasNext()) {
+                                    Log.d(TAG, "onResponse: " + keys.next());
+                                }
+                                // end
+
+
                                 item = new Article(
                                         article
                                 );
