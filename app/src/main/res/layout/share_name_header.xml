@@ -53,10 +53,11 @@
         android:layout_weight="1"/>
     <ImageView
         android:id="@+id/image_watermark"
-        android:layout_width="120dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_margin="8dp"
+        android:layout_margin="16dp"
         android:src="@drawable/tapt_watermark"
+        android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         />
 
