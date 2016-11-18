@@ -100,6 +100,7 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
             }
         });
 
+//        toolbar.setTitleTextAppearance();
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         mAdapter = new ArticleElementAdapter(mArticle);
@@ -174,6 +175,19 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
         vCommentButton.setOnClickListener(this);
         vShareButton.setOnClickListener(this);
 
+       /* if(vLikeButton.getBackground() instanceof RippleDrawable){
+            Log.d(TAG, vLikeButton.getBackground().toString());
+
+//            drawable.setI
+//            ShapeDrawable round = ShapeDrawable.create(R.drawable.bg_round_white);
+//            ((RippleDrawable)vLikeButton.getBackground()).getLayer(0,android.R.id.mask);
+            Drawable drawable = getContext().getResources().getDrawable(R.drawable.bg_round_white);
+            int index = ((RippleDrawable)vLikeButton.getBackground()).addLayer(drawable);
+            ((RippleDrawable)vLikeButton.getBackground()).setId(index,android.R.id.mask);
+        }*/
+
+
+
         return view;
     }
 
@@ -190,7 +204,12 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
     }*/
 
     @Override
-    public void onClick(View v) {
+    public void onClick(final View v) {
+        v.setAlpha(.5f);
+//        ObjectAnimator animator = new ObjectAnimator();
+        v.clearAnimation();
+        v.animate().alpha(1).start();
+
         if (v == vLikeButton || v == vLikeIcon) {
             toggleLike();
         } else if (v == vCommentButton) {
