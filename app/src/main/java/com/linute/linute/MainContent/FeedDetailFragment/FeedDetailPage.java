@@ -1405,7 +1405,10 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                         recList.scrollToPosition(mFeedDetail.getComments().size());*/
 
                                     int pos = mFeedDetail.getComments().size() - 1;
-                                    if (mFeedDetailLLM.findLastVisibleItemPosition() < pos && (com.getCommentUserId() == null || !com.getCommentUserId().equals(mViewId))) {
+                                    if (getContext() != null && mCommentEditText != null &&
+                                            mFeedDetailLLM.findLastVisibleItemPosition() < pos &&
+                                            (com.getCommentUserId() == null || !com.getCommentUserId().equals(mViewId))) {
+
                                         mNewCommentSnackbar = Snackbar.make(mCommentEditText, (mNewCommentCount > 1 ? mNewCommentCount + " New Comments" : "New Comment"), Snackbar.LENGTH_LONG);
                                         TextView snackbarTV = (TextView) mNewCommentSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
                                         snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
@@ -1714,6 +1717,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     @Override
     public void startShare(final BaseFeedItem bfi, BaseFeedAdapter.ShareProgressListener listener) {
+        if (getContext() == null) return;
+
         if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)  == PackageManager.PERMISSION_DENIED){
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERM_REQ_WRITE_FOR_SHARE);
             shareItem = bfi;
