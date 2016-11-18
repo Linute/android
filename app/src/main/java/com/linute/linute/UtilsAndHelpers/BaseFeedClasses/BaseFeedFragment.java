@@ -43,7 +43,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -577,7 +577,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
     }
 
 
-    public abstract ArrayList<BaseFeedItem> getFeedArray();
+    public abstract List<BaseFeedItem> getFeedArray();
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

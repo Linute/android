@@ -101,12 +101,6 @@ public class FeedFragment extends BaseFeedFragment {
         return root;
     }
 
-    /*@Override
-    protected int getEmptyLayout() {
-        return 0;
-    }*/
-
-    private ArrayList<Poll> mTempPolls = new ArrayList<>();
 
     @Override
     public void onResume() {
