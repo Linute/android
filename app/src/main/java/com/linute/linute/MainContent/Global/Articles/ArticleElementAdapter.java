@@ -4,7 +4,6 @@ import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -112,6 +111,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         final TextView vLikeCount;
         final ImageView vCommentIcon;
         final TextView vCommentCount;
+        final TextView vViewCount;
 
         final int mFilterColor;
 
@@ -129,6 +129,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             vLikeCount = (TextView)itemView.findViewById(R.id.text_like_count);
             vCommentIcon = (ImageView)itemView.findViewById(R.id.icon_comment);
             vCommentCount = (TextView)itemView.findViewById(R.id.text_comment_count);
+            vViewCount = (TextView)itemView.findViewById(R.id.text_view_count);
 
         }
 
@@ -138,8 +139,9 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             vDate.setText(article.date);
             vLikeCount.setText(String.valueOf(article.getNumberOfLikes()));
             vCommentCount.setText(String.valueOf(article.getNumberOfComments()));
-            Log.d("AAA", article.isPostLiked()+"");
+            vViewCount.setText(String.valueOf(article.getNumberOfLikes()));
             vLikeIcon.setActive(article.isPostLiked());
+
             if (article.hasComments()) {
                 vCommentIcon.clearColorFilter();
             } else {

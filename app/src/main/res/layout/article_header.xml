@@ -96,6 +96,22 @@
             tools:text="28"
             android:padding="8dp"
             />
+        <ImageView
+            android:id="@+id/icon_views"
+            android:layout_width="@dimen/article_header_icon_radius"
+            android:layout_height="@dimen/article_header_icon_radius"
+            android:layout_gravity="center"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="8dp"
+            android:src="@drawable/ic_comment" />
+        <TextView
+            android:id="@+id/text_view_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            tools:text="28"
+            android:padding="8dp"
+            />
     </LinearLayout>
 
 </RelativeLayout>
