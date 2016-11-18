@@ -84,6 +84,17 @@ public class Poll extends BaseFeedItem implements Parcelable{
         }catch (JSONException e){
             e.printStackTrace();
         }
+
+        JSONArray options = object.getJSONArray("options");
+        if(mPollChoiceItems == null){
+            mPollChoiceItems = new ArrayList<>();
+        }
+
+        mPollChoiceItems.clear();
+
+        for (int i = 0; i < options.length(); i++){
+            mPollChoiceItems.add(new PollChoiceItem(options.getJSONObject(i)));
+        }
     }
 
     public void update(Poll p){
@@ -92,6 +103,7 @@ public class Poll extends BaseFeedItem implements Parcelable{
         mNumberOfComments = p.mNumberOfComments;
         mMuted = p.mMuted;
         mHidden = p.mHidden;
+        mPollChoiceItems = p.mPollChoiceItems;
     }
 
 
