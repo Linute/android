@@ -159,7 +159,8 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView((LoadMoreItem) mFeedDetail.getComments().get(0));
         } else if (holder instanceof BaseFeedDetailViewHolder) {
-            ((BaseFeedDetailViewHolder) holder).bindModel((Comment) mFeedDetail.getComments().get(position - 1));
+//            ((BaseFeedDetailViewHolder) holder).bindModel((Comment) mFeedDetail.getComments().get(position - 1));
+            ((BaseFeedDetailViewHolder) holder).bindModel((Comment) mFeedDetail.getComments().get(getItemPosition(position)));
 //            mItemManger.bindView(holder.itemView, position);
         } else if (holder instanceof FeedDetailHeaderImageViewHolder) {
             ((FeedDetailHeaderImageViewHolder) holder).bindModel((Post) mFeedDetail.getFeedItem());
