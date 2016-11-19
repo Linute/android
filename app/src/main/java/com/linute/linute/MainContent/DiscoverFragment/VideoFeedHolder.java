@@ -16,6 +16,7 @@ import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import org.json.JSONException;
@@ -51,14 +52,7 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
     protected void singleClick() {
         if (mVideoUrl == null || videoProcessing) return;
         if (vVideoView.getVisibility() == View.INVISIBLE) { //image is there, so video hasnt been started yet
-            VideoPlayerSingleton.getSingleVideoPlaybackManager().playNewVideo(vVideoView, mVideoUrl);
-
-            vVideoView.setOnPreparedListener(this);
-            vVideoView.setOnCompletionListener(this);
-
-            videoProcessing = true;
-            vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
-            vVideoView.setVisibility(View.VISIBLE);
+            playVideo();
         } else {
             if (vVideoView.isPlaying()) {
                 vVideoView.pause();
@@ -68,6 +62,17 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
                 vCinemaIcon.setAlpha(0);
             }
         }
+    }
+
+    public void playVideo(){
+        SingleVideoPlaybackManager.getInstance().playNewVideo(vVideoView, mVideoUrl);
+
+        vVideoView.setOnPreparedListener(this);
+        vVideoView.setOnCompletionListener(this);
+
+        videoProcessing = true;
+        vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
+        vVideoView.setVisibility(View.VISIBLE);
     }
 
 

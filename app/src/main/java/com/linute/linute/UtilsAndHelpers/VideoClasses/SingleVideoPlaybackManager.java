@@ -9,13 +9,25 @@ import android.net.Uri;
 
 /**
  * Manager that makes sure only one video is being played at a time
+ * When playing a video, ALWAYS use this to start the video
+ * We don't want multiple videos being played at once
  */
 
 public class SingleVideoPlaybackManager {
 
     private TextureVideoView mTextureVideoView;
 
-    public SingleVideoPlaybackManager() {
+    private static SingleVideoPlaybackManager mSingleVideoPlaybackManager;
+
+    public static SingleVideoPlaybackManager getInstance(){
+        if (mSingleVideoPlaybackManager == null){
+            mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
+        }
+
+        return mSingleVideoPlaybackManager;
+    }
+
+    private SingleVideoPlaybackManager() {
 
     }
 

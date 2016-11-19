@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import java.util.ArrayList;
@@ -114,7 +115,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<ArticleElementAd
 
         @Override
         public void bind(ArticleElement element) {
-            vVideo.setVideoURI(Uri.parse(element.content));
+            SingleVideoPlaybackManager.getInstance().playNewVideo(vVideo, Uri.parse(element.content));
         }
 
         @Override
