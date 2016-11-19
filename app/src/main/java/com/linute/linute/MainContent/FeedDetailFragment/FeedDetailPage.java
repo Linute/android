@@ -64,6 +64,7 @@ import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.BlockHelper;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.ImpressionHelper;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -332,8 +333,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         return rootView;
     }
 
+    @Override
+    public void blockComment(Comment comment) {
+        BlockHelper.blockUserFromCommentDialog(getContext(), comment).show();
+    }
 
-    /*
+/*
     * if (mComment.getCommentUserId() != null && mViewerUserId.equals(mComment.getCommentUserId())) {
                         menu.add(Menu.NONE, 10, 0, "Delete");
                         if(mComment.isAnon()){
@@ -836,18 +841,23 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             String[] ops = new String[]{
                     "Delete post",
                     mFeedDetail.isAnon() ? "Reveal post" : "Become anonymous",
-                    mFeedDetail.isMuted() ? "Unmute post" : "Mute post"};
+                    mFeedDetail.isMuted() ? "Unmute post" : "Mute post"
+            };
 
             mAlertDialog = new AlertDialog.Builder(getActivity())
                     .setItems(ops, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (which == 0) {
-                                showConfirmDeleteDialog();
-                            } else if ((which == 1)) {
-                                showRevealConfirm();
-                            } else {
-                                toggleMute();
+                            switch (which) {
+                                case 0:
+                                    showConfirmDeleteDialog();
+                                    break;
+                                case 1:
+                                    showRevealConfirm();
+                                    break;
+                                case 2:
+                                    toggleMute();
+                                    break;
                             }
                         }
                     }).show();
@@ -855,7 +865,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             String[] ops = new String[]{
                     mFeedDetail.isMuted() ? "Unmute post" : "Mute post",
                     mFeedDetail.isHidden() ? "Unhide post" : "Hide post",
-                    "Report post"
+                    "Report post",
+                    "Block User"
             };
             mAlertDialog = new AlertDialog.Builder(getActivity())
                     .setItems(ops, new DialogInterface.OnClickListener() {
@@ -868,8 +879,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                 case 1:
                                     showHideConfirmation();
                                     break;
-                                default:
+                                case 2:
                                     showReportOptionsDialog();
+                                    break;
+                                case 3:
+                                    BlockHelper.blockUserFromPostDialog(getContext(), (Post)mFeedDetail.getFeedItem()).show();
+                                    break;
                             }
                         }
                     }).show();
@@ -1813,40 +1828,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     .show();
     }
 
-    @Override
-    public void blockComment(final Comment comment) {
-        new AlertDialog.Builder(getContext())
-                .setTitle( "Block "+ (comment.isAnon() ? "this Anon" : comment.getCommentUserName()) + "?")
-                .setMessage("You will not see any posts or comments from this user")
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Block", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if(comment.isAnon()){
-                            try {
-                                JSONObject object = new JSONObject();
-                                object.put("block", true);
-                                object.put("comment", comment.getCommentPostId());
-                                TaptSocket.getInstance().emit(API_Methods.VERSION +":users:block:anonymous", object);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }else{
-                            try {
-                                JSONObject object = new JSONObject();
-                                object.put("block", true);
-                                object.put("user", comment.getCommentUserId());
-                                TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:block:real", object);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }).show();
 
-//          refresh comments
-//        displayCommentsAndPost();
-    }
 
     @Override
     public void likeComment(boolean like, String id) {
