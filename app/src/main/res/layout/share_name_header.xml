@@ -34,7 +34,7 @@
             android:textColor="@color/secondaryColor"
             android:textSize="@dimen/header_font_size"
             android:textStyle="bold"
-            tools:text="John Snow" />
+            tools:text="Edward Snowden, True American Hero" />
 
 
         <TextView
@@ -44,13 +44,13 @@
             android:lines="1"
             android:textColor="@color/twentyfive_black"
             android:textSize="@dimen/sub_font_size"
-            tools:text="City college of new" />
+            tools:text="City college of new york really long name" />
     </LinearLayout>
 
-    <android.support.v4.widget.Space
+<!--    <android.support.v4.widget.Space
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"/>-->
     <ImageView
         android:id="@+id/image_watermark"
         android:layout_width="wrap_content"
