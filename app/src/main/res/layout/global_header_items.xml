@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
     android:id="@+id/parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
+    android:layout_height="80dp"
     android:layout_margin="4dp"
     android:background="@drawable/global_item_background"
     android:clickable="true"
     android:elevation="4dp"
     android:foreground="?android:attr/selectableItemBackground"
-    android:orientation="horizontal">
+    android:gravity="center"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start|center_vertical"
-        android:layout_margin="@dimen/activity_horizontal_margin"
         android:shadowColor="#59000000"
         android:shadowDy="2"
         android:shadowRadius="1"
@@ -27,13 +26,17 @@
         android:textStyle="bold"
     />
 
-    <ImageView
-        android:id="@+id/image"
+    <TextView
+        android:id="@+id/new_posts"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="end|center_vertical"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        android:src="@drawable/ic_friends"
+        android:layout_height="wrap_content"
+        android:shadowColor="#59000000"
+        android:shadowDy="2"
+        android:shadowRadius="1"
+        android:textColor="@color/pure_white"
+        android:alpha="0.7"
+        android:textSize="16sp"
+        android:text="5 New Posts"
     />
 
-</FrameLayout>
+</LinearLayout>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <include layout="@layout/tool_bar" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="@dimen/article_menu_total_height"
+            android:clipToPadding="false" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/article_menu_height"
+        android:layout_gravity="center_horizontal|bottom"
+        android:background="@drawable/bg_round_white"
+        android:orientation="horizontal"
+        android:padding="4dp"
+        android:layout_margin="16dp"
+        android:elevation="4dp"
+        >
+
+        <LinearLayout
+            android:id="@+id/menu_like"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            >
+
+            <ImageView
+                android:layout_width="@dimen/article_menu_icon_radius"
+                android:layout_height="@dimen/article_menu_icon_radius"
+                android:padding="8dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_fire" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="4dp"
+                android:text="Fire"
+                android:textColor="#1f2f42"
+                android:textSize="@dimen/article_menu_text_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:background="?android:attr/selectableItemBackground"
+            >
+
+            <View
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:layout_margin="8dp"
+                android:background="#e1e3e5" />
+
+            <ImageView
+                android:layout_width="@dimen/article_menu_icon_radius"
+                android:layout_height="@dimen/article_menu_icon_radius"
+                android:layout_gravity="center"
+                android:padding="8dp"
+                android:src="@drawable/ic_comment" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="4dp"
+                android:text="Comment"
+                android:textColor="#1f2f42"
+                android:textSize="@dimen/article_menu_text_size" />
+
+            <View
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:layout_margin="8dp"
+                android:background="#e1e3e5" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_share"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:background="?android:attr/selectableItemBackground"
+            >
+
+            <ImageView
+                android:layout_width="@dimen/article_menu_icon_radius"
+                android:layout_height="@dimen/article_menu_icon_radius"
+                android:layout_gravity="center"
+                android:padding="8dp"
+                android:src="@drawable/ic_share_gray"
+
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="4dp"
+                android:text="Share"
+                android:textColor="#1f2f42"
+                android:textSize="@dimen/article_menu_text_size" />
+        </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>
