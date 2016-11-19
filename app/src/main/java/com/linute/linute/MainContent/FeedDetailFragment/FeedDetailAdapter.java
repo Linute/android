@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -268,8 +269,9 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             rightControls.findViewById(R.id.comment_report).setOnClickListener(this);
             leftControls.setOnClickListener(this);
 
+
             ((ImageView) leftControls.findViewById(R.id.like))
-                    .setColorFilter(ContextCompat.getColor(context, R.color.pure_white));
+                    .setColorFilter(Color.WHITE);
 
         }
 
