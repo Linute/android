@@ -54,15 +54,14 @@
             android:id="@+id/post_create_text"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
             android:background="@null"
-            android:gravity="center"
-            android:textAlignment="center"
             android:imeOptions="actionDone"
             android:inputType="textMultiLine|textCapSentences"
+            android:paddingBottom="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_horizontal_margin"
+            android:textAlignment="center"
             android:textColor="#000000"
             android:textSize="32sp"
         />
@@ -71,12 +70,9 @@
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:textAlignment="center"
             android:gravity="center"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:textAlignment="center"
             android:textColor="#000000"
             android:textSize="32sp"
             android:visibility="gone"
@@ -86,16 +82,16 @@
             android:id="@+id/text_empty"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
             android:layout_marginBottom="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:textAlignment="center"
+            android:gravity="center"
             android:hint="WHAT WOULD YOU SAY TO YOUR ENTIRE CAMPUS?"
+            android:textAlignment="center"
             android:textSize="32sp"
             android:visibility="visible"
-            />
+        />
 
     </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
@@ -255,10 +251,10 @@
             android:id="@+id/image_profile"
             android:layout_width="@dimen/profile_image_radius"
             android:layout_height="@dimen/profile_image_radius"
-            android:scaleType="centerCrop"
             android:layout_gravity="center"
+            android:scaleType="centerCrop"
 
-            />
+        />
 
 
         <include

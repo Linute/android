@@ -23,6 +23,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.Layout;
+import android.text.Selection;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -186,26 +188,51 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
             }
         });
 
-       // mPostEditText.addTextChangedListener(new LimitTextWatcher(mPostEditText));
 
         mPostEditText.addTextChangedListener(new TextWatcher() {
             String beforeText;
+            int cursorPos;
+            int width = -1;
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 beforeText = s.toString();
+                cursorPos = mPostEditText.getSelectionStart() - 1; //cursorPos
+                if (width <= 0){
+                    width = mPostEditText.getWidth() - 2 * mPostEditText.getPaddingTop();
+                }
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+
                 if (mPostEditText.getLineCount() > mPostEditText.getMaxLines()) {
                     mPostEditText.setText(beforeText);
-                    mPostEditText.setSelection(mPostEditText.getText().length());
+                }
+
+                //check if new char is a space
+                //no need to look if deleting char
+                //// TODO: 11/18/16 :
+                // maybe better idea, find last char added (when someone adds to middle) and check
+                // if it is ' '. then do replace all multi white spaces with ' '
+                else if (before <= count && s.charAt(s.length() - 1) == ' '){
+                    Layout layout = mPostEditText.getLayout();
+                    int line = layout.getLineForOffset(mPostEditText.getSelectionStart());
+
+                    //goes over limit ? then set to text before
+                    if (line >= 0 && layout.getLineWidth(line) > width) {
+                        mPostEditText.setText(beforeText.trim());
+                        int len = mPostEditText.getText().length();
+
+                        //move cursor back to where it was
+                        mPostEditText.setSelection(cursorPos < 0 || cursorPos > len ? len : cursorPos);
+                    }
                 }
             }
 
             @Override
             public void afterTextChanged(Editable s) {
+                // show hint text
                 mEmptyTextView.setVisibility(s.length() == 0 ? View.VISIBLE : View.GONE);
             }
         });
@@ -454,7 +481,7 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
     }
 
     private void showTextView() {
-        mTextView.setText(mPostEditText.getText().toString());
+        mTextView.setText(mPostEditText.getText().toString() /*.trim()*/);
         mTextView.setVisibility(View.VISIBLE);
         mPostEditText.setVisibility(View.GONE);
     }
@@ -493,30 +520,4 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-
-    protected class LimitTextWatcher implements TextWatcher {
-
-        String beforeText;
-
-        public LimitTextWatcher(EditText mTV) {
-            this.mTV = mTV;
-        }
-
-        EditText mTV;
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            Log.d(TAG, "beforeTextChanged: "+s + " "+start + " "+count+" "+after);
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            Log.d(TAG, "ontext "+s + " "+start + " "+count+" ");
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
-        }
-    }
 }
