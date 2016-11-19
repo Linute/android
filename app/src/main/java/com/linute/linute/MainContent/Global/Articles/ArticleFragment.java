@@ -21,6 +21,7 @@ import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.ImpressionHelper;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 
@@ -189,6 +190,12 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
 
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ImpressionHelper.sendImpressionsAsync(null, mUserId, mArticle.getPostId());
     }
 
     /*private void showMenu(){
