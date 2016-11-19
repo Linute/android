@@ -212,7 +212,7 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private boolean mDenySwipe = false;
 
     //holder for comments
-    public abstract class BaseFeedDetailViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public abstract class BaseFeedDetailViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         private ViewGroup mLayout;
 
         protected ImageView vCommentUserImage;
@@ -233,7 +233,7 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             vTopLayer = itemView.findViewById(R.id.feed_detail_hidden_animation);
 
-            itemView.findViewById(R.id.feed_detail_touch).setOnTouchListener(new DoubleTouchListener(750) {
+            itemView.findViewById(R.id.feed_detail_touch).setOnTouchListener(new DoubleTouchListener(250) {
                 @Override
                 public void onDoubleTouch(int x, int y) {
                     if(mViewerUserId.equals(mComment.getCommentUserId())){
@@ -306,6 +306,8 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             vCommentUserName.setOnClickListener(this);
             vCommentUserImage.setOnClickListener(this);
+            vCommentUserName.setOnLongClickListener(this);
+            vCommentUserImage.setOnLongClickListener(this);
         }
 
 
@@ -360,6 +362,15 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 vLikesText.setVisibility(View.INVISIBLE);
                 vFireIcon.setVisibility(View.INVISIBLE);
             }
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+//            if(v.getContext() instanceof Activity){
+//                ((Activity)v.getContext()).openContextMenu(itemView);
+                itemView.performLongClick();
+//            }
+            return true;
         }
 
         @Override
