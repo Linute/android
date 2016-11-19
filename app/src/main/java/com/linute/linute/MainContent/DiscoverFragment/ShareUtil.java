@@ -1,12 +1,14 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LabeledIntent;
 import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
@@ -95,11 +97,22 @@ public class ShareUtil {
         }
 
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
-        Intent shareIntent = Intent.createChooser(sendIntent, "Share");
+        Intent shareIntent;
+        Intent callbackIntent = new Intent(context, ShareService.class);
+        callbackIntent.putExtra(ShareService.EXTRA_POST_ID, bfi.getId());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            PendingIntent callbackPendingIntent = PendingIntent.getService(context, ShareService.REQ_CODE, callbackIntent, 0);
+            shareIntent = Intent.createChooser(sendIntent, "Share", callbackPendingIntent.getIntentSender());
+        }else{
+            shareIntent = Intent.createChooser(sendIntent, "Share");
+            context.startService(callbackIntent);
+        }
 
         final Intent taptShareIntent = new Intent(context, SendToActivity.class);
         taptShareIntent.putExtra(SendToActivity.EXTRA_POST_ID, bfi.getId());
         shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{new LabeledIntent(taptShareIntent, "com.linute.linute", "Messenger", R.mipmap.ic_launcher)});
+
+
 
 
         context.startActivity(shareIntent);
