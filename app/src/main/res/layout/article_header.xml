@@ -103,7 +103,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="2dp"
             android:layout_marginLeft="8dp"
-            android:src="@drawable/ic_comment" />
+            android:src="@drawable/ic_book" />
         <TextView
             android:id="@+id/text_view_count"
             android:layout_width="wrap_content"
