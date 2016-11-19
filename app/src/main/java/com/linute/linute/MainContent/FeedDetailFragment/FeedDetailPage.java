@@ -359,6 +359,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     public static final int MENU_GO_ANON = 12;
     public static final int MENU_LIKE = 20;
     public static final int MENU_REPORT = 21;
+    public static final int MENU_BLOCK = 22;
     public static final int MENU_REPLY = 32;
 
     @Override
@@ -385,6 +386,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 return true;
             case MENU_REPORT:
                 reportComment(commentId);
+                return true;
+            case MENU_BLOCK:
+                blockComment(comment);
                 return true;
             case MENU_REPLY:
                 mMentionedTextAdder.addMentionedPerson(new MentionedPerson(comment.getCommentUserName(), comment.getCommentUserId(), ""), position);
@@ -1807,6 +1811,41 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         }
                     })
                     .show();
+    }
+
+    @Override
+    public void blockComment(final Comment comment) {
+        new AlertDialog.Builder(getContext())
+                .setTitle( "Block "+ (comment.isAnon() ? "this Anon" : comment.getCommentUserName()) + "?")
+                .setMessage("You will not see any posts or comments from this user")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Block", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(comment.isAnon()){
+                            try {
+                                JSONObject object = new JSONObject();
+                                object.put("block", true);
+                                object.put("comment", comment.getCommentPostId());
+                                TaptSocket.getInstance().emit(API_Methods.VERSION +":users:block:anonymous", object);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }else{
+                            try {
+                                JSONObject object = new JSONObject();
+                                object.put("block", true);
+                                object.put("user", comment.getCommentUserId());
+                                TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:block:real", object);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }).show();
+
+//          refresh comments
+//        displayCommentsAndPost();
     }
 
     @Override

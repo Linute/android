@@ -2,7 +2,6 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
@@ -29,8 +28,8 @@ import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.AnimationUtils;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DoubleTouchListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -292,9 +291,11 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     if(mComment.isAnon()){
                         menu.add(Menu.NONE, FeedDetailPage.MENU_LIKE, 0, (mComment.isLiked() ? "Unlike" : "Like"));
                         menu.add(Menu.NONE, FeedDetailPage.MENU_REPORT, 0, "Report");
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_BLOCK, 0, "Block");
                     }else{
                         menu.add(Menu.NONE, FeedDetailPage.MENU_LIKE, 0, (mComment.isLiked() ? "Unlike" : "Like"));
                         menu.add(Menu.NONE, FeedDetailPage.MENU_REPORT, 0, "Report");
+                        menu.add(Menu.NONE, FeedDetailPage.MENU_BLOCK, 0, "Block");
                         menu.add(Menu.NONE, FeedDetailPage.MENU_REPLY, 0, "Reply");
                     }
                 }
@@ -661,6 +662,8 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         void likeComment(final boolean like, final String id);
 
         void closeAllDialogs();
+
+        void blockComment(final Comment comment);
     }
 
 }
