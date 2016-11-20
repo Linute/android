@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -381,14 +382,14 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     public boolean onContextItemSelected(MenuItem item) {
         int position = mFeedDetailAdapter.getContextMenuPosition();
         String commentId = mFeedDetailAdapter.getContextMenuCommentId();
-        Comment comment = (Comment)mFeedDetail.getComments().get(position-1);
+        Comment comment = (Comment) mFeedDetail.getComments().get(position - 1);
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case MENU_DELETE:
                 deleteComment(position, commentId);
                 return true;
             case MENU_REVEAL:
-                revealComment(position, commentId,true);
+                revealComment(position, commentId, true);
                 mFeedDetailAdapter.notifyItemChanged(position);
                 return true;
             case MENU_GO_ANON:
@@ -415,9 +416,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     private void toggleLike(String commentId, Comment comment) {
         boolean like = comment.toggleLiked();
-        if(like) {
+        if (like) {
             comment.incrementLikes();
-        }else{
+        } else {
             comment.decrementLikes();
         }
         likeComment(like, commentId);
@@ -463,7 +464,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                             i = new Intent(getContext(), CameraActivity.class);
                             i.putExtra(CameraActivity.EXTRA_CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE));
 
-                            options.subType =  mFeedDetail.isAnonCommentsDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
+                            options.subType = mFeedDetail.isAnonCommentsDisabled() ? PostOptions.ContentSubType.Comment_No_Anon : PostOptions.ContentSubType.Comment;
                             i.putExtra(CameraActivity.EXTRA_POST_OPTIONS, options);
 
                         } else {
@@ -712,6 +713,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                         @Override
                                         public void run() {
                                             recList.scrollToPosition(mShowPostDetail ? tempComments.size() : tempComments.size() - 1);
+                                            showCommentTutorial();
                                         }
                                     });
                                 }
@@ -738,6 +740,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             new LSDKEvents(getActivity()).getEventWithId(mFeedDetail.getPostId(), callback);
         else {
             new LSDKEvents(getActivity()).getPollWithId(mFeedDetail.getFeedItem().getId(), callback);
+        }
+    }
+
+    private void showCommentTutorial() {
+        if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("comment_tip", true)) {
+            Toast.makeText(getContext(), "Double tap comments to like or long press for other options", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -893,7 +901,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                     showReportOptionsDialog();
                                     break;
                                 case 3:
-                                    BlockHelper.blockUserFromPostDialog(getContext(), (Post)mFeedDetail.getFeedItem()).show();
+                                    BlockHelper.blockUserFromPostDialog(getContext(), (Post) mFeedDetail.getFeedItem()).show();
                                     break;
                             }
                         }
@@ -1699,21 +1707,21 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     /* REVEALING COMMENT */
     @Override
     public void revealComment(final int pos, final String id, final boolean isAnon) {
-            mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle(isAnon ? "Reveal" : "Wear a mask")
-                    .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this comment?" : "Are you sure you want to become anonymous for this comment?")
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            confirmRevealComment(pos, id, isAnon);
-                        }
-                    })
-                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .show();
+        mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle(isAnon ? "Reveal" : "Wear a mask")
+                .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this comment?" : "Are you sure you want to become anonymous for this comment?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        confirmRevealComment(pos, id, isAnon);
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 
     private void confirmRevealComment(final int in, final String id, final boolean isAnon) {
@@ -1810,10 +1818,10 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     public void startShare(final BaseFeedItem bfi, BaseFeedAdapter.ShareProgressListener listener) {
         if (getContext() == null) return;
 
-        if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)  == PackageManager.PERMISSION_DENIED){
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERM_REQ_WRITE_FOR_SHARE);
             shareItem = bfi;
-        }else{
+        } else {
             ShareUtil.share(bfi, getContext(), listener);
         }
     }
@@ -1822,7 +1830,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     @Override
     public void reportComment(final String id) {
-        if (getActivity() != null )
+        if (getActivity() != null)
             mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle("Report comment")
                     .setMessage("Are you sure you want to report this comment?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -1840,7 +1848,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     })
                     .show();
     }
-
 
 
     @Override

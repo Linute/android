@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableStringBuilder;
@@ -287,6 +288,8 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             itemView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
                 @Override
                 public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                    PreferenceManager.getDefaultSharedPreferences(v.getContext()).edit().putBoolean("comment_tip", false).apply();
+
                     contextMenuPosition = getAdapterPosition();
                     contextMenuId = mComment.getCommentPostId();
 
