@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent.Global.Articles;
 
 import android.os.Parcel;
-import android.util.Log;
 
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.Global.GlobalChoiceItem;
@@ -44,7 +43,7 @@ public class Article extends GlobalChoiceItem{
         }
 
         JSONObject event = json.getJSONObject("event");
-        Log.d("AAA", event.toString(4));
+//        Log.d("AAA", event.toString(4));
 
         mPost = new Post();
         mPost.setId(event.getString("id"));

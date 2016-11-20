@@ -32,7 +32,7 @@ import org.json.JSONObject;
  * Created by mikhail on 10/25/16.
  */
 
-public class ArticleFragment extends Fragment implements View.OnClickListener {
+public class ArticleFragment extends Fragment implements View.OnClickListener, ArticleElementAdapter.ArticleActions {
 
     public static final String TAG = ArticleFragment.class.getSimpleName();
     public static final int MENU_ELEVATION_DP = 4;
@@ -100,11 +100,13 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
                 getActivity().getSupportFragmentManager().popBackStack();
             }
         });
+//        toolbar.setTitle(mArticle.getPublisherName());
 
 //        toolbar.setTitleTextAppearance();
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         mAdapter = new ArticleElementAdapter(mArticle);
+        mAdapter.setArticleActions(this);
         mRecyclerView.setAdapter(mAdapter);
         mLayoutManager = new GridLayoutManager(getContext(), 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -218,15 +220,16 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
         v.animate().alpha(1).start();
 
         if (v == vLikeButton || v == vLikeIcon) {
-            toggleLike();
+            toggleLike(mArticle);
         } else if (v == vCommentButton) {
-            openComments();
+            openComments(mArticle);
         } else if (v == vShareButton) {
-            startShare();
+            startShare(mArticle);
         }
     }
 
-    private void toggleLike() {
+    @Override
+    public boolean toggleLike(Article article) {
         ToggleImageView checkbox = vLikeIcon;
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
@@ -257,14 +260,20 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
                 e.printStackTrace();
             }
         }
+        return mArticle.isPostLiked();
     }
-    private void openComments() {
+    @Override
+    public void openComments(Article article) {
         BaseTaptActivity activity = (BaseTaptActivity)getActivity();
         activity.addFragmentToContainer(FeedDetailPage.newInstance(mArticle.getPost(), false));
     }
 
-    private void startShare() {
+    @Override
+    public void startShare(Article article) {
 
     }
+
+
+
 
 }

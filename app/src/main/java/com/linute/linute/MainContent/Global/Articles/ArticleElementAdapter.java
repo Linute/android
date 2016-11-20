@@ -24,6 +24,7 @@ import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Article article;
+    private ArticleActions mArticleActions;
 //    private ArrayList<ArticleElement> elements;
 
     public ArticleElementAdapter(Article article) {
@@ -92,6 +93,9 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         return article.elements.get(position-1);
     }
 
+    public void setArticleActions(ArticleActions actions){
+        this.mArticleActions = actions;
+    }
 
 
     //View Holders
@@ -102,7 +106,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         public abstract void bind(ArticleElement element);
     }
 
-    static class ArticleHeaderVH extends RecyclerView.ViewHolder{
+    class ArticleHeaderVH extends RecyclerView.ViewHolder{
 
         final TextView vTitle;
         final TextView vAuthor;
@@ -131,15 +135,17 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             vCommentCount = (TextView)itemView.findViewById(R.id.text_comment_count);
             vViewCount = (TextView)itemView.findViewById(R.id.text_view_count);
 
+
+
         }
 
-        public void bind(Article article){
+        public void bind(final Article article){
             vTitle.setText(article.title);
             vAuthor.setText(article.author);
             vDate.setText(article.date);
             vLikeCount.setText(String.valueOf(article.getNumberOfLikes()));
             vCommentCount.setText(String.valueOf(article.getNumberOfComments()));
-            vViewCount.setText(String.valueOf(article.getNumberOfLikes()));
+            vViewCount.setText(String.valueOf(article.getNumberOfViews()));
             vLikeIcon.setActive(article.isPostLiked());
 
             if (article.hasComments()) {
@@ -148,8 +154,29 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 vCommentIcon.setColorFilter(mFilterColor, PorterDuff.Mode.SRC_ATOP);
             }
 
+            vLikeIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mArticleActions.toggleLike(article);
+                }
+            });
+
+            vCommentIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mArticleActions.openComments(article);
+                }
+            });
+
 //            vCommentIcon.setImageResource(article.hasComments() ? R.drawable.ic_comment, );
         }
+    }
+
+
+    public static interface ArticleActions{
+        public boolean toggleLike(Article article);
+        public void openComments(Article article);
+        public void startShare(Article article);
     }
 
     private static class TextElementVH extends ElementVH{
