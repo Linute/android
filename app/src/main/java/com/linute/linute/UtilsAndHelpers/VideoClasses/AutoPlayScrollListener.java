@@ -22,7 +22,8 @@ public class AutoPlayScrollListener extends RecyclerView.OnScrollListener {
 
     @Override
     public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-        if (recyclerView.getContext() == null || newState != RecyclerView.SCROLL_STATE_IDLE) return;
+        if (recyclerView.getContext() == null || newState != RecyclerView.SCROLL_STATE_IDLE || !SingleVideoPlaybackManager.autoPlay())
+            return;
 
         //need to check if network is currently wifi
         NetworkInfo mWifiInfo = ((ConnectivityManager) recyclerView.getContext().getSystemService(Context.CONNECTIVITY_SERVICE))
