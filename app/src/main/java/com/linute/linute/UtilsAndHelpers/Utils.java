@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
@@ -37,7 +38,7 @@ public class Utils {
 
     public static String CONTENT_TYPE = "application/json";
 
-    public static SimpleDateFormat getDateFormat(){
+    public static SimpleDateFormat getDateFormat() {
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         f.setTimeZone(TimeZone.getTimeZone("UTC"));
         return f;
@@ -64,7 +65,7 @@ public class Utils {
         //return Base64.encodeToString(byteFormat, Base64.URL_SAFE);
     }
 
-    public static String encodeImageBase64HighRes(Bitmap bitmap){
+    public static String encodeImageBase64HighRes(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream); //NOTE: Change Compression as needed
         byte[] byteFormat = stream.toByteArray();
@@ -78,12 +79,12 @@ public class Utils {
         //return Base64.encodeToString(byteFormat, Base64.URL_SAFE);
     }
 
-    public static Bitmap decodeImageBase64(String base64){
-        if(base64 == null) return null;
-        if(base64.contains(","))
+    public static Bitmap decodeImageBase64(String base64) {
+        if (base64 == null) return null;
+        if (base64.contains(","))
             base64 = base64.substring(base64.indexOf(",") + 1);
         byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
 
@@ -199,7 +200,7 @@ public class Utils {
         return "http://images.linute.com/messages/video/" + jpegName;
     }
 
-    public static String getVideoURL(String videoEnd){
+    public static String getVideoURL(String videoEnd) {
         return "http://images.linute.com/events/video/" + videoEnd;
     }
 
@@ -208,28 +209,28 @@ public class Utils {
         return "http://images.linute.com/profiles/original/" + userImage;
     }
 
-    public static String getAnonImageUrl(String image){
-        return "http://images.linute.com/profiles/anonymous/"+image;
+    public static String getAnonImageUrl(String image) {
+        return "http://images.linute.com/profiles/anonymous/" + image;
     }
 
-    public static String getChatImageUrl(String image){
-        return "http://images.linute.com/rooms/original/"+image;
+    public static String getChatImageUrl(String image) {
+        return "http://images.linute.com/rooms/original/" + image;
     }
 
-    public static String getChatThumbnailUrl(String image){
-        return "http://images.linute.com/rooms/thumbnail/"+image;
+    public static String getChatThumbnailUrl(String image) {
+        return "http://images.linute.com/rooms/thumbnail/" + image;
     }
 
-    public static String getFilterImageUrl(String image){
-        return "http://images.linute.com/filters/"+image;
+    public static String getFilterImageUrl(String image) {
+        return "http://images.linute.com/filters/" + image;
     }
 
-    public static String getMemeImageUrl(String image){
-        return "http://images.linute.com/memes/"+image;
+    public static String getMemeImageUrl(String image) {
+        return "http://images.linute.com/memes/" + image;
     }
 
-    public static String getCommentImageUrl(String image){
-        return "http://images.linute.com/comments/original/"+image;
+    public static String getCommentImageUrl(String image) {
+        return "http://images.linute.com/comments/original/" + image;
     }
 
 
@@ -242,19 +243,19 @@ public class Utils {
         }
     }
 
-    public static String getRoomDateFormat(long before){
-        if (before == 0) return  "";
+    public static String getRoomDateFormat(long before) {
+        if (before == 0) return "";
         SimpleDateFormat simpleDateformat;
 
         long diff = new Date().getTime() - before;
 
-        if (diff < DateUtils.DAY_IN_MILLIS){
+        if (diff < DateUtils.DAY_IN_MILLIS) {
             simpleDateformat = new SimpleDateFormat("h:mm a");
-        }else if(diff < DateUtils.WEEK_IN_MILLIS){
+        } else if (diff < DateUtils.WEEK_IN_MILLIS) {
             simpleDateformat = new SimpleDateFormat("EEE");
-        }else if (diff < DateUtils.YEAR_IN_MILLIS){
+        } else if (diff < DateUtils.YEAR_IN_MILLIS) {
             simpleDateformat = new SimpleDateFormat("MMM d");
-        }else {
+        } else {
             simpleDateformat = new SimpleDateFormat("YYYY");
         }
 
@@ -267,24 +268,23 @@ public class Utils {
 
         long timeDifference = new Date().getTime() - beforeTime;
 
-        if (timeDifference < 0){ //time less than 0
+        if (timeDifference < 0) { //time less than 0
             return 0 + "s";
-        }
-        else if (timeDifference > DateUtils.YEAR_IN_MILLIS) //years
-            return ((int)(timeDifference / DateUtils.YEAR_IN_MILLIS))+"y";
+        } else if (timeDifference > DateUtils.YEAR_IN_MILLIS) //years
+            return ((int) (timeDifference / DateUtils.YEAR_IN_MILLIS)) + "y";
 
-        //NOTE: skipped months - number of milli in a month changes
+            //NOTE: skipped months - number of milli in a month changes
 
         else if (timeDifference > DateUtils.WEEK_IN_MILLIS)
-            return ((int) (timeDifference / DateUtils.WEEK_IN_MILLIS))+"w";
+            return ((int) (timeDifference / DateUtils.WEEK_IN_MILLIS)) + "w";
         else if (timeDifference > DateUtils.DAY_IN_MILLIS)
-            return ((int) (timeDifference / DateUtils.DAY_IN_MILLIS))+"d";
+            return ((int) (timeDifference / DateUtils.DAY_IN_MILLIS)) + "d";
         else if (timeDifference > DateUtils.HOUR_IN_MILLIS)
-            return ((int) (timeDifference / DateUtils.HOUR_IN_MILLIS))+"h";
+            return ((int) (timeDifference / DateUtils.HOUR_IN_MILLIS)) + "h";
         else if (timeDifference > DateUtils.MINUTE_IN_MILLIS)
             return ((int) (timeDifference / DateUtils.MINUTE_IN_MILLIS)) + "m";
         else
-            return ((int) (timeDifference / DateUtils.SECOND_IN_MILLIS))+"s";
+            return ((int) (timeDifference / DateUtils.SECOND_IN_MILLIS)) + "s";
     }
 
     //returns millisecond of date
@@ -299,36 +299,45 @@ public class Utils {
 
     private static StringSignature mGlideSignature;
 
-    public static StringSignature getGlideSignature(Context context){
-        if(mGlideSignature == null) {
+    public static StringSignature getGlideSignature(Context context) {
+        if (mGlideSignature == null) {
             mGlideSignature = new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000"));
         }
         return mGlideSignature;
     }
 
 
-    public static String getFBImage(String id){
+    public static String getFBImage(String id) {
         return String.format("https://graph.facebook.com/%s/picture?width=720&height=720", id);
     }
 
 
-    public static String getMyId(Context context){
+    public static String getMyId(Context context) {
         return context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", null);
     }
 
-    public static String stripUnsupportedCharacters(String in){
+    public static String stripUnsupportedCharacters(String in) {
         /*24 = Nougat, didn't have Build.VERSION_CODE for it*/
-        if(Build.VERSION.SDK_INT >= 24 || in == null){
+        if (Build.VERSION.SDK_INT >= 24 || in == null) {
             return in;
         }
+        Log.i("AAA", Arrays.toString(in.toCharArray()));
 
         String out = in.replaceAll(
                 "(\\uD83C\\udffB|" +
-                "\\uD83C\\uDFFC|" +
-                "\\uD83C\\uDFFD|" +
-                "\\uD83C\\uDFFE|" +
-                "\\uD83C\\uDFFF)", "");
+                        "\\uD83C\\uDFFC|" +
+                        "\\uD83C\\uDFFD|" +
+                        "\\uD83C\\uDFFE|" +
+                        "\\uD83C\\uDFFF)"
+                , "");
 
-        return out;
+        /*
+        "\u200E" = LTR (Left-to-right) character
+        "\u202C" = PDF (Pop directional formatting) character
+        A string begginng with LTR and ending with PDF will be forced
+        into a left to right configuration, Fixing formatting problems with
+        right-to-left languages such as hebrew and arabic
+        */
+        return "\u200E" + out + "\u202C";
     }
 }
