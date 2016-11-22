@@ -745,7 +745,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     private void showCommentTutorial() {
         if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("comment_tip", true)) {
-            Toast.makeText(getContext(), "Double tap comments to like or long press for other options", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Double tap comments to like\nLong press for other options", Toast.LENGTH_LONG).show();
         }
     }
 
