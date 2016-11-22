@@ -403,6 +403,7 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     public void addFragmentToContainer(final Fragment fragment) {
         if (!mSafeForFragmentTransaction) return;
+        mDrawerLayout.closeDrawer(Gravity.LEFT);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainActivity_fragment_holder, fragment)
@@ -413,6 +414,7 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     public void addFragmentToContainer(final Fragment fragment, String tag) {
         if (!mSafeForFragmentTransaction) return;
+        mDrawerLayout.closeDrawer(Gravity.LEFT);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainActivity_fragment_holder, fragment, tag)
@@ -423,6 +425,7 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     public void addFragmentOnTop(Fragment fragment, String tag) {
         if (!mSafeForFragmentTransaction) return;
+        mDrawerLayout.closeDrawer(Gravity.LEFT);
         hideKeyboard();
         getSupportFragmentManager()
                 .beginTransaction()
