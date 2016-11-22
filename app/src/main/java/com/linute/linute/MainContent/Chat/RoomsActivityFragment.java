@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.getbase.floatingactionbutton.FloatingActionButton;
@@ -21,7 +22,11 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
+import com.linute.linute.MainContent.EventBuses.NotificationEvent;
+import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
+import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -47,6 +52,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
@@ -63,6 +69,10 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
 
 
     private static RoomsActivityFragment instance;
+    private View vUpdateIndicator;
+    private TextView vUpdateCounter;
+    private Subscription mNotificationSubscription;
+
     public static RoomsActivityFragment getInstance(){
         if(instance == null){
             instance = new RoomsActivityFragment();
@@ -128,6 +138,23 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
             }
         });
 
+        toolbar.inflateMenu(R.menu.menu_fragment_messenger);
+
+        View chatActionView = toolbar.getMenu().findItem(R.id.menu_updates).getActionView();
+        vUpdateIndicator = chatActionView.findViewById(R.id.notification);
+        vUpdateCounter = (TextView) chatActionView.findViewById(R.id.notification_count);
+
+        chatActionView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                if (activity != null) {
+                    activity.addFragmentToContainer(UpdatesFragment.getInstance(), UpdatesFragment.TAG);
+                }
+            }
+        });
+
+
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -191,6 +218,15 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) activity.setShowSnackbar(false);
 
+        NotificationsCounterSingleton singleton = NotificationsCounterSingleton.getInstance();
+        vUpdateIndicator.setVisibility(singleton.hasNewActivities() ? View.VISIBLE : View.GONE);
+        vUpdateCounter.setText(String.valueOf(singleton.getNumOfNewActivities()));
+
+        mNotificationSubscription = NotificationEventBus.getInstance().getObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mNotificationEventAction1);
+
         if(isViewCreated()) {
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
@@ -218,6 +254,9 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
         //stop listening
         if (mChatSubscription != null && !mChatSubscription.isUnsubscribed()) {
             mChatSubscription.unsubscribe();
+        }
+        if(mNotificationSubscription != null){
+            mNotificationSubscription.unsubscribe();
         }
     }
 
@@ -813,6 +852,19 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
             }
         }
     }
+
+    private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
+        @Override
+        public void call(NotificationEvent notificationEvent) {
+            if (notificationEvent.getType() == NotificationEvent.ACTIVITY) {
+                int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
+                vUpdateIndicator.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+                vUpdateCounter.setText(count < 100 ? count + "" : "+");
+            } /*else if (notificationEvent.getType() == NotificationEvent.DISCOVER) {
+                mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
+            }*/
+        }
+    };
 
     @Override
     public void onCreateContextMenu(ContextMenu contextMenu, final ChatRoom room, final int position, ContextMenu.ContextMenuInfo contextMenuInfo) {

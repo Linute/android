@@ -328,7 +328,7 @@ public class MainActivity extends BaseTaptActivity {
                     fragment = new DiscoverHolderFragment();
                     break;
                 case FRAGMENT_INDEXES.ACTIVITY:
-                    fragment = new UpdatesFragment();
+                    fragment = UpdatesFragment.getInstance();
                     break;
                 case FRAGMENT_INDEXES.PROFILE:
                     fragment = new Profile();
