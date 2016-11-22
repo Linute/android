@@ -47,6 +47,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.AutoPlayScrollListener;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONArray;
@@ -157,6 +158,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         });
 
         vRecList.setLayoutManager(llm);
+        vRecList.addOnScrollListener(new AutoPlayScrollListener());
 
         mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
 
@@ -170,6 +172,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         mProfileAdapter.setOnSwitchLayoutClicked(new ProfileAdapter.OnSwitchLayoutClicked() {
             @Override
             public void switchClicked(int position) {
+                SingleVideoPlaybackManager.getInstance().stopPlayback();
                 isLinearFeed = position == 1;
                 llm.setSpanCount(isLinearFeed ? 1 : 3 );
                 mProfileAdapter.showThumbnails = !isLinearFeed;

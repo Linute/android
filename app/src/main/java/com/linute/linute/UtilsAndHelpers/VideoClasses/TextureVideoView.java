@@ -205,9 +205,9 @@ public class TextureVideoView extends TextureView
         mVideoWidth = 0;
         mVideoHeight = 0;
         setSurfaceTextureListener(mSurfaceTextureListener);
-        setFocusable(true);
-        setFocusableInTouchMode(true);
-        requestFocus();
+        //setFocusable(true);
+        //setFocusableInTouchMode(true);
+        //requestFocus();
         mCurrentState = STATE_IDLE;
         mTargetState = STATE_IDLE;
     }
@@ -241,6 +241,11 @@ public class TextureVideoView extends TextureView
         openVideo();
         requestLayout();
         invalidate();
+    }
+
+
+    public Uri getUri() {
+        return mUri;
     }
 
     public void stopPlayback() {
@@ -644,7 +649,6 @@ public class TextureVideoView extends TextureView
 
     @Override
     public void pause() {
-        Log.i(TAG, "pause: tt");
         if (isInPlaybackState()) {
             if (mMediaPlayer.isPlaying()) {
                 mMediaPlayer.pause();
@@ -655,7 +659,6 @@ public class TextureVideoView extends TextureView
     }
 
     public void suspend() {
-        Log.i(TAG, "suspend: tt");
         release(false);
     }
 

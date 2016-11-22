@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
@@ -65,11 +66,10 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
     }
 
     public void playVideo(){
-        SingleVideoPlaybackManager.getInstance().playNewVideo(vVideoView, mVideoUrl);
-
         vVideoView.setOnPreparedListener(this);
         vVideoView.setOnCompletionListener(this);
 
+        SingleVideoPlaybackManager.getInstance().playNewVideo(vVideoView, mVideoUrl); //new uri was set
         videoProcessing = true;
         vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
         vVideoView.setVisibility(View.VISIBLE);

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/header_feed_detail"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -56,7 +55,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:gravity="center_vertical"
-        android:singleLine="true"
+        android:lines="1"
         android:textColor="@color/twentyfive_black"
         android:textSize="@dimen/sub_font_size"
         tools:text="1m" />
