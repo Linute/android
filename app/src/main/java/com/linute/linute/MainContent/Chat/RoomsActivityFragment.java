@@ -98,6 +98,8 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        mUserId = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
+
         mRoomsAdapter = new RoomsAdapter(context, mRoomsList);
         getRooms();
     }
@@ -106,7 +108,6 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mUserId = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
 
         return inflater.inflate(R.layout.fragment_rooms, container, false);
     }
