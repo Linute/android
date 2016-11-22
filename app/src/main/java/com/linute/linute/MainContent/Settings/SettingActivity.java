@@ -42,7 +42,7 @@ public class SettingActivity extends BaseSocketActivity {
 
     //use a variable to keep track of if user made changes to account info
     //if user did change account information, let the parent "ProfileFragment" know, so it can update info
-    public static String TAG = "SettingActivity";
+    public static final String TAG = SettingActivity.class.getSimpleName();
 
     private boolean mUpdateNeeded;
 
@@ -67,12 +67,13 @@ public class SettingActivity extends BaseSocketActivity {
         Toolbar toolBar = (Toolbar) findViewById(R.id.settingactivity_toolbar);
         toolBar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolBar.setTitle("Settings");
-        toolBar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
+        toolBar.setNavigationOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        onBackPressed();
+                    }
+                });
     }
 
     @Override
@@ -142,7 +143,6 @@ public class SettingActivity extends BaseSocketActivity {
     }
 
 
-
     //fragment with our settings layout
     public static class LinutePreferenceFragment extends PreferenceFragment {
         Preference mEditProfileInfo;
@@ -192,7 +192,7 @@ public class SettingActivity extends BaseSocketActivity {
 
 
             DeviceInfoSingleton info = DeviceInfoSingleton.getInstance(getActivity());
-            mAbout.setSummary("v" + info.getVersionCode() + "api" + API_Methods.VERSION + (API_Methods.IS_DEV_BUILD ? " @"+new Date(BuildConfig.TIMESTAMP).toLocaleString() : ""));
+            mAbout.setSummary("v" + info.getVersionCode() + "api" + API_Methods.VERSION + (API_Methods.IS_DEV_BUILD ? " @" + new Date(BuildConfig.TIMESTAMP).toLocaleString() : ""));
         }
 
         /* TODO: still need to add the following on click listeners:
@@ -289,7 +289,6 @@ public class SettingActivity extends BaseSocketActivity {
             });
 
             //privacy policy
-            //FIXME : open in browser
             mPrivacyPolicy.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
@@ -325,11 +324,11 @@ public class SettingActivity extends BaseSocketActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     ArrayList<User> users = new ArrayList();
-                    users.add(new User("56be0e665e504abb121290b0","TaptHQ", "", null));
+                    users.add(new User("56be0e665e504abb121290b0", "TaptHQ", "", null));
 
                     ChatFragment.newInstance(null, users);
 //                    ((AppCompatActivity)getActivity()).getSupportFragmentManager().beginTransaction().add(ChatFragment.newInstance(null, users),"").commit();
-                    ((BaseTaptActivity)getActivity())
+                    ((BaseTaptActivity) getActivity())
                             .addFragmentOnTop(ChatFragment.newInstance(null, users), "Chat");
                     return true;
                 }
@@ -338,14 +337,6 @@ public class SettingActivity extends BaseSocketActivity {
             mGiveFeedback.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    /*Intent intent = new Intent(Intent.ACTION_SENDTO);
-                    intent.setData(Uri.parse("mailto:")); // only email apps should handle this
-                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@tapt.io"});
-                    intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback");
-                    intent.putExtra(android.content.Intent.EXTRA_TEXT, "Replace this text with any feedback you'd like to give us!");
-                    if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                        startActivity(intent);
-                    }*/
                     Intent intent = new Intent(getActivity(), FeedbackActivity.class);
                     startActivity(intent);
                     return true;
@@ -360,10 +351,10 @@ public class SettingActivity extends BaseSocketActivity {
                 }
             });
 
-            if(!API_Methods.IS_DEV_BUILD) {
+            if (!API_Methods.IS_DEV_BUILD) {
                 PreferenceCategory misc = (PreferenceCategory) findPreference("misc");
                 misc.removePreference(mChangeCollege);
-            }else{
+            } else {
                 mChangeCollege.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override
                     public boolean onPreferenceClick(Preference preference) {
