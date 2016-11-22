@@ -43,6 +43,7 @@ import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.BlockHelper;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
@@ -611,9 +612,9 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         final boolean isOwner = p.getUserId().equals(mUserid);
         String[] options;
         if (isOwner) {
-            options = new String[]{"Delete post", p.getPrivacy() == 1 ? "Reveal identity" : "Make anonymous", "Share post"};
+            options = new String[]{"Delete post", p.getPrivacy() == 1 ? "Reveal identity" : "Make anonymous"};
         } else {
-            options = new String[]{"Report post", p.isPostHidden() ? "Unhide post" : "Hide post", "Share post"};
+            options = new String[]{"Report post", p.isPostHidden() ? "Unhide post" : "Hide post", "Block User"};
         }
         mAlertDialog = new AlertDialog.Builder(getContext())
                 .setItems(options, new DialogInterface.OnClickListener() {
@@ -629,7 +630,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
                                 else confirmToggleHidden(p, position);
                                 return;
                             case 2:
-                                sharePost(p);
+                                BlockHelper.blockUserFromPostDialog(getContext(), p).show();
                         }
                     }
                 }).show();

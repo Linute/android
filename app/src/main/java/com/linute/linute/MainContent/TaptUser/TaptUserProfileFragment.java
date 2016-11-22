@@ -909,9 +909,9 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         final boolean isOwner = p.getUserId().equals(mViewerId);
         String[] options;
         if (isOwner) {
-            options = new String[]{"Delete post", p.getPrivacy() == 1 ? "Reveal identity" : "Make anonymous", "Share post"};
+            options = new String[]{"Delete post", p.getPrivacy() == 1 ? "Reveal identity" : "Make anonymous"};
         } else {
-            options = new String[]{"Report post", p.isPostHidden() ? "Unhide post" : "Hide post", "Share post"};
+            options = new String[]{"Report post", p.isPostHidden() ? "Unhide post" : "Hide post", "Block User"};
         }
         mAlertDialog = new AlertDialog.Builder(getContext())
                 .setItems(options, new DialogInterface.OnClickListener() {
@@ -927,7 +927,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                                 else confirmToggleHidden(p);
                                 return;
                             case 2:
-                                sharePost(p);
+                                blockPost(p);
                         }
                     }
                 }).show();
@@ -1198,6 +1198,27 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                 progressDialog.dismiss();
             }
         });
+    }
+
+
+    private void blockPost(final Post p){
+        if (getContext() == null) return;
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle(p.isPostHidden() ? "Unhide post" : "Hide it")
+                .setMessage(p.isPostHidden() ? "This will make this post viewable on your feed. Still want to go ahead with it?" : "This will remove this post from your feed, go ahead with it?")
+                .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        toggleHidden(p);
+                    }
+                })
+                .setNegativeButton("no, thanks", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 
 

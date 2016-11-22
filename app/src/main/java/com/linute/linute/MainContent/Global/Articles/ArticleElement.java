@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Locale;
+
 /**
  * Created by mikhail on 10/25/16.
  */
@@ -85,7 +87,48 @@ public class ArticleElement implements Parcelable{
         dest.writeString(content);
     }
 
+    @Override
+    public String toString() {
+        String ret;
+        switch (type){
+            case 0:
+                ret = "TITLE";
+                break;
+            case 1:
+                ret = "DATE";
+                break;
+            case 2:
+                ret = "AUTHOR";
+                break;
+            case 3:
+                ret = "HEADER";
+                break;
+            case 4:
+                ret = "PARAGRAPH";
+                break;
+            case 5:
+                ret = "CAPTION";
+                break;
+            case 6:
+                ret = "ATTRIBUTION";
+                break;
+            case 7:
+                ret = "IMAGE";
+                break;
+            case 8:
+                ret = "VIDEO";
+                break;
+            case 9:
+                ret = "GIF";
+                break;
+            case 10:
+                ret = "QUOTE";
+                break;
+            default:
+                ret = "ERR";
+        }
 
+        return ret.substring(0,1).toUpperCase(Locale.US)+ret.substring(1).toLowerCase(Locale.US) + ": "+content;
 
-
+    }
 }

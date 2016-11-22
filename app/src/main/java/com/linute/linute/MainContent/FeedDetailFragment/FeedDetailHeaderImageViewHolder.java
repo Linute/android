@@ -92,5 +92,4 @@ public class FeedDetailHeaderImageViewHolder extends ImageFeedHolder {
 
     }
 
-
 }

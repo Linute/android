@@ -1,7 +1,6 @@
 package com.linute.linute.UtilsAndHelpers;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.Socket.TaptSocket;
@@ -24,6 +23,7 @@ public class ImpressionHelper {
                 try {
                     JSONObject body = new JSONObject();
 
+                    if(collegeId != null)
                     body.put("college", collegeId);
                     body.put("user", userId);
 

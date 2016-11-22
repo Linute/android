@@ -35,16 +35,17 @@ public class LSDKFriends {
         return API_Methods.get(new String[]{"activities"}, header, param, callback);
     }
 
-    public Call getFriendsForMention(String userId, String fullname, String skip, Callback callback) {
+    public Call getFriendsForMention(String userId, String fullname, String postId, String skip, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         Map<String, Object> param = new HashMap<>();
         param.put("owner", userId);
         param.put("limit", "25");
         param.put("skip", skip);
+        param.put("event", postId);
         param.put("fullName", fullname);
 
-        return API_Methods.get(new String[]{"friends"}, header, param, callback);
+        return API_Methods.post("friends/mentions", header, param, callback);
     }
 
 //    public Call getSendTo(String name, String userId, Callback callback) {
@@ -62,7 +63,7 @@ public class LSDKFriends {
     public Call getSendToList(Map<String, Object> param, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
         //param.put("timestamp", timeStamp);
-        return API_Methods.post("friends/followers", header, param, callback);
+        return API_Methods.post("friends/shared", header, param, callback);
     }
 
 }

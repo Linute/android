@@ -10,7 +10,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -76,12 +75,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.client.Socket;
@@ -410,6 +404,7 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     public void addFragmentToContainer(final Fragment fragment) {
         if (!mSafeForFragmentTransaction) return;
+        mDrawerLayout.closeDrawer(Gravity.LEFT);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainActivity_fragment_holder, fragment)
@@ -420,6 +415,7 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     public void addFragmentToContainer(final Fragment fragment, String tag) {
         if (!mSafeForFragmentTransaction) return;
+        mDrawerLayout.closeDrawer(Gravity.LEFT);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainActivity_fragment_holder, fragment, tag)
@@ -430,6 +426,7 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     public void addFragmentOnTop(Fragment fragment, String tag) {
         if (!mSafeForFragmentTransaction) return;
+        mDrawerLayout.closeDrawer(Gravity.LEFT);
         hideKeyboard();
         getSupportFragmentManager()
                 .beginTransaction()
@@ -595,8 +592,8 @@ public class MainActivity extends BaseTaptActivity {
         socket.on("badge", badge);
         socket.on("unread", haveUnread);
         socket.on("posts refresh", refresh);
-        socket.on("memes", meme);
-        socket.on("filters", filter);
+//        socket.on("memes", meme);
+//        socket.on("filters", filter);
         socket.on("status colors", statusColors);
         socket.on("blocked", blocked);
         socket.on("message", message);
@@ -661,8 +658,8 @@ public class MainActivity extends BaseTaptActivity {
             socket.off("badge", badge);
             socket.off("unread", haveUnread);
             socket.off("posts refresh", refresh);
-            socket.off("memes", meme);
-            socket.off("filters", filter);
+//            socket.off("memes", meme);
+//            socket.off("filters", filter);
             socket.off("status colors", statusColors);
             socket.off("blocked", blocked);
             socket.off("message", message);
@@ -1091,113 +1088,33 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-    private Emitter.Listener meme = new Emitter.Listener() {
+    /*private Emitter.Listener meme = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             try {
                 JSONObject body = new JSONObject(args[0].toString());
-                JSONArray memes = body.getJSONArray("memes");
-
-                File memeDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "memes/");
-                memeDir.mkdirs();
-
-
-                if (memes == null) return;
-
-                for (File f : memeDir.listFiles()) {
-                    for (int i = 0; i < memes.length(); i++) {
-                        String fileName = memes.getString(i);
-                        if (fileName.equals(f)) break;
-                        if (i == memes.length() - 1)
-                            f.delete();
-                    }
-                }
-
-                for (int i = 0; i < memes.length(); i++) {
-                    final String fileName = memes.getString(i);
-                    final File file = new File(memeDir, fileName);
-                    if (!file.exists()) {
-                        try {
-                            file.createNewFile();
-                            File res = Glide.with(MainActivity.this)
-                                    .load(Utils.getMemeImageUrl(fileName))
-                                    .downloadOnly(1080, 1920).get();
-
-                            FileOutputStream fos = new FileOutputStream(file);
-                            FileInputStream fis = new FileInputStream(res);
-                            byte[] buf = new byte[1024];
-                            int len;
-                            while ((len = fis.read(buf)) > 0) {
-                                fos.write(buf, 0, len);
-                            }
-                            fis.close();
-                            fos.close();
-                        } catch (IOException | InterruptedException | ExecutionException ioe) {
-                            ioe.printStackTrace();
-                        }
-
-                    }
-                }
+                saveStickers(body);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
-    };
+    };*/
 
-    private Emitter.Listener filter = new Emitter.Listener() {
+
+
+   /* private Emitter.Listener filter = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             try {
                 JSONObject body = new JSONObject(args[0].toString());
-                JSONArray filters = body.getJSONArray("filters");
-
-                File filtersDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "filters/");
-                filtersDir.mkdirs();
-
-                if (filters == null) return;
-
-                for (File f : filtersDir.listFiles()) {
-                    for (int i = 0; i < filters.length(); i++) {
-                        String fileName = filters.getString(i);
-                        if (fileName.equals(f)) break;
-                        if (i == filters.length() - 1)
-                            f.delete();
-                    }
-                }
-
-                for (int i = 0; i < filters.length(); i++) {
-                    final String fileName = filters.getString(i);
-                    final File file = new File(filtersDir, fileName);
-                    if (!file.exists()) {
-                        try {
-                            file.createNewFile();
-                            File res = Glide.with(MainActivity.this)
-                                    .load(Utils.getFilterImageUrl(fileName))
-                                    .downloadOnly(1080, 1920).get();
-
-                            FileOutputStream fos = new FileOutputStream(file);
-                            FileInputStream fis = new FileInputStream(res);
-                            byte[] buf = new byte[1024];
-                            int len;
-                            while ((len = fis.read(buf)) > 0) {
-                                fos.write(buf, 0, len);
-                            }
-                            fis.close();
-                            fos.close();
-                        } catch (IOException | ExecutionException ioe) {
-                            ioe.printStackTrace();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                }
+                saveFilters(body);
             } catch (JSONException e) {
                 e.printStackTrace();
 
             }
         }
-    };
+    };*/
+
 
     private Emitter.Listener blocked = new Emitter.Listener() {
         @Override

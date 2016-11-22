@@ -1,8 +1,5 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -10,9 +7,6 @@ import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -26,6 +20,7 @@ import com.bumptech.glide.request.target.Target;
 import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.AnimationUtils;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.CustomOnTouchListener;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -88,73 +83,21 @@ public class ImageFeedHolder extends BasePostFeedHolder {
 
     private void doubleClick(float x, float y) {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            animateLollipop(vTopLayer,
+            AnimationUtils.animateLollipop(vTopLayer,
                     (int) x,
                     (int) y,
-                    (float) getMax(Math.hypot(x, y),
+                    (float) AnimationUtils.getMax(Math.hypot(x, y),
                             Math.hypot(x, vTopLayer.getHeight() - y),
                             Math.hypot(vTopLayer.getWidth() - x, y),
                             Math.hypot(vTopLayer.getWidth() - x, vTopLayer.getHeight() - y)
                     ));
         } else {
-            animatePreLollipop(vTopLayer);
+            AnimationUtils.animatePreLollipop(vTopLayer);
         }
 
         if (!vLikesHeart.isChecked()) {
             vLikesHeart.toggle();
         }
-    }
-
-    private double getMax(double a, double b, double c, double d) {
-        return Math.max(Math.max(a, b), Math.max(c, d));
-    }
-
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void animateLollipop(final View v, int x, int y, float radius) {
-        Animator animator = ViewAnimationUtils.createCircularReveal(v, x, y, 0, radius);
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                v.setVisibility(View.INVISIBLE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                super.onAnimationCancel(animation);
-                v.setVisibility(View.INVISIBLE);
-            }
-        });
-
-        v.setVisibility(View.VISIBLE);
-        animator.start();
-    }
-
-    private void animatePreLollipop(final View layer) {
-        AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
-        a.setDuration(400);
-
-        final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
-        a2.setDuration(200);
-
-        a.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                layer.startAnimation(a2);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-
-        layer.startAnimation(a);
     }
 
     private void longPress() {

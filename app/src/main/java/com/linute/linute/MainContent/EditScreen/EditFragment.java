@@ -51,6 +51,7 @@ import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.linute.linute.API.LSDKMisc;
 import com.linute.linute.MainContent.EditScreen.PostOptions.ContentType;
 import com.linute.linute.MainContent.EditScreen.Tools.CommentPrivacyTool;
 import com.linute.linute.MainContent.EditScreen.Tools.CropTool;
@@ -67,11 +68,14 @@ import com.linute.linute.SquareCamera.CustomView;
 import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.SquareCamera.ScreenSizeSingleton;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.EditContentUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import org.bson.types.ObjectId;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -79,6 +83,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
@@ -189,6 +196,8 @@ public class EditFragment extends BaseFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ScreenSizeSingleton.init(getActivity().getWindowManager());
+
+        loadContent();
 
         mProcessingDialog = new ProgressDialog(getContext());
         mProcessingDialog.setIndeterminate(true);
@@ -1359,6 +1368,44 @@ public class EditFragment extends BaseFragment {
 
     private boolean isPortrait() {
         return mDimens.rotation == 90 || mDimens.rotation == 270;
+    }
+
+
+    private void loadContent(){
+        LSDKMisc api = new LSDKMisc(getContext());
+        api.getStickers(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+//                Log.d(TAG, "Stickers: " +response.body().string());
+                try {
+                    EditContentUtils.saveStickers(getContext(), new JSONObject(response.body().string()));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        api.getFilters(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+//                Log.d(TAG, "Stickers: " +response.body().string());
+                try {
+                    EditContentUtils.saveFilters(getContext(), new JSONObject(response.body().string()));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
 

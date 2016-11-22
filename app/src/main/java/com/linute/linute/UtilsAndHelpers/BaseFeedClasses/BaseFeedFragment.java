@@ -34,6 +34,7 @@ import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.BlockHelper;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
@@ -106,9 +107,9 @@ public abstract class BaseFeedFragment extends BaseFragment {
                     final Post p = (Post) bfi;
                     final boolean isOwner = p.getUserId().equals(mUserId);
                     if (isOwner) {
-                        options = new String[]{"Delete post", p.getPrivacy() == 1 ? "Reveal identity" : "Make anonymous", "Share post"};
+                        options = new String[]{"Delete post", p.getPrivacy() == 1 ? "Reveal identity" : "Make anonymous"};
                     } else {
-                        options = new String[]{"Report post", p.isPostHidden() ? "Unhide post" : "Hide post", "Share post"};
+                        options = new String[]{"Report post", p.isPostHidden() ? "Unhide post" : "Hide post", "Block User"};
                     }
                     mAlertDialog = new AlertDialog.Builder(getContext())
                             .setItems(options, new DialogInterface.OnClickListener() {
@@ -124,7 +125,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
                                             else confirmToggleHidden(p, position);
                                             return;
                                         case 2:
-                                            sharePost(p);
+                                            BlockHelper.blockUserFromPostDialog(getContext(), p).show();
                                     }
                                 }
                             }).show();

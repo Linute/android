@@ -99,7 +99,7 @@ public class Update {
         if (hasEventInformation())
             setUpEvent(json);
 
-        mDescription = getStringFromJson(json, "text");
+        mDescription = Utils.stripUnsupportedCharacters(" "+getStringFromJson(json, "text"));
 
 //        if(isAnon()){
 //            mDescription = text.replaceFirst("Anon ", "");
