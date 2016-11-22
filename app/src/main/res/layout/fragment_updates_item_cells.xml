@@ -47,15 +47,19 @@
 
             <TextView
                 android:id="@+id/updatesFragment_name_text"
-                android:layout_width="0px"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:layout_weight="1"
                 android:singleLine="true"
                 android:textColor="@color/user_name_blue"
                 android:textSize="@dimen/header_font_size"
                 tools:text="FIRST LAST"/>
 
+            <android.support.v4.widget.Space
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                />
             <TextView
                 android:id="@+id/time"
                 android:layout_width="wrap_content"
@@ -75,7 +79,8 @@
             android:maxLines="3"
             android:textColor="@color/fifty_black"
             android:textSize="@dimen/sub_font_size"
-            tools:text="Test text. This est text. This est text. This est text. This is what it will looking like test test test test tedfs "
+            android:textAlignment="viewStart"
+            tools:text="انتا النفط, في يتم لعدم Test text. This est text. This est text. This est text. This is what it will looking like test test test test tedfs "
         />
 
     </LinearLayout>
