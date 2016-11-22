@@ -1236,7 +1236,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
             if (mFriendSearchCall != null) mFriendSearchCall.cancel();
 
-            mFriendSearchCall = new LSDKFriends(getActivity()).getFriendsForMention(mViewId, mQueryString, "0", new Callback() {
+            mFriendSearchCall = new LSDKFriends(getActivity()).getFriendsForMention(mViewId, mQueryString, mFeedDetail.getPostId(), "0", new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     if (getActivity() == null || call.isCanceled()) return;
@@ -1246,6 +1246,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                             Utils.showBadConnectionToast(getActivity());
                         }
                     });
+                    e.printStackTrace();
                 }
 
                 @Override
@@ -1254,15 +1255,15 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         try {
 
                             String res = response.body().string();
-                            //Log.i(TAG, "onResponse: " + res);
+                            Log.i(TAG, "onResponse: " + res);
 
-                            JSONArray friends = new JSONObject(res).getJSONArray("friends");
+                            JSONArray friends = new JSONObject(res).getJSONArray("users");
                             JSONObject user;
 
                             final ArrayList<MentionedPerson> personList = new ArrayList<>();
 
                             for (int i = 0; i < friends.length(); i++) {
-                                user = friends.getJSONObject(i).getJSONObject("user");
+                                user = friends.getJSONObject(i);
                                 try {
                                     personList.add(
                                             new MentionedPerson(
