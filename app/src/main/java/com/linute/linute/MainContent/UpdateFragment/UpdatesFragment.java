@@ -116,7 +116,17 @@ public class UpdatesFragment extends BaseFragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().popBackStack();
+                //pops up to main screen
+                if (getFragmentManager() != null) {
+                    int count = getFragmentManager().getBackStackEntryCount();
+                    for (int i = 1; i < count; i++) {
+                        if(getFragmentManager()!=null)
+                            getFragmentManager().popBackStackImmediate();
+                    }
+                }
+                ((MainActivity)getActivity()).clearBackStack();
+
+//                getFragmentManager().popBackStackImmediate(MainActivity.PROFILE_OR_EVENT_NAME, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             }
         });
 
