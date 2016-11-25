@@ -89,7 +89,12 @@ public class DeactivateAccountActivity extends BaseSocketActivity {
         lsdkUser.sendFeedback(feedback, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.showBadConnectionToast(DeactivateAccountActivity.this);
+                    }
+                });
             }
 
             @Override
@@ -103,7 +108,12 @@ public class DeactivateAccountActivity extends BaseSocketActivity {
         lsdkUser.deactivateAccount(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.showBadConnectionToast(DeactivateAccountActivity.this);
+                    }
+                });
             }
 
             @Override
