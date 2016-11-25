@@ -69,10 +69,11 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
         vVideoView.setOnPreparedListener(this);
         vVideoView.setOnCompletionListener(this);
 
-        SingleVideoPlaybackManager.getInstance().playNewVideo(vVideoView, mVideoUrl); //new uri was set
-        videoProcessing = true;
-        vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
-        vVideoView.setVisibility(View.VISIBLE);
+        if(SingleVideoPlaybackManager.getInstance().playNewVideo(vVideoView, mVideoUrl)) { //new uri was set
+            videoProcessing = true;
+            vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
+            vVideoView.setVisibility(View.VISIBLE);
+        }
     }
 
 
@@ -160,9 +161,15 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
         vCinemaIcon.setAlpha(1);
     }
 
+    public void stopVideo(){
+        vVideoView.stopPlayback();
+    }
+
     @Override
     public void onSurfaceDestroyed() {
-        vVideoView.stopPlayback();
-        hideVideo();
+        if (vVideoView.getVisibility() == View.VISIBLE) {
+            stopVideo();
+            hideVideo();
+        }
     }
 }

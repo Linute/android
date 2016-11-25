@@ -1,9 +1,11 @@
 package com.linute.linute.UtilsAndHelpers.BaseFeedClasses;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import com.bumptech.glide.RequestManager;
 import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
+import com.linute.linute.MainContent.DiscoverFragment.VideoFeedHolder;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 
 /**
@@ -54,6 +56,15 @@ public abstract class BaseFeedAdapter extends RecyclerView.Adapter<RecyclerView.
 
     public void setGetMoreFeed(LoadMoreViewHolder.OnLoadMore moreFeed) {
         mGetMoreFeed = moreFeed;
+    }
+
+
+    @Override
+    public void onViewRecycled(RecyclerView.ViewHolder holder) {
+        if (holder instanceof VideoFeedHolder)
+            ((VideoFeedHolder)holder).stopVideo();
+
+        super.onViewRecycled(holder);
     }
 
 

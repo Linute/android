@@ -7,8 +7,6 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.facebook.AccessToken;
@@ -157,6 +155,7 @@ public class SettingActivity extends BaseSocketActivity {
         Preference mAttributions;
         Preference mNotification;
         Preference mAbout;
+        Preference mContent;
         Preference mChangePassword;
 
         Preference mChangeCollege;
@@ -188,6 +187,7 @@ public class SettingActivity extends BaseSocketActivity {
             mAbout = findPreference("version");
             mChangePassword = findPreference("change_password");
 
+            mContent = findPreference("content");
             mChangeCollege = findPreference("change_college");
 
 
@@ -345,7 +345,18 @@ public class SettingActivity extends BaseSocketActivity {
             mNotification.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent(getActivity(), NotificationSettingsActivity.class);
+                    Intent i = new Intent(getActivity(), BasicSettingsActivity.class);
+                    i.putExtra(BasicSettingsActivity.ARG_TYPE, BasicSettingsActivity.NOTIFICATIONS);
+                    startActivity(i);
+                    return true;
+                }
+            });
+
+            mContent.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent i = new Intent(getActivity(), BasicSettingsActivity.class);
+                    i.putExtra(BasicSettingsActivity.ARG_TYPE, BasicSettingsActivity.CONTENT);
                     startActivity(i);
                     return true;
                 }
