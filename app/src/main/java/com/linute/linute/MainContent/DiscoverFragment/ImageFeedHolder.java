@@ -24,6 +24,7 @@ import com.linute.linute.UtilsAndHelpers.AnimationUtils;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.CustomOnTouchListener;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 /**
  * Created by QiFeng on 2/3/16.
@@ -102,7 +103,7 @@ public class ImageFeedHolder extends BasePostFeedHolder {
     private void longPress() {
         if (mPost.getType() != Post.POST_TYPE_STATUS) {
             MainActivity activity = (MainActivity) mContext;
-            VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+            SingleVideoPlaybackManager.getInstance().stopPlayback();
             activity.addFragmentOnTop(
                     ViewFullScreenFragment.newInstance(
                             Uri.parse(mPost.getType() == Post.POST_TYPE_VIDEO ? mPost.getVideoUrl() : mPost.getImage()),

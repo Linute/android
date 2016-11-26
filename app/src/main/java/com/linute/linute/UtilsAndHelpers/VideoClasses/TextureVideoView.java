@@ -205,28 +205,22 @@ public class TextureVideoView extends TextureView
         mVideoWidth = 0;
         mVideoHeight = 0;
         setSurfaceTextureListener(mSurfaceTextureListener);
-        setFocusable(true);
-        setFocusableInTouchMode(true);
-        requestFocus();
+        //setFocusable(true);
+        //setFocusableInTouchMode(true);
+        //requestFocus();
         mCurrentState = STATE_IDLE;
         mTargetState = STATE_IDLE;
-    }
-
-    /**
-     * Sets video path.
-     *
-     * @param path the path of the video.
-     */
-    public void setVideoPath(String path) {
-        setVideoURI(Uri.parse(path));
     }
 
     /**
      * Sets video URI.
      *
      * @param uri the URI of the video.
+     *
+     * To set a videoview's uri, use the SingleVideoPlaybackManager
+     * We don't want more than 1 video playing at any moment
      */
-    public void setVideoURI(Uri uri) {
+    protected void setVideoURI(Uri uri) {
         setVideoURI(uri, null);
     }
 
@@ -240,13 +234,18 @@ public class TextureVideoView extends TextureView
      *                "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value
      *                to disallow or allow cross domain redirection.
      */
-    public void setVideoURI(Uri uri, Map<String, String> headers) {
+    private void setVideoURI(Uri uri, Map<String, String> headers) {
         mUri = uri;
         mHeaders = headers;
         mSeekWhenPrepared = 0;
         openVideo();
         requestLayout();
         invalidate();
+    }
+
+
+    public Uri getUri() {
+        return mUri;
     }
 
     public void stopPlayback() {
@@ -650,7 +649,6 @@ public class TextureVideoView extends TextureView
 
     @Override
     public void pause() {
-        Log.i(TAG, "pause: tt");
         if (isInPlaybackState()) {
             if (mMediaPlayer.isPlaying()) {
                 mMediaPlayer.pause();
@@ -661,7 +659,6 @@ public class TextureVideoView extends TextureView
     }
 
     public void suspend() {
-        Log.i(TAG, "suspend: tt");
         release(false);
     }
 

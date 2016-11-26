@@ -22,14 +22,17 @@
 
     <PreferenceCategory android:title="SUPPORT">
         <Preference
+            android:key="notifications"
+            android:title="Notification Settings" />
+        <Preference
+            android:key="content"
+            android:title="Content Settings"/>
+        <Preference
             android:key="talk_to_us"
             android:title="Talk to Us" />
         <Preference
             android:key="give_feedback"
             android:title="Give Feedback" />
-        <Preference
-            android:key="notifications"
-            android:title="Notification Settings" />
         <Preference
             android:key="attributions"
             android:title="Attributions" />

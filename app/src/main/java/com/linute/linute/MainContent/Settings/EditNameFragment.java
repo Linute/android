@@ -16,6 +16,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
@@ -94,8 +95,14 @@ public class EditNameFragment extends Fragment {
         boolean areValid = true;
         //no changes made
         if (lastName.equals(mSharedPreferences.getString("lastName", "")) &&
-                firstName.equals(mSharedPreferences.getString("firstName", "")))
+                firstName.equals(mSharedPreferences.getString("firstName", ""))) {
+
+            //if unchanged, just say we saved it
+            if (getActivity() != null)
+                Utils.showSavedToast(getActivity());
+
             return false;
+        }
 
         if (lastName.isEmpty()) {
             mLastName.setError(getString(R.string.error_field_required));

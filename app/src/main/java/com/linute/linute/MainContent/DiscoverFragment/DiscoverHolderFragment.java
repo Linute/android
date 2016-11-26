@@ -31,6 +31,7 @@ import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -136,7 +137,7 @@ public class DiscoverHolderFragment extends BaseFragment {
             public void onPageSelected(int position) {
                 //we will only load the other fragment if it is needed
                 //ex. we start on the campus tab. we won't load the friends tab until we swipe left
-                VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+                SingleVideoPlaybackManager.getInstance().stopPlayback();
                 if (mFloatingActionsMenu.isExpanded()) mFloatingActionsMenu.collapse();
                 loadFragmentAtPositionIfNeeded(position);
                 mInitiallyPresentedFragmentWasCampus = position == 0;
@@ -317,7 +318,7 @@ public class DiscoverHolderFragment extends BaseFragment {
     public void onPause() {
         super.onPause();
 
-        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+        SingleVideoPlaybackManager.getInstance().stopPlayback();
 
         if (mChatSubscription != null) {
             mChatSubscription.unsubscribe();

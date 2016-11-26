@@ -69,6 +69,7 @@ import com.linute.linute.UtilsAndHelpers.FiveStarRater.FiveStarsDialog;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.NetworkUtil;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -641,6 +642,7 @@ public class MainActivity extends BaseTaptActivity {
 
         mWatchForRefresh = true;
         mSafeForFragmentTransaction = false;
+        SingleVideoPlaybackManager.getInstance().stopPlayback();
     }
 
     @Override
@@ -668,8 +670,6 @@ public class MainActivity extends BaseTaptActivity {
             socket.off(Socket.EVENT_ERROR, onEventError);
             socket.off(Socket.EVENT_RECONNECT, onReconnect);
         }
-
-        //Log.i(TAG, "onStop: ");
     }
 
 

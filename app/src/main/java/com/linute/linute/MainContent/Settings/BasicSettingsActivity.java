@@ -5,6 +5,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.linute.linute.API.API_Methods;
@@ -12,6 +13,7 @@ import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,33 +24,61 @@ import java.util.HashMap;
 /**
  * Created by QiFeng on 4/17/16.
  */
-public class NotificationSettingsActivity extends BaseSocketActivity {
+public class BasicSettingsActivity extends BaseSocketActivity {
 
-    private static final String TAG = NotificationSettingsActivity.class.getSimpleName();
+    private static final String TAG = BasicSettingsActivity.class.getSimpleName();
 
+    public static final String ARG_TYPE = "activity_type";
+    public static final int NOTIFICATIONS = 0;
+    public static final int CONTENT = 1;
+
+    private int mType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mType = getIntent().getIntExtra(ARG_TYPE, NOTIFICATIONS);
         setContentView(R.layout.activity_settings);
 
         //get toolbar
         setUpToolbar();
 
         if (savedInstanceState == null)
-            getFragmentManager().beginTransaction().replace(R.id.setting_fragment, new NotificationFragment()).commit();
+            getFragmentManager().beginTransaction().replace(R.id.setting_fragment, getFragment()).commit();
 
     }
 
     private void setUpToolbar() {
         Toolbar toolBar = (Toolbar) findViewById(R.id.settingactivity_toolbar);
         toolBar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        toolBar.setTitle("Notifications");
+        toolBar.setTitle(getToolbarTitle());
         setSupportActionBar(toolBar);
     }
 
 
+    private PreferenceFragment getFragment(){
+        switch (mType){
+            case NOTIFICATIONS:
+                return new NotificationFragment();
+            case CONTENT:
+                return new ContentFragment();
+            default:
+                return new NotificationFragment();
+        }
+    }
+
+    private String getToolbarTitle(){
+        switch (mType){
+            case NOTIFICATIONS:
+                return "Notifications";
+            case CONTENT:
+                return "Content";
+            default:
+                return "";
+
+        }
+    }
     //override up button to go back
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -111,7 +141,7 @@ public class NotificationSettingsActivity extends BaseSocketActivity {
 
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {
-            NotificationSettingsActivity activity = (NotificationSettingsActivity) getActivity();
+            BasicSettingsActivity activity = (BasicSettingsActivity) getActivity();
             if (activity != null) {
                 try {
                     JSONObject object = new JSONObject();
@@ -139,5 +169,25 @@ public class NotificationSettingsActivity extends BaseSocketActivity {
         }
     }
 
+    public static class ContentFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener{
+
+        @Override
+        public void onCreate(final Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            getPreferenceManager().setSharedPreferencesName(LinuteConstants.SHARED_PREF_NAME);
+            addPreferencesFromResource(R.xml.pref_content);
+
+            findPreference("autoPlay").setOnPreferenceChangeListener(this);
+        }
+
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object o) {
+            if (preference.getKey().equals("autoPlay")) {
+                SingleVideoPlaybackManager.setAutoPlay((Boolean) o);
+                return true;
+            }
+            return false;
+        }
+    }
 
 }

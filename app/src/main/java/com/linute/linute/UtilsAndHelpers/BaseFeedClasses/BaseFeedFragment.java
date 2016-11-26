@@ -39,6 +39,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.AutoPlayScrollListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -155,7 +156,6 @@ public abstract class BaseFeedFragment extends BaseFragment {
         });
 
         vEmptyView = rootView.findViewById(R.id.empty_view);
-//        inflater.inflate(getEmptyLayout(), (ViewGroup)vEmptyView, true);
 
         vRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
 
@@ -166,8 +166,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         vRecyclerView.setLayoutManager(llm);
 
-      /*  recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
-                true, true));*/
+        vRecyclerView.addOnScrollListener(new AutoPlayScrollListener());
 
         mFeedAdapter.setGetMoreFeed(new LoadMoreViewHolder.OnLoadMore() {
             @Override

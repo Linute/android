@@ -32,7 +32,6 @@ import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.ShareUtil;
-import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
@@ -49,6 +48,8 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.AutoPlayScrollListener;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -158,6 +159,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         });
 
         vRecList.setLayoutManager(llm);
+        vRecList.addOnScrollListener(new AutoPlayScrollListener());
 
         mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
 
@@ -171,6 +173,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         mProfileAdapter.setOnSwitchLayoutClicked(new ProfileAdapter.OnSwitchLayoutClicked() {
             @Override
             public void switchClicked(int position) {
+                SingleVideoPlaybackManager.getInstance().stopPlayback();
                 isLinearFeed = position == 1;
                 llm.setSpanCount(isLinearFeed ? 1 : 3 );
                 mProfileAdapter.showThumbnails = !isLinearFeed;
@@ -290,7 +293,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
             mNotificationSubscription.unsubscribe();
         }
 
-        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+        SingleVideoPlaybackManager.getInstance().stopPlayback();
     }
 
     @Override

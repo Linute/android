@@ -7,6 +7,7 @@ import android.support.multidex.MultiDexApplication;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import io.realm.DynamicRealm;
 import io.realm.Realm;
@@ -41,6 +42,8 @@ public class TaptApplication extends MultiDexApplication {
             API_Methods.HOST = API_Methods.HOST_LIVE;
             API_Methods.VERSION = API_Methods.VERSION_LIVE;
         }
+
+        SingleVideoPlaybackManager.initManager(this);
 
         Realm.init(this);
         RealmConfiguration configuration = new RealmConfiguration.Builder().name(FILE_NAME)

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
@@ -16,6 +17,7 @@ import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import org.json.JSONException;
@@ -51,14 +53,7 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
     protected void singleClick() {
         if (mVideoUrl == null || videoProcessing) return;
         if (vVideoView.getVisibility() == View.INVISIBLE) { //image is there, so video hasnt been started yet
-            VideoPlayerSingleton.getSingleVideoPlaybackManager().playNewVideo(vVideoView, mVideoUrl);
-
-            vVideoView.setOnPreparedListener(this);
-            vVideoView.setOnCompletionListener(this);
-
-            videoProcessing = true;
-            vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
-            vVideoView.setVisibility(View.VISIBLE);
+            playVideo();
         } else {
             if (vVideoView.isPlaying()) {
                 vVideoView.pause();
@@ -67,6 +62,17 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
                 vVideoView.start();
                 vCinemaIcon.setAlpha(0);
             }
+        }
+    }
+
+    public void playVideo(){
+        vVideoView.setOnPreparedListener(this);
+        vVideoView.setOnCompletionListener(this);
+
+        if(SingleVideoPlaybackManager.getInstance().playNewVideo(vVideoView, mVideoUrl)) { //new uri was set
+            videoProcessing = true;
+            vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
+            vVideoView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -155,9 +161,15 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
         vCinemaIcon.setAlpha(1);
     }
 
+    public void stopVideo(){
+        vVideoView.stopPlayback();
+    }
+
     @Override
     public void onSurfaceDestroyed() {
-        vVideoView.stopPlayback();
-        hideVideo();
+        if (vVideoView.getVisibility() == View.VISIBLE) {
+            stopVideo();
+            hideVideo();
+        }
     }
 }

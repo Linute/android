@@ -277,13 +277,14 @@ public class ChangeEmailActivity extends BaseSocketActivity {
         user.updateUserInfo(userInfo, null, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Utils.showBadConnectionToast(ChangeEmailActivity.this);
-                        showProgress(false);
-                    }
-                });
+                runOnUiThread(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showBadConnectionToast(ChangeEmailActivity.this);
+                                showProgress(false);
+                            }
+                        });
             }
 
             @Override
@@ -292,33 +293,36 @@ public class ChangeEmailActivity extends BaseSocketActivity {
                     try {
                         LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
                         persistData(user);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showSavedToast(ChangeEmailActivity.this);
-                                showProgress(false);
-                                finish();
-                            }
-                        });
+                        runOnUiThread(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Utils.showSavedToast(ChangeEmailActivity.this);
+                                        showProgress(false);
+                                        finish();
+                                    }
+                                });
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showServerErrorToast(ChangeEmailActivity.this);
-                                showProgress(false);
-                            }
-                        });
+                        runOnUiThread(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Utils.showServerErrorToast(ChangeEmailActivity.this);
+                                        showProgress(false);
+                                    }
+                                });
                     }
                 } else {
                     Log.v(TAG, response.body().string());
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showServerErrorToast(ChangeEmailActivity.this);
-                            showProgress(false);
-                        }
-                    });
+                    runOnUiThread(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(ChangeEmailActivity.this);
+                                    showProgress(false);
+                                }
+                            });
                 }
 
             }
@@ -352,7 +356,10 @@ public class ChangeEmailActivity extends BaseSocketActivity {
     }
 
     private void persistData(LinuteUser user) {
-        mSharedPreferences.edit().putString("email", user.getEmail()).apply();
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString("email", user.getEmail());
+        editor.putString("lastLoginEmail", user.getEmail());
+        editor.apply();
     }
 
     private void showProgress(final boolean show) {

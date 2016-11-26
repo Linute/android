@@ -21,13 +21,13 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
-import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.ProgressBarAnimation;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import org.json.JSONException;
@@ -242,7 +242,7 @@ public class ViewFullScreenFragment extends BaseFragment {
                     .into(vImage);
         } else if (mPostType == Post.POST_TYPE_VIDEO) {
 
-            VideoPlayerSingleton.getSingleVideoPlaybackManager().playNewVideo(vTextureVideoView, mLink);
+            SingleVideoPlaybackManager.getInstance().playNewVideo(vTextureVideoView, mLink);
             vVideoParent.setVisibility(View.VISIBLE);
             vImage.setVisibility(View.GONE);
             vLoadingText.setVisibility(View.VISIBLE);
@@ -295,7 +295,7 @@ public class ViewFullScreenFragment extends BaseFragment {
     @Override
     public void onStop() {
         super.onStop();
-        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+        SingleVideoPlaybackManager.getInstance().stopPlayback();
         if (getActivity() != null)
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }

@@ -7,7 +7,6 @@ import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,7 +22,6 @@ import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.PollsSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
-import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
@@ -35,6 +33,7 @@ import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -235,7 +234,7 @@ public class TrendingPostsFragment extends BaseFeedFragment {
     @Override
     public void onPause() {
         super.onPause();
-        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+        SingleVideoPlaybackManager.getInstance().stopPlayback();
         vAppBarLayout.setExpanded(true, false);
     }
 

@@ -70,6 +70,7 @@ import com.linute.linute.SquareCamera.ScreenSizeSingleton;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.EditContentUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import org.bson.types.ObjectId;
@@ -655,7 +656,7 @@ public class EditFragment extends BaseFragment {
 
                 if (mDimens.isFrontFacing) mVideoView.setScaleX(-1);
 
-                mVideoView.setVideoURI(mUri);
+                SingleVideoPlaybackManager.getInstance().playNewVideo(mVideoView, mUri);
                 mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     @Override
                     public void onPrepared(MediaPlayer mp) {
@@ -1038,9 +1039,9 @@ public class EditFragment extends BaseFragment {
         if (mContentBitmap != null) {
             mContentBitmap.recycle();
         }
-
-
     }
+
+
 
     public static class ToolHolder extends RecyclerView.ViewHolder {
 
@@ -1081,8 +1082,9 @@ public class EditFragment extends BaseFragment {
     public void onDestroy() {
         if (mPostOptions.type == ContentType.Video && mDimens.deleteVideoWhenFinished)
             ImageUtility.deleteCachedVideo(mUri);
-
         super.onDestroy();
+
+        SingleVideoPlaybackManager.getInstance().stopPlayback();
     }
 
     interface Activatable {

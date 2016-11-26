@@ -38,7 +38,6 @@ import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.Request;
 import okhttp3.Response;
 
 public class CollegePickerActivity extends AppCompatActivity implements SearchView.OnQueryTextListener{
@@ -50,6 +49,7 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
     private List<College> mColleges = new ArrayList<>();
     private CollegeListAdapter mCollegeListAdapter;
     private SearchView mSearchView;
+    private Call mSearchCall;
     private ProgressBar mProgressBar;
 
     private static final String INIT_STRING = "Search for your college by entering your college's name into the search bar";
@@ -105,6 +105,7 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
 
         if (TextUtils.isEmpty(newText)){
             mColleges.clear();
+            if (mSearchCall != null) mSearchCall.cancel();
             if (mEmptyView.getVisibility() == View.GONE){
                 mEmptyView.setVisibility(View.VISIBLE);
                 mEmptyView.setText(INIT_STRING);
@@ -133,13 +134,16 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
     };
 
     private void retrieveColleges(){
+        if (mSearchCall != null) mSearchCall.cancel();
         Map<String, Object> params = new HashMap<>();
         params.put("name", mSearchView.getQuery().toString());
         params.put("limit", "40"); //40 is enough ?
 
-        new LSDKCollege(this).getColleges(params, new Callback() {
+        mSearchCall = new LSDKCollege(this).getColleges(params, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                if (call.isCanceled()) return;
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

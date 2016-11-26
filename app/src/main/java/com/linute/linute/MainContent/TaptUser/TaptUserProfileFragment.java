@@ -33,7 +33,6 @@ import com.linute.linute.MainContent.DiscoverFragment.BaseFeedItem;
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.ShareUtil;
-import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.ProfileFragment.ProfileAdapter;
 import com.linute.linute.MainContent.SendTo.SendToFragment;
@@ -48,6 +47,8 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.AutoPlayScrollListener;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -154,6 +155,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         });
 
         recList.setLayoutManager(llm);
+        recList.addOnScrollListener(new AutoPlayScrollListener());
 
         mLinuteUser.setUserID(mTaptUserId);
         mLinuteUser.setFirstName(mUserName);
@@ -167,6 +169,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         mProfileAdapter.setOnSwitchLayoutClicked(new ProfileAdapter.OnSwitchLayoutClicked() {
             @Override
             public void switchClicked(int position) {
+                SingleVideoPlaybackManager.getInstance().stopPlayback();
                 isLinearFeed = position == 1;
                 llm.setSpanCount(isLinearFeed ? 1 : 3 );
                 mProfileAdapter.showThumbnails = !isLinearFeed;
@@ -310,7 +313,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
     public void onPause() {
         super.onPause();
 
-        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+        SingleVideoPlaybackManager.getInstance().stopPlayback();
     }
 
     @Override
