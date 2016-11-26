@@ -419,6 +419,7 @@ public class ForgotPasswordFragment extends Fragment {
     }
 
     private void failedConnectionWithCurrentView(final int index) {
+        if (getActivity() == null) return;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -439,7 +440,7 @@ public class ForgotPasswordFragment extends Fragment {
             new LSDKUser(getActivity()).changePassword(mUserToken, mUserID, password, new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    if (getActivity() == null){
+                    if (getActivity() != null){
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
