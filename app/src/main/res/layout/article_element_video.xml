@@ -3,36 +3,48 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/feedDetail_event_image"
+    <!--<ImageView
+        android:id="@+id/feedDetail_event_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        />
+
+    <com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView
+        android:id="@+id/video"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:visibility="invisible"
+        />
+
+
+    <ImageView
+        android:id="@+id/cinema_icon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:src="@drawable/ic_cinema"/>
+
+    <View
+        android:id="@+id/feed_detail_hidden_animation"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.3"
+        android:background="#EA294C"
+        android:visibility="invisible"/>
+-->
+
+    <!--temp: use html5 video player instead of writing our own-->
+    <!--webview bugs out when in a height=wrap_content parent-->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <WebView
+            android:id="@+id/video_html"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitXY"
-            />
-
-        <com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView
-            android:id="@+id/video"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:visibility="invisible"
-            />
-
-
-        <ImageView
-            android:id="@+id/cinema_icon"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_gravity="center"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:src="@drawable/ic_cinema"/>
-
-        <View
-            android:id="@+id/feed_detail_hidden_animation"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:alpha="0.3"
-            android:background="#EA294C"
-            android:visibility="invisible"/>
-
+            android:layout_height="match_parent" />
+    </FrameLayout>
 </FrameLayout>

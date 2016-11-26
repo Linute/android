@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent.Global.Articles;
 
 import android.graphics.PorterDuff;
-import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,7 +15,6 @@ import com.bumptech.glide.Glide;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 /**
  * Created by mikhail on 10/25/16.
@@ -196,16 +194,19 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     private static class VideoElementVH extends ElementVH implements View.OnClickListener{
 
-        private final ImageView vPreview;
+        /*private final ImageView vPreview;
         private final TextureVideoView vVideo;
-        private final ImageView vPause;
+        private final ImageView vPause;*/
+
+        private final WebView vHTML5;
 
         VideoElementVH(View itemView) {
             super(itemView);
-            vPreview = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
+            /*vPreview = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
             vVideo = (TextureVideoView) itemView.findViewById(R.id.video);
             vPause = (ImageView) itemView.findViewById(R.id.cinema_icon);
-            vPause.setOnClickListener(this);
+            vPause.setOnClickListener(this);*/
+            vHTML5 = (WebView)itemView.findViewById(R.id.video_html);
         }
 
         @Override
@@ -215,11 +216,11 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         @Override
         public void onClick(View v) {
-            if(vVideo.isPlaying()){
+            /*if(vVideo.isPlaying()){
                 vVideo.pause();
             }else {
                 vVideo.start();
-            }
+            }*/
         }
     }
 

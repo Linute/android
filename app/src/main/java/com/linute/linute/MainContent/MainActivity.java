@@ -450,7 +450,7 @@ public class MainActivity extends BaseTaptActivity {
         //if there are a lot of other user profile/ events in mainActivity, clear them
         if (getSupportFragmentManager().getBackStackEntryCount() > 0)
             getSupportFragmentManager().popBackStackImmediate(PROFILE_OR_EVENT_NAME, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-
+        Log.i("AAA", ""+getSupportFragmentManager().getBackStackEntryCount());
     }
 
     //sets needsUpdating for fragment at index
