@@ -261,7 +261,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                         return true;
                     case R.id.menu_updates:
                         if (activity != null) {
-                            activity.addFragmentToContainer(new UpdatesFragment());
+                            activity.addFragmentToContainer(UpdatesFragment.getInstance());
                         }
                         return true;
 

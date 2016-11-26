@@ -744,8 +744,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     }
 
     private void showCommentTutorial() {
-        if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("comment_tip", true)) {
-            Toast.makeText(getContext(), "Double tap comments to like\nLong press for other options", Toast.LENGTH_LONG).show();
+        //when moving through posts quickly, stacking toasts can throw a null pointer
+        try {
+            if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("comment_tip", true)) {
+                Toast.makeText(getContext(), "Double tap comments to like\nLong press for other options", Toast.LENGTH_LONG).show();
+            }
+        }catch (NullPointerException e){
+            e.printStackTrace();
         }
     }
 

@@ -318,11 +318,9 @@ public class Utils {
 
     public static String stripUnsupportedCharacters(String in) {
         /*24 = Nougat, didn't have Build.VERSION_CODE for it*/
-        if (Build.VERSION.SDK_INT >= 24 || in == null) {
+        if (Build.VERSION.SDK_INT >= 24 || in == null || in.isEmpty()) {
             return in;
         }
-        Log.i("AAA", Arrays.toString(in.toCharArray()));
-
         String out = in.replaceAll(
                 "(\\uD83C\\udffB|" +
                         "\\uD83C\\uDFFC|" +
