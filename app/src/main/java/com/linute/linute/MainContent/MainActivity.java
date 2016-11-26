@@ -866,7 +866,6 @@ public class MainActivity extends BaseTaptActivity {
             @Override
             public void onClick(View v) {
 
-                //TODO: NOT TESTED - Drawer might lag while closing if we add a fragment before it is fully closed
                 // to fix : use mMainDrawerListener.setOnDrawerClosedRunnable();
                 if (mDrawerLayout.isDrawerOpen(mNavigationView))
                     mDrawerLayout.closeDrawers();
@@ -886,7 +885,6 @@ public class MainActivity extends BaseTaptActivity {
             @Override
             public void onClick(View v) {
 
-                //TODO: NOT TESTED - Drawer might lag while closing if we add a fragment before it is fully closed
                 // to fix : use mMainDrawerListener.setOnDrawerClosedRunnable();
                 if (mDrawerLayout.isDrawerOpen(mNavigationView))
                     mDrawerLayout.closeDrawers();
@@ -908,7 +906,6 @@ public class MainActivity extends BaseTaptActivity {
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: NOT TESTED - Drawer might lag while closing if we add a fragment before it is fully closed
                 // to fix : use mMainDrawerListener.setOnDrawerClosedRunnable();
                 if (mDrawerLayout.isDrawerOpen(mNavigationView))
                     mDrawerLayout.closeDrawers();
