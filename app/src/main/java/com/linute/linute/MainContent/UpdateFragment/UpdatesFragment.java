@@ -124,7 +124,9 @@ public class UpdatesFragment extends BaseFragment {
                             getFragmentManager().popBackStackImmediate();
                     }
                 }
-                ((MainActivity)getActivity()).clearBackStack();
+//                MainActivity activity = (MainActivity) getActivity();
+
+//                if(activity != null){activity.clearBackStack();};
 
 //                getFragmentManager().popBackStackImmediate(MainActivity.PROFILE_OR_EVENT_NAME, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             }
