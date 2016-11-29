@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.Global.Articles;
 
 import android.graphics.PorterDuff;
+import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,6 +16,12 @@ import com.bumptech.glide.Glide;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
+import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
+
+<<<<<<<Updated upstream
+        =======
+        >>>>>>>Stashed changes
 
 /**
  * Created by mikhail on 10/25/16.
@@ -211,7 +218,14 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         @Override
         public void bind(ArticleElement element) {
-            SingleVideoPlaybackManager.getInstance().playNewVideo(vVideo, Uri.parse(element.content));
+            vHTML5.loadData(
+                    "<video >" +
+                            "<source width=\""+320+"\" height=\""+240+"\" src=\""+element.content+"\" type=\"video/mp4\">"+
+                            "</video>",
+                    "text/html", null
+            );
+//            vHTML5.evaluateJavascript("")*/
+//            SingleVideoPlaybackManager.getInstance().playNewVideo(vVideo, Uri.parse(Utils.getArticleMediaUrl(element.content)));
         }
 
         @Override
@@ -243,7 +257,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
 
             Glide.with(itemView.getContext())
-                    .load(element.content)
+                    .load(Utils.getArticleMediaUrl(element.content))
                     .placeholder(R.drawable.image_loading_background)
                     .into(vImage);
 
@@ -260,7 +274,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         @Override
         public void bind(ArticleElement element) {
-            String data = "<html><body><img style='display:block; width:100%' src=\""+element.content+"\"></body></html>";
+            String data = "<html><body><img style='display:block; width:100%' src=\""+Utils.getArticleMediaUrl(element.content)+"\"></body></html>";
             vWeb.loadData(data, "text/html", null);
         }
     }
