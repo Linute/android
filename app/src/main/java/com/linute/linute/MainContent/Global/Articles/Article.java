@@ -39,7 +39,7 @@ public class Article extends GlobalChoiceItem{
 
         JSONArray elementsJson = json.getJSONArray("content");
         for(int i=0;i<elementsJson.length();i++){
-            elements.add(new ArticleElement(elementsJson.getJSONObject(i)));
+            elements.add(ArticleElement.parseJSON(elementsJson.getJSONObject(i)));
         }
 
         JSONObject event = json.getJSONObject("event");

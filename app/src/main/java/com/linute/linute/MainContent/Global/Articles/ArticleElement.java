@@ -12,11 +12,12 @@ import java.util.Locale;
  * Created by mikhail on 10/25/16.
  */
 
-public class ArticleElement implements Parcelable{
+public class ArticleElement implements Parcelable {
 
 
     public static final class ElementTypes {
-        private ElementTypes() {}
+        private ElementTypes() {
+        }
 
         public static final int TITLE = 0;
         public static final int DATE = 1;
@@ -49,7 +50,7 @@ public class ArticleElement implements Parcelable{
     public final int type;
     public final String content;
 
-    protected ArticleElement(JSONObject object) throws JSONException{
+    protected ArticleElement(JSONObject object) throws JSONException {
         this.type = object.getInt("type"); //ELEMENT_TYPES.get(object.getString("type"));
         this.content = object.getString("value");
     }
@@ -90,7 +91,7 @@ public class ArticleElement implements Parcelable{
     @Override
     public String toString() {
         String ret;
-        switch (type){
+        switch (type) {
             case 0:
                 ret = "TITLE";
                 break;
@@ -128,7 +129,20 @@ public class ArticleElement implements Parcelable{
                 ret = "ERR";
         }
 
-        return ret.substring(0,1).toUpperCase(Locale.US)+ret.substring(1).toLowerCase(Locale.US) + ": "+content;
+        return ret.substring(0, 1).toUpperCase(Locale.US) + ret.substring(1).toLowerCase(Locale.US) + ": " + content;
+    }
+
+    public static ArticleElement parseJSON(JSONObject object) throws JSONException {
+        int type = object.getInt("type");
+        switch (type) {
+            case ElementTypes.IMAGE:
+            case ElementTypes.VIDEO:
+            case ElementTypes.GIF:
+                return new ArticleMediaElement(object);
+            default:
+                return new ArticleElement(object);
+        }
+
 
     }
 }

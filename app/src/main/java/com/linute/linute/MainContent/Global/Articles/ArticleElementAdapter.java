@@ -1,8 +1,6 @@
 package com.linute.linute.MainContent.Global.Articles;
 
-import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -40,8 +38,6 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import com.linute.linute.API.API_Methods;
-import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -252,32 +248,33 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         @Override
         public void bind(ArticleElement element) {
-            String url = Utils.getArticleVideoUrl(element.content);
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-            retriever.setDataSource(url, API_Methods.getMainHeader(new LSDKUser(itemView.getContext()).getToken()));
-            Bitmap b = retriever.getFrameAtTime(0);
-            float ratio = (float)b.getHeight()/b.getWidth();
-            b.recycle();
-
+            String url = element.content.contains("http") ? element.content : Utils.getArticleVideoUrl(element.content);
+//            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+//            retriever.setDataSource(url, API_Methods.getMainHeader(new LSDKUser(itemView.getContext()).getToken()));
+//            Bitmap b = retriever.getFrameAtTime(0);
+            float ratio = (float)((ArticleMediaElement)element).height/((ArticleMediaElement)element).width;
+//            b.recycle();
+//
             vVideo.getLayoutParams().height = (int)(ratio * itemView.getResources().getDisplayMetrics().widthPixels);
-                    vVideo.getPlayer().prepare(buildMediaSource(Uri.parse(url), null));
+            vVideo.getPlayer().prepare(buildMediaSource(Uri.parse(url), null));
             vVideo.setControllerShowTimeoutMs(2000);
         }
 
         private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
             int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
                     : uri.getLastPathSegment());
+            DataSource.Factory manifestDataSourceFactory = buildDataSourceFactory();
             switch (type) {
                 case C.TYPE_SS:
-                    return new SsMediaSource(uri, buildDataSourceFactory(),
-                            new DefaultSsChunkSource.Factory(buildDataSourceFactory()), new Handler(), null);
+                    return new SsMediaSource(uri, manifestDataSourceFactory,
+                            new DefaultSsChunkSource.Factory(manifestDataSourceFactory), new Handler(), null);
                 case C.TYPE_DASH:
-                    return new DashMediaSource(uri, buildDataSourceFactory(),
-                            new DefaultDashChunkSource.Factory(buildDataSourceFactory()), new Handler(), null);
+                    return new DashMediaSource(uri, manifestDataSourceFactory,
+                            new DefaultDashChunkSource.Factory(manifestDataSourceFactory), new Handler(), null);
                 case C.TYPE_HLS:
-                    return new HlsMediaSource(uri, buildDataSourceFactory(), new Handler(), null);
+                    return new HlsMediaSource(uri, manifestDataSourceFactory, new Handler(), null);
                 case C.TYPE_OTHER:
-                    return new ExtractorMediaSource(uri, buildDataSourceFactory(), new DefaultExtractorsFactory(),
+                    return new ExtractorMediaSource(uri, manifestDataSourceFactory, new DefaultExtractorsFactory(),
                             new Handler(), null);
                 default: {
                     throw new IllegalStateException("Unsupported type: " + type);
