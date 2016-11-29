@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.Global.Articles;
 
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -317,7 +318,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             Glide.with(itemView.getContext())
                     .load(Utils.getArticleImageUrl(element.content))
-                    .placeholder(R.drawable.image_loading_background)
+                    .placeholder(((ArticleMediaElement)element).preload == null ? null : new BitmapDrawable(itemView.getResources(), Utils.decodeImageBase64(((ArticleMediaElement)element).preload)))
                     .into(vImage);
 
         }
