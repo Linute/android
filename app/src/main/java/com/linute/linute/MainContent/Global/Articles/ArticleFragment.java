@@ -151,8 +151,8 @@ public class ArticleFragment extends Fragment implements View.OnClickListener, A
                     hideMenu();
                 }*/
 
-                totalScroll = recyclerView.computeVerticalScrollOffset();// + recyclerView.computeVerticalScrollExtent();
-                vProgressBar.setProgress(1000*totalScroll / (recyclerView.computeVerticalScrollRange()-recyclerView.computeVerticalScrollExtent()));
+//                totalScroll = recyclerView.computeVerticalScrollOffset();// + recyclerView.computeVerticalScrollExtent();
+//                vProgressBar.setProgress(1000*totalScroll / (recyclerView.computeVerticalScrollRange()-recyclerView.computeVerticalScrollExtent()));
 
 
 //                Log.d(TAG, "Scrolled "+totalScroll + " " +recyclerView.computeVerticalScrollRange() + " " + recyclerView.computeVerticalScrollOffset() + " " + recyclerView.computeVerticalScrollExtent());

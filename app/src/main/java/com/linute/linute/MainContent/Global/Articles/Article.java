@@ -34,7 +34,7 @@ public class Article extends GlobalChoiceItem{
     private int mNumberOfShares;
 
     public Article(JSONObject json) throws JSONException{
-        super(json.getString("title"), json.getString("description"), json.getJSONArray("images").getString(0), json.getString("id"), TYPE_ARTICLE);
+        super(json.getString("title"), json.getString("description"), (json.getJSONArray("images").length() > 0 ? json.getJSONArray("images").getString(0) : null ), json.getString("id"), TYPE_ARTICLE);
 
 
         JSONArray elementsJson = json.getJSONArray("content");
