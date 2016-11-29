@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
@@ -231,6 +230,14 @@ public class Utils {
 
     public static String getCommentImageUrl(String image) {
         return "http://images.linute.com/comments/original/" + image;
+    }
+
+    public static String getArticleImageUrl(String media) {
+        return "http://images.linute.com/articles/original/" + media;
+    }
+
+    public static String getArticleVideoUrl(String media) {
+        return "http://images.linute.com/articles/video/" + media;
     }
 
 

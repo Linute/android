@@ -14,14 +14,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
-
-<<<<<<<Updated upstream
-        =======
-        >>>>>>>Stashed changes
+import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 /**
  * Created by mikhail on 10/25/16.
@@ -201,31 +197,31 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     private static class VideoElementVH extends ElementVH implements View.OnClickListener{
 
-        /*private final ImageView vPreview;
+        private final ImageView vPreview;
         private final TextureVideoView vVideo;
-        private final ImageView vPause;*/
+//        private final ImageView vPause;
 
-        private final WebView vHTML5;
+//        private final WebView vHTML5;
 
         VideoElementVH(View itemView) {
             super(itemView);
-            /*vPreview = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
+            vPreview = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
             vVideo = (TextureVideoView) itemView.findViewById(R.id.video);
-            vPause = (ImageView) itemView.findViewById(R.id.cinema_icon);
-            vPause.setOnClickListener(this);*/
-            vHTML5 = (WebView)itemView.findViewById(R.id.video_html);
+//            vPause = (ImageView) itemView.findViewById(R.id.cinema_icon);
+//            vPause.setOnClickListener(this);
+//            vHTML5 = (WebView)itemView.findViewById(R.id.video_html);
         }
 
         @Override
         public void bind(ArticleElement element) {
-            vHTML5.loadData(
+           /* vHTML5.loadData(
                     "<video >" +
-                            "<source width=\""+320+"\" height=\""+240+"\" src=\""+element.content+"\" type=\"video/mp4\">"+
+                            "<source width=\""+320+"\" height=\""+240+"\" src=\""+Utils.getArticleVideoUrl(element.content)+"\" type=\"video/mp4\">"+
                             "</video>",
                     "text/html", null
-            );
-//            vHTML5.evaluateJavascript("")*/
-//            SingleVideoPlaybackManager.getInstance().playNewVideo(vVideo, Uri.parse(Utils.getArticleMediaUrl(element.content)));
+            );*/
+//            vHTML5.evaluateJavascript("")
+            SingleVideoPlaybackManager.getInstance().playNewVideo(vVideo, Uri.parse(Utils.getArticleVideoUrl(element.content)));
         }
 
         @Override
@@ -257,7 +253,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
 
             Glide.with(itemView.getContext())
-                    .load(Utils.getArticleMediaUrl(element.content))
+                    .load(Utils.getArticleImageUrl(element.content))
                     .placeholder(R.drawable.image_loading_background)
                     .into(vImage);
 
@@ -274,7 +270,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         @Override
         public void bind(ArticleElement element) {
-            String data = "<html><body><img style='display:block; width:100%' src=\""+Utils.getArticleMediaUrl(element.content)+"\"></body></html>";
+            String data = "<html><body><img style='display:block; width:100%' src=\""+Utils.getArticleImageUrl(element.content)+"\"></body></html>";
             vWeb.loadData(data, "text/html", null);
         }
     }
