@@ -38,7 +38,6 @@ public class StatusFeedHolder extends BasePostFeedHolder {
     @Override
     public void bindModel(Post post) {
         super.bindModel(post);
-
         vStatus.setText(post.getTitle());
     }
 
