@@ -30,6 +30,7 @@ public class ArticleElement implements Parcelable {
         public static final int VIDEO = 8;
         public static final int GIF = 9;
         public static final int QUOTE = 10;
+        public static final int LINK = 11;
 
     }
 
@@ -139,6 +140,8 @@ public class ArticleElement implements Parcelable {
             case ElementTypes.VIDEO:
             case ElementTypes.GIF:
                 return new ArticleMediaElement(object);
+            case ElementTypes.LINK:
+                return new ArticleLinkElement(object);
             default:
                 return new ArticleElement(object);
         }

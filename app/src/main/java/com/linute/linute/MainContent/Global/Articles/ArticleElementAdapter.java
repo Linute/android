@@ -1,12 +1,16 @@
 package com.linute.linute.MainContent.Global.Articles;
 
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,7 +64,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        switch (viewType){
+        switch (viewType) {
             case -1:
                 return new ArticleHeaderVH(inflater.inflate(R.layout.article_header, parent, false));
             case ArticleElement.ElementTypes.TITLE:
@@ -85,6 +89,9 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 return new TextElementVH(inflater.inflate(R.layout.article_element_date, parent, false));
             case ArticleElement.ElementTypes.AUTHOR:
                 return new TextElementVH(inflater.inflate(R.layout.article_element_author, parent, false));
+            case ArticleElement.ElementTypes.LINK:
+                return new LinkElementVH(inflater.inflate(R.layout.article_element_link, parent, false));
+
             default:
                 return new InvalidElementVH(inflater.inflate(R.layout.article_element_invalid, parent, false));
         }
@@ -92,34 +99,33 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public int getItemViewType(int position) {
-        if(position == 0){
+        if (position == 0) {
             return -1;
-        }else{
+        } else {
             return getElement(position).type;
         }
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if(holder instanceof ElementVH){
-            ((ElementVH)holder).bind(getElement(position));
-        }else
-        if(holder instanceof ArticleHeaderVH){
-            ((ArticleHeaderVH)holder).bind(article);
+        if (holder instanceof ElementVH) {
+            ((ElementVH) holder).bind(getElement(position));
+        } else if (holder instanceof ArticleHeaderVH) {
+            ((ArticleHeaderVH) holder).bind(article);
         }
     }
 
     @Override
     public int getItemCount() {
-        return article.elements.size()+1;
+        return article.elements.size() + 1;
     }
 
 
-    public ArticleElement getElement(int position){
-        return article.elements.get(position-1);
+    public ArticleElement getElement(int position) {
+        return article.elements.get(position - 1);
     }
 
-    public void setArticleActions(ArticleActions actions){
+    public void setArticleActions(ArticleActions actions) {
         this.mArticleActions = actions;
     }
 
@@ -127,12 +133,15 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     //View Holders
 
 
-    static abstract class ElementVH extends RecyclerView.ViewHolder{
-        ElementVH(View itemView) {super(itemView);}
+    static abstract class ElementVH extends RecyclerView.ViewHolder {
+        ElementVH(View itemView) {
+            super(itemView);
+        }
+
         public abstract void bind(ArticleElement element);
     }
 
-    class ArticleHeaderVH extends RecyclerView.ViewHolder{
+    class ArticleHeaderVH extends RecyclerView.ViewHolder {
 
         final TextView vTitle;
         final TextView vAuthor;
@@ -146,26 +155,24 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         final int mFilterColor;
 
 
-
-        ArticleHeaderVH(View itemView){
+        ArticleHeaderVH(View itemView) {
             super(itemView);
             mFilterColor = ContextCompat.getColor(itemView.getContext(), R.color.inactive_grey);
 
-            vTitle = (TextView)itemView.findViewById(R.id.text_title);
-            vAuthor = (TextView)itemView.findViewById(R.id.text_author);
-            vDate = (TextView)itemView.findViewById(R.id.text_date);
-            vLikeIcon = (ToggleImageView)itemView.findViewById(R.id.icon_like);
+            vTitle = (TextView) itemView.findViewById(R.id.text_title);
+            vAuthor = (TextView) itemView.findViewById(R.id.text_author);
+            vDate = (TextView) itemView.findViewById(R.id.text_date);
+            vLikeIcon = (ToggleImageView) itemView.findViewById(R.id.icon_like);
             vLikeIcon.setImageViews(R.drawable.ic_fire_off, R.drawable.ic_fire);
-            vLikeCount = (TextView)itemView.findViewById(R.id.text_like_count);
-            vCommentIcon = (ImageView)itemView.findViewById(R.id.icon_comment);
-            vCommentCount = (TextView)itemView.findViewById(R.id.text_comment_count);
-            vViewCount = (TextView)itemView.findViewById(R.id.text_view_count);
-
+            vLikeCount = (TextView) itemView.findViewById(R.id.text_like_count);
+            vCommentIcon = (ImageView) itemView.findViewById(R.id.icon_comment);
+            vCommentCount = (TextView) itemView.findViewById(R.id.text_comment_count);
+            vViewCount = (TextView) itemView.findViewById(R.id.text_view_count);
 
 
         }
 
-        public void bind(final Article article){
+        public void bind(final Article article) {
             vTitle.setText(article.title);
             vAuthor.setText(article.author);
             vDate.setText(article.date);
@@ -199,18 +206,21 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
 
-    public static interface ArticleActions{
+    public static interface ArticleActions {
         public boolean toggleLike(Article article);
+
         public void openComments(Article article);
+
         public void startShare(Article article);
     }
 
-    private static class TextElementVH extends ElementVH{
+    private static class TextElementVH extends ElementVH {
 
         TextView vText;
+
         TextElementVH(View itemView) {
             super(itemView);
-            vText = (TextView)itemView.findViewById(R.id.text);
+            vText = (TextView) itemView.findViewById(R.id.text);
         }
 
         @Override
@@ -219,7 +229,46 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
     }
 
-    private static class VideoElementVH extends ElementVH implements View.OnClickListener{
+    private static class LinkElementVH extends ElementVH implements View.OnClickListener {
+
+        TextView vText;
+        Uri mUri = null;
+
+        LinkElementVH(View itemView) {
+            super(itemView);
+            vText = (TextView) itemView.findViewById(R.id.text);
+            vText.setOnClickListener(this);
+        }
+
+        @Override
+        public void bind(ArticleElement element) {
+
+//            mUri = Uri.parse("http://www.tapt.io");
+
+            if (element instanceof ArticleLinkElement && ((ArticleLinkElement) element).link.matches("http://www\\.(.)+")) {
+                String link = ((ArticleLinkElement) element).link;
+                SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(link);
+                spannableStringBuilder.setSpan(new UnderlineSpan(), 0, link.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+
+                vText.setText(spannableStringBuilder);
+                mUri = Uri.parse(link);
+            } else {
+                vText.setText(element.content);
+            }
+        }
+
+        @Override
+        public void onClick(View v) {
+            if(mUri == null){
+                return;
+            }
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(mUri);
+            v.getContext().startActivity(intent);
+        }
+    }
+
+    private static class VideoElementVH extends ElementVH implements View.OnClickListener {
 
         private final ImageView vPreview;
         private final SimpleExoPlayerView vVideo;
@@ -253,10 +302,10 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 //            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 //            retriever.setDataSource(url, API_Methods.getMainHeader(new LSDKUser(itemView.getContext()).getToken()));
 //            Bitmap b = retriever.getFrameAtTime(0);
-            float ratio = (float)((ArticleMediaElement)element).height/((ArticleMediaElement)element).width;
+            float ratio = (float) ((ArticleMediaElement) element).height / ((ArticleMediaElement) element).width;
 //            b.recycle();
 //
-            vVideo.getLayoutParams().height = (int)(ratio * itemView.getResources().getDisplayMetrics().widthPixels);
+            vVideo.getLayoutParams().height = (int) (ratio * itemView.getResources().getDisplayMetrics().widthPixels);
             vVideo.getPlayer().prepare(buildMediaSource(Uri.parse(url), null));
             vVideo.setControllerShowTimeoutMs(2000);
         }
@@ -298,15 +347,15 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
     }
 
-    private class ImageElementVH extends ElementVH{
+    private class ImageElementVH extends ElementVH {
 
         private final ImageView vImage;
         private final ProgressBar vProgressBar;
 
         ImageElementVH(View itemView) {
             super(itemView);
-            vImage = (ImageView)itemView.findViewById(R.id.image);
-            vProgressBar = (ProgressBar)itemView.findViewById(R.id.progress_bar);
+            vImage = (ImageView) itemView.findViewById(R.id.image);
+            vProgressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar);
         }
 
         @Override
@@ -315,36 +364,37 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             vProgressBar.setVisibility(View.VISIBLE);*/
 
 
-
             Glide.with(itemView.getContext())
                     .load(Utils.getArticleImageUrl(element.content))
-                    .placeholder(((ArticleMediaElement)element).preload == null ? null : new BitmapDrawable(itemView.getResources(), Utils.decodeImageBase64(((ArticleMediaElement)element).preload)))
+                    .placeholder(((ArticleMediaElement) element).preload == null ? null : new BitmapDrawable(itemView.getResources(), Utils.decodeImageBase64(((ArticleMediaElement) element).preload)))
                     .into(vImage);
 
         }
     }
 
-    private static class GifElementVH extends ElementVH{
+    private static class GifElementVH extends ElementVH {
         private final WebView vWeb;
+
         public GifElementVH(View itemView) {
             super(itemView);
-            vWeb = (WebView)itemView.findViewById(R.id.gif);
+            vWeb = (WebView) itemView.findViewById(R.id.gif);
 
         }
 
         @Override
         public void bind(ArticleElement element) {
-            String data = "<html><body><img style='display:block; width:100%' src=\""+Utils.getArticleImageUrl(element.content)+"\"></body></html>";
+            String data = "<html><body><img style='display:block; width:100%' src=\"" + Utils.getArticleImageUrl(element.content) + "\"></body></html>";
             vWeb.loadData(data, "text/html", null);
         }
     }
 
-    private static class InvalidElementVH extends ElementVH{
+    private static class InvalidElementVH extends ElementVH {
 
         private final TextView vText;
+
         InvalidElementVH(View itemView) {
             super(itemView);
-            vText = (TextView)itemView.findViewById(R.id.text);
+            vText = (TextView) itemView.findViewById(R.id.text);
         }
 
         @Override
