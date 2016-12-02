@@ -931,6 +931,12 @@ public class MainActivity extends BaseTaptActivity {
 
 
     private void checkIntent(Intent intent) {
+        Uri uri = intent.getData();
+        if(uri != null){
+            Log.d(TAG, "MainActivity opened with Uri: "+uri);
+
+        }
+
         int type = intent.getIntExtra("NOTIFICATION", LinuteConstants.MISC);
         if (type == LinuteConstants.FEED_DETAIL) {
             String id = intent.getStringExtra("event");

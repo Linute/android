@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.Global.Articles;
 
 import android.os.Parcel;
+import android.util.Log;
 
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.Global.GlobalChoiceItem;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 
 public class Article extends GlobalChoiceItem{
 
+    private static final String TAG = Article.class.getSimpleName();
     private static final DateFormat DATE_FORMAT = DateFormat.getDateInstance();
 
     public final String author;
@@ -36,8 +38,7 @@ public class Article extends GlobalChoiceItem{
 
     public Article(JSONObject json) throws JSONException{
         super(json.getString("title"), json.getString("description"), (json.has("images") && json.getJSONArray("images").length() > 0 ? json.getJSONArray("images").getString(0) : null ), json.getString("id"), TYPE_ARTICLE);
-
-//        Log.i("AAA", json.toString(4));
+        Log.d(TAG, json.toString(4));
 
         JSONArray elementsJson = json.getJSONArray("content");
         for(int i=0;i<elementsJson.length();i++){

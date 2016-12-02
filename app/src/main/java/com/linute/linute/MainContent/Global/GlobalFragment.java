@@ -402,7 +402,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
             if (item.type == GlobalChoiceItem.TYPE_ARTICLE)
-                activity.addFragmentToContainer(ArticleFragment.newInstance((Article) item));
+                activity.addFragmentToContainer(ArticleFragment.newInstance(((Article) item)));
             else
                 activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item), "TREND");
         }
