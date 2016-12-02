@@ -27,17 +27,21 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunnin
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.FeedDetailFragment.Comment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.JsonHelpers;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Locale;
 
 /**
@@ -76,11 +80,12 @@ public class Post extends BaseFeedItem implements Parcelable {
 
     private boolean mCommentAnonDisabled;
 
+
     private int mType;
     public String imageBase64;
     private boolean isPrivacyChanged;
 
-    //private ArrayList<Object> mComments = new ArrayList<>();
+    private LinkedList<Object> mComments = new LinkedList<>();
 
     public Post() {
         setPrivacyChanged(false);
@@ -194,14 +199,15 @@ public class Post extends BaseFeedItem implements Parcelable {
         if(jsonObject.has("preloaders") && jsonObject.getJSONArray("preloaders").length() > 0)
             imageBase64 = jsonObject.getJSONArray("preloaders").getString(0);
 
-//        JSONArray comments = jsonObject.getJSONArray("comments");
-//        for (int i = 0; i < comments.length(); i++) {
-//            try {
-//                mComments.add(new Comment(comments.getJSONObject(i)));
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//        }
+        JSONArray comments = jsonObject.getJSONArray("comments");
+        Log.d(TAG, comments.toString(4));
+        for (int i = 0; i < comments.length(); i++) {
+            try {
+                mComments.add(new Comment(comments.getJSONObject(i)));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -426,6 +432,10 @@ public class Post extends BaseFeedItem implements Parcelable {
 
     public boolean isDeleted() {
         return mIsDeleted;
+    }
+
+    public LinkedList<Object> getComments() {
+        return mComments;
     }
 
     @Override

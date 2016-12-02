@@ -6,6 +6,8 @@ import com.linute.linute.MainContent.DiscoverFragment.Post;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.LinkedList;
+
 /**
  * Created by QiFeng on 11/1/16.
  */
@@ -51,6 +53,11 @@ public class PostFeedDetail extends BaseFeedDetail{
     @Override
     public void addComment() {
         mPost.setNumOfComments(mPost.getNumOfComments() + 1);
+    }
+
+    @Override
+    public LinkedList<Object> getComments() {
+        return mPost.getComments();
     }
 
     @Override
