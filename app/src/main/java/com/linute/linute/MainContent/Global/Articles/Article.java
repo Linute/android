@@ -24,6 +24,7 @@ public class Article extends GlobalChoiceItem{
 
     public final String author;
     public final String date;
+//    public final String publisher;
     public final ArrayList<ArticleElement> elements = new ArrayList<>();
 
     private Post mPost;
@@ -34,8 +35,9 @@ public class Article extends GlobalChoiceItem{
     private int mNumberOfShares;
 
     public Article(JSONObject json) throws JSONException{
-        super(json.getString("title"), json.getString("description"), (json.getJSONArray("images").length() > 0 ? json.getJSONArray("images").getString(0) : null ), json.getString("id"), TYPE_ARTICLE);
+        super(json.getString("title"), json.getString("description"), (json.has("images") && json.getJSONArray("images").length() > 0 ? json.getJSONArray("images").getString(0) : null ), json.getString("id"), TYPE_ARTICLE);
 
+//        Log.i("AAA", json.toString(4));
 
         JSONArray elementsJson = json.getJSONArray("content");
         for(int i=0;i<elementsJson.length();i++){

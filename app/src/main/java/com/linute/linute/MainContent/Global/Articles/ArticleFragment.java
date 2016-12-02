@@ -100,7 +100,8 @@ public class ArticleFragment extends Fragment implements View.OnClickListener, A
                 getActivity().getSupportFragmentManager().popBackStack();
             }
         });
-//        toolbar.setTitle(mArticle.getPublisherName());
+        toolbar.setTitle(mArticle.title);
+
 
 //        toolbar.setTitleTextAppearance();
 
