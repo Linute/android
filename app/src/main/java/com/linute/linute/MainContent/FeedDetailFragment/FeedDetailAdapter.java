@@ -12,7 +12,6 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -178,7 +177,7 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemCount() {
-        Log.d(TAG, ""+(mShowPost ? mFeedDetail.getComments().size() + 1 : mFeedDetail.getComments().size()));
+//        Log.d(TAG, ""+(mShowPost ? mFeedDetail.getComments().size() + 1 : mFeedDetail.getComments().size()));
         return mShowPost ? mFeedDetail.getComments().size() + 1 : mFeedDetail.getComments().size();
     }
 
