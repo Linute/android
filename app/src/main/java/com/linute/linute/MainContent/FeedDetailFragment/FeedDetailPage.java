@@ -357,6 +357,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         ImpressionHelper.sendImpressionsAsync(pref.getString("collegeId", ""), mViewId, mFeedDetail.getPostId());
 
+        recList.scrollToPosition(mFeedDetailAdapter.getItemCount()-1);
         return rootView;
     }
 

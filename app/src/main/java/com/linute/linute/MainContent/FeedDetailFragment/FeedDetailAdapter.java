@@ -12,6 +12,7 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -54,6 +55,7 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private static final int TYPE_VIDEO_HEADER = 5;
     private static final int TYPE_LOAD_MORE = 6;
     private static final int TYPE_POLL_HEADER = 7;
+    public static final String TAG = FeedDetailAdapter.class.getSimpleName();
 
     private Context context;
 
@@ -176,6 +178,7 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemCount() {
+        Log.d(TAG, ""+(mShowPost ? mFeedDetail.getComments().size() + 1 : mFeedDetail.getComments().size()));
         return mShowPost ? mFeedDetail.getComments().size() + 1 : mFeedDetail.getComments().size();
     }
 
