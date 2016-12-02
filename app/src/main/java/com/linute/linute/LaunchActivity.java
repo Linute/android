@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -23,6 +24,7 @@ import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.API.RegistrationIntentService;
 import com.linute.linute.LoginAndSignup.CollegePickerActivity;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
+import com.linute.linute.MainContent.Global.Articles.ArticleActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -80,6 +82,8 @@ public class LaunchActivity extends Activity {
                     }
                 });
             }
+
+
         }
 
         //Initialize sending crash reports to backend. This comes up in the #android-crash channel
@@ -209,6 +213,7 @@ public class LaunchActivity extends Activity {
     private void goToNextActivity() {
 
         Class nextActivity; //the next activity we go to
+        Intent additionalIntent =null;
 
         SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
@@ -218,6 +223,21 @@ public class LaunchActivity extends Activity {
             if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null) {
 
                 API_Methods.USER_ID = sharedPreferences.getString("userID", null);
+
+                Intent launchIntent = getIntent();
+                if(launchIntent != null) {
+                    Uri uri = launchIntent.getData();
+                    if (uri != null) {
+                        if ("linute".equals(uri.getScheme())) {
+                            if ("article".equals(uri.getHost())) {
+                                additionalIntent = new Intent(this, ArticleActivity.class);
+                                additionalIntent.setData(uri);
+//                                startActivity(additionalIntent);
+                            }
+                        }
+                    }
+                }
+
 
                 nextActivity = MainActivity.class;
 
@@ -234,6 +254,9 @@ public class LaunchActivity extends Activity {
 
         Intent i = new Intent(LaunchActivity.this, nextActivity);
         startActivity(i);
+        if(additionalIntent != null){
+            startActivity(additionalIntent);
+        }
         finish();
     }
 }
