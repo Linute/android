@@ -37,4 +37,10 @@ public class LSDKGlobal {
         return API_Methods.get(new String[]{"articles"}, header, params, callback);
 
     }
+
+    public Call getArticle(String articleId, Callback callback){
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+        Map<String, Object> params = new HashMap<>(0);
+        return API_Methods.get(new String[]{"articles",articleId}, header, params, callback);
+    }
 }
